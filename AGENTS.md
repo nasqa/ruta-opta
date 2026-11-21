@@ -34,7 +34,7 @@ A file is born next to the route that uses it (`app/**/_components`). It moves t
 
 - Shared UI is Trama (`@nasqa/trama-react`) and Mantine as is. Use `Component.extend`; add a thin wrapper only when needed. No `components/ui`.
 - Use Trama's text classes (`.t-{style}`) and territories via `<Scope>` on sections only.
-- Pages are Server Components with semantic HTML. Mantine goes in interactive islands only.
+- Pages are Server Components with semantic HTML. A Mantine component without handlers may render directly from a server page; one with handlers, state or compound parts goes in a `'use client'` island (see `apps/landing/AGENTS.md`).
 - Hand-written colors and lengths are lint errors. Font families, durations and z-index also come from the theme, even where lint cannot see them.
 - Names are kebab-case. Lint enforces it.
 

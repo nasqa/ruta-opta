@@ -9,6 +9,9 @@ const root = join(import.meta.dirname, '..');
 const hook = (name, input) =>
   spawnSync('node', [join(root, '.claude/hooks', name)], { input: JSON.stringify(input), encoding: 'utf8', cwd: root });
 
+const raw = (name, input) =>
+  spawnSync('node', [join(root, '.claude/hooks', name)], { input, encoding: 'utf8', cwd: root });
+
 const lintEdited = (file_path) => hook('lint-edited.mjs', { tool_name: 'Edit', tool_input: { file_path } });
 const verifyOnStop = (stop_hook_active) => hook('verify-on-stop.mjs', { hook_event_name: 'Stop', stop_hook_active });
 
@@ -64,3 +67,9 @@ test('verify-on-stop sends Claude back to work on a type error', () =>
     assert.equal(status, 2);
     assert.match(stderr, /error TS/);
   }));
+
+test.describe('hooks tolerate bad stdin', () => {
+  for (const name of ['lint-edited.mjs', 'verify-on-stop.mjs'])
+    for (const [label, input] of [['empty', ''], ['invalid JSON', '{bad']])
+      test(`${name} exits 0 on ${label} stdin`, () => assert.equal(raw(name, input).status, 0));
+});

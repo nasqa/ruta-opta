@@ -11,7 +11,7 @@ Thin routes with colocation, domain modules, and packages at the second consumer
 - It moves to `packages/<domain>` when the second app needs it.
 - Moving code to `shared/` or `packages/` needs Santiago's approval.
 
-Modules expose up to three entry points (`index.ts`, `server.ts`, `actions.ts`) and never import each other. Pages are Server Components. Mantine appears only in interactive islands. Shared UI is Trama.
+Modules expose up to three entry points (`index.ts`, `server.ts`, `actions.ts`) and never import each other. Pages are Server Components. A Mantine component without handlers may render from a server page; one with handlers, state or compound parts goes in a `'use client'` island. Shared UI is Trama.
 
 Enforcement: strict TypeScript 6, ESLint with `eslint-plugin-boundaries`, Stylelint for theme-only CSS, `server-only` with `next build`, axe in the browser, Lighthouse budgets in CI, and dependency-cruiser from the first package or the second app. Agent feedback runs in three rings: editor hooks, pre-commit `lint-staged`, and CI.
 

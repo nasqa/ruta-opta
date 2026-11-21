@@ -5,7 +5,7 @@ description: Add a route to apps/landing (page, its components, its messages). U
 
 # New route
 
-1. Create the folder under `apps/landing/src/app/[locale]/(site)/<route>/` with a `page.tsx` that is a Server Component with semantic HTML. Copy the shape of the smoke page.
+1. Create the folder under `apps/landing/src/app/[locale]/(site)/<route>/` with a `page.tsx` that is a Server Component with semantic HTML. Copy the shape of `apps/landing/src/app/[locale]/(site)/page.tsx`.
 2. Put what only this route uses in `_components/` next to the page. Do not create `shared/` or `modules/` files for it.
 3. Add a `<Namespace>` to `messages/es.json` and render every visible string with `getTranslations`. No literal text in JSX.
 4. Add the same namespace to `messages/en.json` with `translate-namespace`. An English namespace is complete or absent.

@@ -4,7 +4,14 @@ import { ESLint } from 'eslint';
 import stylelint from 'stylelint';
 
 const root = resolve(import.meta.dirname, '../..');
-const { tool_input } = JSON.parse(readFileSync(0, 'utf8'));
+const parse = (text) => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+};
+const tool_input = parse(readFileSync(0, 'utf8'))?.tool_input;
 const file = tool_input?.file_path && relative(root, resolve(root, tool_input.file_path));
 
 const inScope = file && /^(apps|packages)\//.test(file) && /\.(tsx?|css)$/.test(file);
