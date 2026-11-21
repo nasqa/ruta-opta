@@ -16,7 +16,12 @@ import { siteUrl } from '@/shared/env';
 
 export const generateStaticParams = () => routing.locales.map((locale) => ({ locale }));
 
-export const metadata: Metadata = { metadataBase: siteUrl };
+// A page sets only its own title and the template adds the site name; pages without one, such as the 404, get the default
+export const generateMetadata = async (): Promise<Metadata> => {
+  const t = await getTranslations('Site');
+
+  return { metadataBase: siteUrl, title: { default: t('name'), template: t('titleTemplate', { page: '%s' }) } };
+};
 
 const LocaleLayout = async ({ children }: LayoutProps<'/[locale]'>) => {
   const locale = await getLocale();

@@ -1,9 +1,12 @@
 {
+  "Site": {
+    "name": "Ruta Opta",
+    "titleTemplate": "{page} · Ruta Opta"
+  },
   "Common": {
     "close": "Close"
   },
   "Home": {
-    "metaTitle": "Ruta Opta",
     "title": "Hello from Ruta Opta",
     "lead": "This page checks the theme, the fonts and the languages.",
     "cta": "Get started"
