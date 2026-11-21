@@ -8,7 +8,9 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  use: { baseURL },
+  // CI uploads the report and the failure traces (test-results/) when a run fails; open: 'never' keeps a local failure from blocking
+  reporter: [['list'], ['html', { open: 'never' }]],
+  use: { baseURL, trace: 'retain-on-failure' },
   projects: [
     { name: 'desktop', use: desktop },
     { name: 'phone', use: phone },

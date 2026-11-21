@@ -1,5 +1,16 @@
-import { expect, test } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 import es from '../messages/es.json';
+import { pagePaths } from './pages';
+
+const watchProblems = (page: Page) => {
+  const problems: string[] = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error' || /hydrat/i.test(message.text())) problems.push(message.text());
+  });
+  // Production React reports hydration failures through reportError, which surfaces here
+  page.on('pageerror', (error) => problems.push(error.message));
+  return problems;
+};
 
 test.describe('smoke page on /es', () => {
   test('renders the light theme in Spanish', async ({ page }) => {
@@ -46,17 +57,42 @@ test.describe('smoke page on /es', () => {
     // Mantine's default blue: the theme did not reach Mantine
     expect(background).not.toBe('rgb(34, 139, 230)');
   });
+});
 
-  test('hydrates without console errors or hydration warnings', async ({ page }) => {
-    const problems: string[] = [];
-    page.on('console', (message) => {
-      if (message.type() === 'error' || /hydrat/i.test(message.text())) problems.push(message.text());
-    });
-    // Production React reports hydration failures through reportError, which surfaces here
-    page.on('pageerror', (error) => problems.push(error.message));
+for (const path of pagePaths) {
+  test(`${path} hydrates without console errors or hydration warnings`, async ({ page }) => {
+    const problems = watchProblems(page);
     // networkidle lets hydration and late font loads finish before asserting that nothing went wrong
-    await page.goto('/es', { waitUntil: 'networkidle' });
+    await page.goto(path, { waitUntil: 'networkidle' });
 
     expect(problems).toEqual([]);
   });
+}
+
+test.describe('under a dark color-scheme preference', () => {
+  test.use({ colorScheme: 'dark' });
+
+  for (const path of pagePaths) {
+    test(`${path} stays light and hydrates cleanly`, async ({ page }) => {
+      const problems = watchProblems(page);
+      // Every scheme <html> takes, from Mantine's inline script through hydration: a dark flash would end light anyway
+      await page.addInitScript(() => {
+        const schemes: string[] = [];
+        Object.assign(window, { schemes });
+        new MutationObserver(() => schemes.push(document.documentElement.dataset.mantineColorScheme ?? '')).observe(document, {
+          subtree: true,
+          attributeFilter: ['data-mantine-color-scheme'],
+        });
+      });
+      await page.goto(path, { waitUntil: 'networkidle' });
+
+      // mantineHtmlProps suppresses hydration warnings on <html>, so a scheme flipped before hydration shows only in these attributes
+      const html = page.locator('html');
+      await expect(html).toHaveAttribute('data-mantine-color-scheme', 'light');
+      await expect(html).toHaveAttribute('data-theme', 'light');
+      const schemes = await page.evaluate(() => (window as unknown as { schemes: string[] }).schemes);
+      expect(schemes.filter((scheme) => scheme !== 'light')).toEqual([]);
+      expect(problems).toEqual([]);
+    });
+  }
 });
