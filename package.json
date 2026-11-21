@@ -12,7 +12,7 @@
     "check": "npm run typecheck && npm run lint && npm test",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint . && stylelint \"apps/**/*.css\"",
-    "test": "node --test tests/",
+    "test": "node --test \"tests/**/*.test.mjs\"",
     "e2e": "npm run e2e --workspaces --if-present",
     "build": "npm run build --workspaces --if-present"
   },
