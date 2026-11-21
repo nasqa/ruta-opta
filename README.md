@@ -19,6 +19,6 @@ Run from the repo root:
 - `npm run check`: typecheck, lint and unit tests.
 - `npm run typecheck`: typecheck every workspace.
 - `npm run lint`: ESLint and Stylelint.
-- `npm test`: unit tests (`node --test tests/`).
+- `npm test`: unit tests (`tests/**/*.test.mjs` with `node --test`).
 - `npm run e2e`: end-to-end tests in every workspace that defines them.
 - `npm run build`: build every workspace.

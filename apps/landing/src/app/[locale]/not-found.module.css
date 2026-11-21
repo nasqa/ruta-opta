@@ -1,0 +1,14 @@
+.page {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-group);
+  padding: var(--space-inset-page);
+}
+
+.page > * {
+  margin: 0;
+}
+
+.page a {
+  color: var(--color-action-text);
+}

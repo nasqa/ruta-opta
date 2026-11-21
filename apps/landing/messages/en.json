@@ -1,0 +1,18 @@
+{
+  "Site": {
+    "name": "Ruta Opta",
+    "titleTemplate": "{page} · Ruta Opta"
+  },
+  "Common": {
+    "close": "Close"
+  },
+  "Home": {
+    "title": "Hello from Ruta Opta",
+    "lead": "This page checks the theme, the fonts and the languages.",
+    "cta": "Get started"
+  },
+  "NotFound": {
+    "title": "We couldn't find this page",
+    "home": "Go to the home page"
+  }
+}
