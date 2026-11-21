@@ -7,7 +7,7 @@ for (const path of ['/es', '/en']) {
     // Without this, axe would happily audit a 404 page
     expect(response?.status()).toBe(200);
     const { violations } = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();
 
     expect(violations).toEqual([]);

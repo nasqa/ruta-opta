@@ -15,7 +15,8 @@ export const generateMetadata = async (): Promise<Metadata> => {
     alternates: {
       languages: {
         ...Object.fromEntries(routing.locales.map((locale) => [locale, getPathname({ locale, href: '/' })])),
-        'x-default': getPathname({ locale: routing.defaultLocale, href: '/' }),
+        // The root, where the proxy picks the locale from Accept-Language; metadataBase makes it absolute
+        'x-default': '/',
       },
     },
   };

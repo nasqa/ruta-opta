@@ -25,12 +25,13 @@ test('/en renders in English', async ({ page }) => {
 
 test('/es declares absolute hreflang alternates', async ({ page, baseURL }) => {
   await page.goto('/es');
-  const alternates = { es: '/es', en: '/en', 'x-default': '/es' };
+  // x-default is the root, where the proxy negotiates the locale
+  const alternates = { es: '/es', en: '/en', 'x-default': '/' };
   for (const [hreflang, path] of Object.entries(alternates)) {
-    await expect(page.locator(`link[rel="alternate"][hreflang="${hreflang}"]`)).toHaveAttribute(
-      'href',
-      new URL(path, baseURL).href,
-    );
+    const href = await page.locator(`link[rel="alternate"][hreflang="${hreflang}"]`).getAttribute('href');
+    expect(href).toMatch(/^https?:\/\//);
+    // Compared as parsed URLs: Next writes the root without its trailing slash
+    expect(new URL(href ?? '').href).toBe(new URL(path, baseURL).href);
   }
 });
 
