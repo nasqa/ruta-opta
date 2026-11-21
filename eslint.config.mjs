@@ -95,6 +95,14 @@ const boundariesConfig = {
 
 const keepLocale = 'Use Link, redirect, useRouter and usePathname from @/i18n/navigation to keep the locale.';
 
+// jsx-no-literals ignores props, so these text props get their own check; alt="" (decorative) stays allowed
+const textProp = 'JSXAttribute[name.name=/^(alt|title|placeholder|aria-label|aria-description)$/]';
+const textFromMessages = [
+  `${textProp} > Literal[value=/\\S/]`,
+  `${textProp} > JSXExpressionContainer > Literal[value=/\\S/]`,
+  `${textProp} > JSXExpressionContainer > TemplateLiteral > TemplateElement[value.raw=/\\S/]`,
+].map((selector) => ({ selector, message: "Accessible and visible text comes from messages: use t('…')." }));
+
 const eslintConfig = defineConfig([
   globalIgnores(['**/.next/**', '**/out/**', '**/next-env.d.ts', '**/playwright-report/**', '**/.lighthouseci/**']),
   ...warnToError(nextVitals),
@@ -131,6 +139,7 @@ const eslintConfig = defineConfig([
     files: ['apps/*/src/**/*.tsx'],
     rules: {
       'react/jsx-no-literals': ['error', { noStrings: true, ignoreProps: true }],
+      'no-restricted-syntax': ['error', ...textFromMessages],
       'react/forbid-dom-props': [
         'error',
         {
@@ -160,6 +169,15 @@ const eslintConfig = defineConfig([
         {
           ignoreMiddleExtensions: true,
           errorMessage: 'File names are kebab-case: rename "{{ target }}" to lowercase words joined by hyphens.',
+        },
+      ],
+      // Route folders may also use Next's forms: [locale], [...rest], (site), _components
+      'check-file/folder-naming-convention': [
+        'error',
+        { 'apps/*/src/app/**/': 'NEXT_JS_APP_ROUTER_CASE', 'apps/*/src/!(app)/**/': 'KEBAB_CASE' },
+        {
+          errorMessage:
+            'Folder names are kebab-case (route folders may also use [param], (group) and _private): rename "{{ target }}".',
         },
       ],
     },

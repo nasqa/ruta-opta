@@ -16,6 +16,7 @@ const messages = {
   routeToModuleInternals: 'Import a module only through index.ts, server.ts or actions.ts.',
   sharedToModule: 'shared knows no domains: move this code into the module that uses it.',
   navigation: 'Use Link, redirect, useRouter and usePathname from @/i18n/navigation to keep the locale.',
+  textProps: "Accessible and visible text comes from messages: use t('…').",
 };
 
 // Lints source as if it lived at a path under the repo root; the file itself need not exist
@@ -157,6 +158,24 @@ test('visible text comes from messages', async () => {
   );
 });
 
+test('accessible text comes from messages', async () => {
+  const route = 'apps/landing/src/app/[locale]/probe/page.tsx';
+  const hardcoded = ['alt="Photo"', "title={'Opens in a new tab'}", 'placeholder={`Your name`}', 'aria-label="Close"', 'aria-description="Closes the dialog"'];
+  for (const prop of hardcoded) {
+    assertReported(await lint(route, `export const Probe = () => <input ${prop} />;\n`), 'no-restricted-syntax', messages.textProps);
+  }
+  assertClean(
+    await lint(
+      route,
+      `import { useTranslations } from 'next-intl';\n\nexport const Probe = () => {\n  const t = useTranslations('Common');\n\n  return <input className="t-body-lg" aria-label={t('close')} placeholder={t('close')} title={t('close')} />;\n};\n`,
+    ),
+  );
+  // An empty alt marks a decorative image, so it is not text
+  assertClean(
+    await lint(route, `import Image from 'next/image';\n\nexport const Probe = () => <Image alt="" src="/x.png" width={1} height={1} />;\n`),
+  );
+});
+
 test('explicit any is an error', async () => {
   assertReported(
     await lint('apps/landing/src/shared/probe.ts', 'export const identity = (value: any) => value;\n'),
@@ -184,6 +203,15 @@ test('file names are kebab-case', async () => {
   assertReported(await lint('apps/landing/src/app/MyThing.module.css', '.x {}\n'), 'check-file/filename-naming-convention');
   assertClean(await lint('apps/landing/src/shared/my-thing.ts', 'export const x = 1;\n'));
   assertClean(await lint('apps/landing/src/app/my-thing.module.css', '.x {}\n'));
+});
+
+test('folder names are kebab-case, and route folders follow Next', async () => {
+  for (const path of ['apps/landing/src/shared/MyFolder/x.ts', 'apps/landing/src/modules/my_module/index.ts', 'apps/landing/src/app/[locale]/AboutUs/page.tsx']) {
+    assertReported(await lint(path, 'export const x = 1;\n'), 'check-file/folder-naming-convention');
+  }
+  for (const path of ['apps/landing/src/app/[locale]/(site)/_components/x.tsx', 'apps/landing/src/app/[locale]/[...rest]/x.ts', 'apps/landing/src/modules/my-module/index.ts']) {
+    assertClean(await lint(path, 'export const x = 1;\n'));
+  }
 });
 
 test('no inline style on DOM elements', async () => {
@@ -220,9 +248,19 @@ test('CSS uses theme variables, not literals', async () => {
     'value-type-custom-property-required-list:error',
     'value-type-custom-property-required-list:error',
   ]);
-  assert.deepEqual(cssRules(await lintCss('.x {\n  color: var(--color-text-primary);\n  margin: 0;\n}\n')), []);
+  assert.deepEqual(
+    cssRules(await lintCss('.x {\n  color: var(--color-text-primary);\n  margin: 0;\n  border-color: currentColor;\n  outline-color: currentcolor;\n}\n')),
+    [],
+  );
 });
 
 test('CSS cannot invent tokens', async () => {
   assert.deepEqual(cssRules(await lintCss('.x {\n  color: var(--color-nope);\n}\n')), ['no-unknown-custom-properties:error']);
+});
+
+test('CSS cannot hide a literal in a var() fallback or a local custom property', async () => {
+  for (const token of ['--color-text-primary', '--color-nope']) {
+    assert.deepEqual(cssRules(await lintCss(`.x {\n  color: var(${token}, #f00);\n}\n`)), ['declaration-property-value-disallowed-list:error']);
+  }
+  assert.deepEqual(cssRules(await lintCss('.x {\n  --c: #fff;\n  color: var(--c);\n}\n')), ['property-disallowed-list:error']);
 });

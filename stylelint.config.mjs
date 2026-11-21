@@ -15,7 +15,16 @@ const stylelintConfig = {
     'no-unknown-custom-properties': true,
     'value-type-custom-property-required-list': [
       ['color', 'length'],
-      { ignoreValues: ['0', 'transparent', 'currentcolor'] },
+      { ignoreValues: ['0', 'transparent', '/^currentcolor$/i'] },
+    ],
+    // Both rules above let a literal through: as a var() fallback, or as a custom property defined here
+    'declaration-property-value-disallowed-list': [
+      { '/.*/': ['/var\\(\\s*--[^,)]+,/'] },
+      { message: 'No var() fallback: a literal there skips the theme. Read a token the theme declares, with no fallback.' },
+    ],
+    'property-disallowed-list': [
+      ['/^--/'],
+      { message: 'Custom properties come from the theme: read its tokens with var(--…) instead of defining one here.' },
     ],
   },
 };
