@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, rm, rmdir, stat, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { ESLint } from 'eslint';
@@ -102,6 +102,22 @@ test('a package cannot import an app', async () => {
     `import { routing } from '../../../apps/landing/src/i18n/routing';\n\nexport const value = routing;\n`,
   );
   assertReported(reports, 'boundaries/dependencies');
+});
+
+test('a package may import another package', async () => {
+  const packages = join(root, 'packages');
+  const existed = await stat(packages).then(() => true, () => false);
+  const name = `probe-${randomBytes(4).toString('hex')}`;
+  try {
+    await mkdir(join(packages, name, 'src'), { recursive: true });
+    await writeFile(join(packages, name, 'src/index.ts'), 'export const value = 1;\n');
+    assertClean(
+      await lint(`packages/${name}-consumer/src/index.ts`, `import { value } from '../../${name}/src/index';\n\nexport const copy = value;\n`),
+    );
+  } finally {
+    await rm(join(packages, name), { recursive: true, force: true });
+    if (!existed) await rmdir(packages).catch(() => {});
+  }
 });
 
 test('an app cannot import another app', async () => {

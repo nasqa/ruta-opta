@@ -86,6 +86,7 @@ const boundariesConfig = {
             from: { file: { categories: 'proxy' } },
             allow: { to: { element: { type: 'i18n', captured: { app: '{{ from.file.captured.app }}' } } } },
           },
+          // Any package: "declared in its package.json" is dependency-cruiser's npm-no-pkg once the first package exists (see docs/decisions)
           { from: { element: { type: 'package' } }, allow: toPackage },
         ],
       },
