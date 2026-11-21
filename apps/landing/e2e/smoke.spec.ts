@@ -17,12 +17,14 @@ test.describe('smoke page on /es', () => {
     await page.goto('/es');
 
     await expect(page.getByRole('heading', { level: 1 })).toHaveCSS('font-family', /Comfortaa/);
-    const comfortaaLoaded = await page.evaluate(async () => {
+    // fonts.check() is true for a family with no @font-face at all, so read the loaded faces instead
+    const loadedFamilies = await page.evaluate(async () => {
       await document.fonts.ready;
-      return document.fonts.check('16px "Comfortaa Variable"');
+      return [...document.fonts].filter(({ status }) => status === 'loaded').map(({ family }) => family);
     });
-    expect(comfortaaLoaded).toBe(true);
-    expect(fonts.length).toBeGreaterThan(0);
+    expect(loadedFamilies).toContain('Comfortaa Variable');
+    const comfortaaServed = fonts.some(({ url, status }) => /comfortaa/i.test(url) && status < 400);
+    expect(comfortaaServed, `woff2 responses: ${JSON.stringify(fonts)}`).toBe(true);
     expect(fonts.filter(({ status }) => status >= 400)).toEqual([]);
   });
 
