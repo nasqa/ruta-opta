@@ -14,25 +14,29 @@
         "resource-summary:script:size": [
           "error",
           {
-            "maxNumericValue": 297984
+            "maxNumericValue": 297984,
+            "aggregationMethod": "median"
           }
         ],
         "cumulative-layout-shift": [
           "error",
           {
-            "maxNumericValue": 0.1
+            "maxNumericValue": 0.1,
+            "aggregationMethod": "median"
           }
         ],
         "largest-contentful-paint": [
           "warn",
           {
-            "maxNumericValue": 2500
+            "maxNumericValue": 2500,
+            "aggregationMethod": "median"
           }
         ],
         "categories:performance": [
           "warn",
           {
-            "minScore": 0.9
+            "minScore": 0.9,
+            "aggregationMethod": "median"
           }
         ]
       }
