@@ -7,3 +7,16 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Landing conventions
+
+- Show figures as goals until evidence backs them.
+- Text over a photo always gets a scrim (a veil).
+- Every form returns a request number and reaches an owner.
+
+## Client islands
+
+- Pages stay Server Components.
+- A Mantine component without handlers renders directly from a server page.
+- An island gets its own `'use client'` file under the route's `_components/` when it has handlers, state, compound components (for example `Menu.Item`) or client-side `useTranslations`.
+- `NextIntlClientProvider` passes only the namespaces the islands use.
