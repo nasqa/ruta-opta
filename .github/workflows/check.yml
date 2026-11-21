@@ -9,11 +9,15 @@ permissions:
   contents: read
   packages: read
 
+# A new push to the same branch or PR cancels the run it replaces
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
-    env:
-      NASQA_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -22,8 +26,13 @@ jobs:
           registry-url: https://npm.pkg.github.com
           scope: '@nasqa'
           cache: npm
+      # Only these two steps read GitHub Packages; every later step runs without the token
       - run: node scripts/registry-access.mjs
+        env:
+          NASQA_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm ci
+        env:
+          NASQA_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
@@ -31,3 +40,15 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e -w apps/landing
       - run: npm run budget -w apps/landing
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: e2e-and-budget-reports
+          path: |
+            apps/landing/playwright-report
+            apps/landing/test-results
+            apps/landing/.lighthouseci
+          # .lighthouseci is a hidden folder, which upload-artifact skips by default
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 14
