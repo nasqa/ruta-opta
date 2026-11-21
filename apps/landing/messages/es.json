@@ -1,0 +1,15 @@
+{
+  "Common": {
+    "close": "Cerrar"
+  },
+  "Home": {
+    "metaTitle": "Ruta Opta",
+    "title": "Hola desde Ruta Opta",
+    "lead": "Esta página comprueba el tema, las fuentes y los idiomas.",
+    "cta": "Empezar"
+  },
+  "NotFound": {
+    "title": "No encontramos esta página",
+    "home": "Ir al inicio"
+  }
+}
