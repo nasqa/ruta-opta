@@ -31,7 +31,7 @@ Enforcement: strict TypeScript 6, ESLint with `eslint-plugin-boundaries`, Stylel
 
 - next-intl with `es` and `en`, locale prefix always, and `src/i18n/` as its own boundaries element.
 - Spanish is the source of the message types. An English namespace is complete or does not exist, and a test checks it.
-- A page exists only in the locales that have its namespace: an untranslated page has no `/en` route, and that URL answers 404.
+- A page exists only in the locales that have its namespace: an untranslated page has no English version, and its `/en` URL answers the localized 404.
 - Navigation comes from `@/i18n/navigation`; lint forbids `next/link` and `next/navigation` elsewhere.
 - Visible text comes from messages. Dates and numbers are formatted with next-intl.
 - Each page declares hreflang for the locales it exists in. A page in every locale also declares `x-default`, the unprefixed path where the proxy negotiates the locale. The client provider receives only the namespaces its islands use.
