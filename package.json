@@ -11,7 +11,7 @@
   "scripts": {
     "check": "npm run typecheck && npm run lint && npm test",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "lint": "eslint . && stylelint \"apps/**/*.css\"",
+    "lint": "eslint . && stylelint \"apps/**/*.css\" \"packages/**/*.css\" --allow-empty-input",
     "test": "node --test --test-concurrency=1 \"tests/**/*.test.mjs\"",
     "e2e": "npm run e2e --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
@@ -32,7 +32,7 @@
     "pre-commit": "npx lint-staged"
   },
   "lint-staged": {
-    "*.{ts,tsx}": "eslint --fix",
+    "*.{ts,tsx,js,jsx,mjs,cjs}": "eslint --fix",
     "*.css": [
       "stylelint --fix"
     ]

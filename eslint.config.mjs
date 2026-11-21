@@ -43,8 +43,11 @@ const boundariesConfig = {
       { type: 'messages', pattern: 'apps/*/messages', capture: ['app'], partialMatch: false },
       { type: 'package', pattern: 'packages/*', capture: ['name'], partialMatch: false },
     ],
-    // A single file is not an element in boundaries v7, so the proxy is a file category
-    'boundaries/files': [{ category: 'proxy', pattern: 'apps/*/src/proxy.ts', capture: ['app'] }],
+    // A single file is not an element in boundaries v7, so the proxy and Next's other src-root files are file categories
+    'boundaries/files': [
+      { category: 'proxy', pattern: 'apps/*/src/proxy.ts', capture: ['app'] },
+      { category: 'next-root', pattern: 'apps/*/src/{instrumentation.ts,instrumentation-client.ts,mdx-components.tsx}', capture: ['app'] },
+    ],
     'import/resolver': {
       [require.resolve('eslint-import-resolver-typescript')]: {
         alwaysTryTypes: true,
@@ -96,13 +99,57 @@ const boundariesConfig = {
 
 const keepLocale = 'Use Link, redirect, useRouter and usePathname from @/i18n/navigation to keep the locale.';
 
-// jsx-no-literals ignores props, so these text props get their own check; alt="" (decorative) stays allowed
-const textProp = 'JSXAttribute[name.name=/^(alt|title|placeholder|aria-label|aria-description)$/]';
+// jsx-no-literals ignores props, so these text props (HTML's and Mantine's) get their own check; alt="" (decorative) stays allowed
+const textProp = 'JSXAttribute[name.name=/^(alt|title|placeholder|label|description|error|aria-label|aria-description)$/]';
 const textFromMessages = [
   `${textProp} > Literal[value=/\\S/]`,
   `${textProp} > JSXExpressionContainer > Literal[value=/\\S/]`,
   `${textProp} > JSXExpressionContainer > TemplateLiteral > TemplateElement[value.raw=/\\S/]`,
 ].map((selector) => ({ selector, message: "Accessible and visible text comes from messages: use t('…')." }));
+
+// Mantine's color and length style props: a number, or a string with a CSS color or a number with a unit, is a hand-written value
+const styleProp =
+  'JSXAttribute[name.name=/^(m[trblsexy]?|p[trblsexy]?|mi[sewh]|pi[se]|ma[wh]|w|h|bd|bdrs|bg|c|ff|fz|lh|lts|bgsz|top|right|bottom|left|inset)$/]';
+const literalValue = '/^-?[\\d.]+$|\\d[a-z]|#[\\da-f]{3}|\\b(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix)\\(/i';
+const themeKeysOnly = [
+  `${styleProp} Literal[value=type(number)]`,
+  `${styleProp} Literal[value=${literalValue}]`,
+  `${styleProp} TemplateElement[value.raw=${literalValue}]`,
+].map((selector) => ({
+  selector,
+  message:
+    'Mantine style props take theme keys (p="md", c="action", fz="sm"), not literal colors or lengths. Use a theme key or a CSS module that reads theme variables.',
+}));
+
+// D1: process.env stays on the server, behind a module's server.ts or src/shared/env.ts; Next inlines NEXT_PUBLIC_* for any file
+const envMessage =
+  "Read process.env only in a module's server.ts or in src/shared/env.ts, and import the value from there. Any file may read process.env.NEXT_PUBLIC_*.";
+const envOnServer = [
+  ":not(MemberExpression) > MemberExpression[object.name='process'][property.name='env']",
+  "MemberExpression[object.object.name='process'][object.property.name='env']:not([property.name=/^NEXT_PUBLIC_/])",
+].map((selector) => ({ selector, message: envMessage }));
+
+// D1: module entry files
+const namedExports = {
+  selector: 'ExportAllDeclaration',
+  message: 'Module entry files export by name: replace export * with export { … } from ….',
+};
+const serverOnlyFirst = {
+  selector: "Program > :first-child:not(ImportDeclaration[source.value='server-only'][specifiers.length=0])",
+  message: "A module's server.ts starts with import 'server-only', so a client import fails the build. Make it the first line.",
+};
+
+// Flat config replaces a rule's options in each matching block instead of merging them, so every file kind lists all its
+// selectors here, once; the last matching glob wins, so specific globs come after general ones
+const restrictedSyntax = {
+  'apps/*/src/**/*.ts': envOnServer,
+  'apps/*/src/**/*.tsx': [...envOnServer, ...textFromMessages, ...themeKeysOnly],
+  'apps/*/src/modules/*/{index,actions}.ts': [...envOnServer, namedExports],
+  'apps/*/src/modules/*/server.ts': [serverOnlyFirst, namedExports],
+  'apps/*/src/shared/env.ts': [],
+  // Source under src is TypeScript, so every rule scoped to .ts and .tsx sees it
+  'apps/*/src/**/*.{js,jsx,mjs,cjs,mts,cts}': [{ selector: 'Program', message: 'Source under src is TypeScript: rename this file to .ts or .tsx.' }],
+};
 
 const eslintConfig = defineConfig([
   globalIgnores(['**/.next/**', '**/out/**', '**/next-env.d.ts', '**/playwright-report/**', '**/.lighthouseci/**']),
@@ -135,12 +182,11 @@ const eslintConfig = defineConfig([
     },
   },
   { files: ['apps/*/src/i18n/navigation.ts'], rules: { 'no-restricted-imports': 'off' } },
-  // D6: visible text comes from messages; D1: styles come from CSS that reads theme variables
+  // D6: visible text comes from messages; D1/D2: styles come from CSS that reads theme variables, or from theme keys
   {
     files: ['apps/*/src/**/*.tsx'],
     rules: {
       'react/jsx-no-literals': ['error', { noStrings: true, ignoreProps: true }],
-      'no-restricted-syntax': ['error', ...textFromMessages],
       'react/forbid-dom-props': [
         'error',
         {
@@ -152,8 +198,23 @@ const eslintConfig = defineConfig([
           ],
         },
       ],
+      // The default list also forbids className, which components need for CSS modules and Trama's text classes
+      'react/forbid-component-props': [
+        'error',
+        {
+          forbid: ['style', 'styles'].map((propName) => ({
+            propName,
+            message:
+              'No inline style or styles on components: use a CSS module that reads theme variables, or Mantine style props with theme keys.',
+          })),
+        },
+      ],
     },
   },
+  ...Object.entries(restrictedSyntax).map(([glob, selectors]) => ({
+    files: [glob],
+    rules: { 'no-restricted-syntax': selectors.length > 0 ? ['error', ...selectors] : 'off' },
+  })),
   // CSS is not JavaScript: check-file's processor hands ESLint an empty block so the file name still gets checked
   {
     files: ['apps/*/src/**/*.css'],

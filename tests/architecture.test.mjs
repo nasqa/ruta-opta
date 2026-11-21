@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { mkdir, rm, rmdir, stat, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, rmdir, stat, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { ESLint } from 'eslint';
@@ -17,6 +18,13 @@ const messages = {
   sharedToModule: 'shared knows no domains: move this code into the module that uses it.',
   navigation: 'Use Link, redirect, useRouter and usePathname from @/i18n/navigation to keep the locale.',
   textProps: "Accessible and visible text comes from messages: use t('…').",
+  componentStyle: 'No inline style or styles on components: use a CSS module that reads theme variables, or Mantine style props with theme keys.',
+  styleProps: 'Mantine style props take theme keys (p="md", c="action", fz="sm"), not literal colors or lengths. Use a theme key or a CSS module that reads theme variables.',
+  serverOnly: "A module's server.ts starts with import 'server-only', so a client import fails the build. Make it the first line.",
+  exportAll: 'Module entry files export by name: replace export * with export { … } from ….',
+  processEnv:
+    "Read process.env only in a module's server.ts or in src/shared/env.ts, and import the value from there. Any file may read process.env.NEXT_PUBLIC_*.",
+  typescriptOnly: 'Source under src is TypeScript: rename this file to .ts or .tsx.',
 };
 
 // Lints source as if it lived at a path under the repo root; the file itself need not exist
@@ -279,4 +287,126 @@ test('CSS cannot hide a literal in a var() fallback or a local custom property',
     assert.deepEqual(cssRules(await lintCss(`.x {\n  color: var(${token}, #f00);\n}\n`)), ['declaration-property-value-disallowed-list:error']);
   }
   assert.deepEqual(cssRules(await lintCss('.x {\n  --c: #fff;\n  color: var(--c);\n}\n')), ['property-disallowed-list:error']);
+});
+
+const route = 'apps/landing/src/app/[locale]/probe/page.tsx';
+
+test('Mantine text props come from messages', async () => {
+  for (const prop of ['label="Email"', "description={'We reply within a day'}", 'error={`Required`}']) {
+    assertReported(
+      await lint(route, `import { TextInput } from '@mantine/core';\n\nexport const Probe = () => <TextInput ${prop} />;\n`),
+      'no-restricted-syntax',
+      messages.textProps,
+    );
+  }
+  assertClean(
+    await lint(
+      route,
+      `import { TextInput } from '@mantine/core';\nimport { useTranslations } from 'next-intl';\n\nexport const Probe = () => {\n  const t = useTranslations('Common');\n\n  return <TextInput label={t('close')} description={t('close')} error />;\n};\n`,
+    ),
+  );
+});
+
+test('no inline style or styles on components', async () => {
+  for (const prop of ['style={{}}', 'styles={{}}']) {
+    assertReported(
+      await lint(route, `import { Button } from '@mantine/core';\n\nexport const Probe = () => <Button ${prop} />;\n`),
+      'react/forbid-component-props',
+      messages.componentStyle,
+    );
+  }
+  // className stays allowed: it is how components get CSS modules and Trama's text classes
+  assertClean(
+    await lint(
+      route,
+      `import { useTranslations } from 'next-intl';\nimport { Link } from '@/i18n/navigation';\n\nexport const Probe = () => {\n  const t = useTranslations('NotFound');\n\n  return (\n    <Link className="t-body-lg" href="/">\n      {t('home')}\n    </Link>\n  );\n};\n`,
+    ),
+  );
+});
+
+test('Mantine style props take theme keys, not literal colors or lengths', async () => {
+  const literals = ['p={12}', 'mt={-4}', 'w="320px"', 'maw="40rem"', 'c="#ff0000"', 'bg="rgb(0 0 0)"', 'bd="1px solid red"', 'fz={`1.25rem`}', 'lh={1.4}', 'm={{ base: 8, md: 16 }}'];
+  for (const prop of literals) {
+    assertReported(
+      await lint(route, `import { Box } from '@mantine/core';\n\nexport const Probe = () => <Box ${prop} />;\n`),
+      'no-restricted-syntax',
+      messages.styleProps,
+    );
+  }
+  assertClean(
+    await lint(route, `import { Box } from '@mantine/core';\n\nexport const Probe = () => <Box p="md" c="action" fz="sm" maw="100%" m={{ base: 'xs', md: 'lg' }} />;\n`),
+  );
+});
+
+test("a module's server.ts starts with import 'server-only'", async () => {
+  const server = 'apps/landing/src/modules/probe/server.ts';
+  for (const code of ['export const query = () => 1;\n', `import { cache } from 'react';\nimport 'server-only';\n\nexport const query = cache(() => 1);\n`]) {
+    assertReported(await lint(server, code), 'no-restricted-syntax', messages.serverOnly);
+  }
+  assertClean(await lint(server, `import 'server-only';\n\nexport const query = () => 1;\n`));
+});
+
+test('module entry files export by name, never export *', () =>
+  withModules({ 'a/value.ts': 'export const value = 1;\n' }, async (name) => {
+    for (const entry of ['index.ts', 'server.ts', 'actions.ts']) {
+      const path = `apps/landing/src/modules/${name('a')}/${entry}`;
+      const head = entry === 'server.ts' ? `import 'server-only';\n\n` : '';
+      assertReported(await lint(path, `${head}export * from './value';\n`), 'no-restricted-syntax', messages.exportAll);
+      assertClean(await lint(path, `${head}export { value } from './value';\n`));
+    }
+  }));
+
+test('process.env is read only in a module server.ts and in shared/env.ts', async () => {
+  const reads = ['export const url = process.env.URL;\n', 'export const { URL } = process.env;\n', "export const url = process.env['URL'];\n", 'export const env = process.env;\n'];
+  for (const path of ['apps/landing/src/shared/probe.ts', 'apps/landing/src/modules/probe/index.ts', 'apps/landing/src/modules/probe/actions.ts', 'apps/landing/src/app/[locale]/probe/data.ts']) {
+    for (const code of reads) assertReported(await lint(path, code), 'no-restricted-syntax', messages.processEnv);
+  }
+  assertReported(await lint(route, 'export const Probe = () => <p>{process.env.URL}</p>;\n'), 'no-restricted-syntax', messages.processEnv);
+  // Next inlines NEXT_PUBLIC_* at build time, so any file may read them
+  assertClean(await lint('apps/landing/src/shared/probe.ts', 'export const site = process.env.NEXT_PUBLIC_SITE;\n'));
+  assertClean(await lint('apps/landing/src/modules/probe/server.ts', `import 'server-only';\n\nexport const url = process.env.URL;\n`));
+  assertClean(await lint('apps/landing/src/shared/env.ts', `import 'server-only';\n\nexport const siteUrl = new URL(process.env.URL ?? 'http://localhost:3000');\n`));
+});
+
+test('each file kind keeps every selector it needs', async () => {
+  // Flat config replaces no-restricted-syntax options per matching block, so a .tsx in a module must still get the text and env checks
+  const reports = await lint('apps/landing/src/modules/probe/ui/form.tsx', 'export const Form = () => <input aria-label="Close" defaultValue={process.env.URL} />;\n');
+  assertReported(reports, 'no-restricted-syntax', messages.textProps);
+  assertReported(reports, 'no-restricted-syntax', messages.processEnv);
+});
+
+test('source under src is TypeScript', async () => {
+  for (const path of ['apps/landing/src/shared/probe.js', 'apps/landing/src/app/[locale]/probe/page.jsx', 'apps/landing/src/shared/probe.mjs']) {
+    assertReported(await lint(path, 'export const x = 1;\n'), 'no-restricted-syntax', messages.typescriptOnly);
+  }
+});
+
+test("Next's special files at the src root are known files", async () => {
+  for (const path of ['apps/landing/src/instrumentation.ts', 'apps/landing/src/instrumentation-client.ts', 'apps/landing/src/mdx-components.tsx']) {
+    assertClean(await lint(path, 'export const register = () => {};\n'));
+  }
+  // Only those names: any other file at the src root is still out of place
+  assertReported(await lint('apps/landing/src/setup.ts', 'export const x = 1;\n'), 'boundaries/no-unknown-files');
+});
+
+const stylelintCommand = JSON.parse(await readFile(join(root, 'package.json'), 'utf8')).scripts.lint.split(' && ').find((command) => command.startsWith('stylelint'));
+const runStylelint = () =>
+  spawnSync(stylelintCommand, { cwd: root, shell: true, encoding: 'utf8', env: { ...process.env, PATH: `${join(root, 'node_modules/.bin')}:${process.env.PATH}` } });
+
+test('npm run lint checks CSS in packages too, and passes while packages has none', async () => {
+  const packages = join(root, 'packages');
+  const existed = await stat(packages).then(() => true, () => false);
+  const name = `probe-${randomBytes(4).toString('hex')}`;
+  try {
+    const clean = runStylelint();
+    assert.equal(clean.status, 0, `${clean.stdout}${clean.stderr}`);
+    await mkdir(join(packages, name, 'src'), { recursive: true });
+    await writeFile(join(packages, name, 'src/card.css'), '.card {\n  color: #fff;\n}\n');
+    const { status, stdout, stderr } = runStylelint();
+    assert.notEqual(status, 0, 'stylelint passed a literal color in packages/');
+    assert.match(`${stdout}${stderr}`, new RegExp(`${name}/src/card\\.css`));
+  } finally {
+    await rm(join(packages, name), { recursive: true, force: true });
+    if (!existed) await rmdir(packages).catch(() => {});
+  }
 });
