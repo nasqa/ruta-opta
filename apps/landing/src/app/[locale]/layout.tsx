@@ -8,7 +8,10 @@ import '@nasqa/trama-react/system.css';
 import { ColorSchemeScript, mantineHtmlProps } from '@mantine/core';
 import { TramaProvider } from '@nasqa/trama-react';
 import { theme } from '@nasqa/trama-theme-opta';
+import comfortaa from '@nasqa/trama-theme-opta/fonts/comfortaa-latin-wght-normal.woff2';
+import inter from '@nasqa/trama-theme-opta/fonts/inter-latin-opsz-normal.woff2';
 import type { Metadata } from 'next';
+import { preload } from 'react-dom';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
@@ -30,6 +33,8 @@ const LocaleLayout = async ({ children }: LayoutProps<'/[locale]'>) => {
   const locale = await getLocale();
   const { Common } = await getMessages();
   const t = await getTranslations('Common');
+  // The fonts download alongside the CSS instead of after it (React adds the crossorigin a font preload needs)
+  [comfortaa, inter].forEach((font) => preload(font, { as: 'font', type: 'font/woff2' }));
 
   return (
     <html lang={locale} data-theme="light" {...mantineHtmlProps}>

@@ -39,6 +39,22 @@ test.describe('smoke page on /es', () => {
     expect(fonts.filter(({ status }) => status >= 400)).toEqual([]);
   });
 
+  test('preloads the theme fonts and downloads each one once', async ({ page }) => {
+    const requested: string[] = [];
+    page.on('request', (request) => {
+      const { pathname } = new URL(request.url());
+      if (pathname.endsWith('.woff2')) requested.push(pathname);
+    });
+    await page.goto('/es', { waitUntil: 'networkidle' });
+
+    const preloaded = await page
+      .locator('head link[rel="preload"][as="font"]')
+      .evaluateAll((links) => links.map((link) => new URL((link as HTMLLinkElement).href).pathname));
+    expect(preloaded).toHaveLength(2);
+    // A preload whose URL differs from the @font-face src would be a second download
+    expect(requested.toSorted()).toEqual(preloaded.toSorted());
+  });
+
   test('paints the Mantine button with the Opta action color', async ({ page }) => {
     await page.goto('/es');
     const [background, actionFilled] = await page
