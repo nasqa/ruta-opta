@@ -16,6 +16,9 @@ import { siteUrl } from '@/shared/env';
 
 export const generateStaticParams = () => routing.locales.map((locale) => ({ locale }));
 
+// Netlify's free plan injects a comment wrapped in line breaks into <head>. React fails to hydrate a document whose <head> has text nodes and re-renders it all on the client
+const dropHeadWhitespace = 'for (const node of [...document.head.childNodes]) if (node.nodeType === 3 && !node.data.trim()) node.remove()';
+
 // A page sets only its own title and the template adds the site name; pages without one, such as the 404, get the default
 export const generateMetadata = async (): Promise<Metadata> => {
   const t = await getTranslations('Site');
@@ -31,6 +34,8 @@ const LocaleLayout = async ({ children }: LayoutProps<'/[locale]'>) => {
   return (
     <html lang={locale} data-theme="light" {...mantineHtmlProps}>
       <head>
+        {/* Runs while the HTML parses, before React hydrates */}
+        <script dangerouslySetInnerHTML={{ __html: dropHeadWhitespace }} />
         <ColorSchemeScript forceColorScheme="light" />
       </head>
       <body>

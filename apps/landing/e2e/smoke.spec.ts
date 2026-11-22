@@ -69,6 +69,22 @@ for (const path of pagePaths) {
   });
 }
 
+test('hydrates cleanly when the host injects a comment into <head>', async ({ page }) => {
+  const problems = watchProblems(page);
+  const charset = '<meta charSet="utf-8"/>';
+  let injected = false;
+  // What Netlify's free plan adds to every *.netlify.app page, right after <meta charset>
+  await page.route('/es', async (route) => {
+    const html = await (await route.fetch()).text();
+    injected = html.includes(charset);
+    await route.fulfill({ contentType: 'text/html; charset=utf-8', body: html.replace(charset, `${charset}\n\n<!-- Injected by the host -->\n`) });
+  });
+  await page.goto('/es', { waitUntil: 'networkidle' });
+
+  expect(injected).toBe(true);
+  expect(problems).toEqual([]);
+});
+
 test.describe('under a dark color-scheme preference', () => {
   test.use({ colorScheme: 'dark' });
 
