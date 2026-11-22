@@ -3,3 +3,10 @@
   # Exit 1 builds, exit 0 skips. The lockfile and root package.json are listed so a dependency-only bump still rebuilds.
   # Equal refs mean "Trigger deploy" with no new commit, which always builds: the app bakes Netlify's URL at build time.
   ignore = '[ "$CACHED_COMMIT_REF" != "$COMMIT_REF" ] && git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- apps/landing package.json package-lock.json'
+
+# Netlify's default hostname keeps serving the site after a custom domain is added; send it to the primary domain so there is one public address
+[[redirects]]
+  from = "https://rutaopta.netlify.app/*"
+  to = "https://www.rutaopta.org/:splat"
+  status = 301
+  force = true
