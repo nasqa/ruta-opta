@@ -10,3 +10,10 @@
   to = "https://www.rutaopta.org/:splat"
   status = 301
   force = true
+
+# TEMPORARY: proves on this PR's preview that the rule runs before the Next.js proxy edge function; removed before merge
+[[redirects]]
+  from = "https://deploy-preview-5--rutaopta.netlify.app/*"
+  to = "https://www.rutaopta.org/:splat"
+  status = 301
+  force = true
