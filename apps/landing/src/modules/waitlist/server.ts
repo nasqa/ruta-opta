@@ -1,82 +1,121 @@
 import 'server-only';
+import { randomBytes, randomUUID } from 'node:crypto';
+import type { Locale } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
+import { getPathname } from '@/i18n/navigation';
+import { siteUrl } from '@/shared/env';
+import { createFakeAudience } from './audience-fake';
+import { createZohoAudience, zohoDataCenters } from './audience-zoho';
+import { buildConfirmEmail } from './confirm-email';
+import type { Mailer } from './mailer';
+import { createCpaasMailer } from './mailer-cpaas';
+import { createFakeMailer } from './mailer-fake';
 import type { WaitlistValues } from './state';
+import { createBlobsStore, createMemoryStore } from './store';
+import { createThrottle, defaultLimits } from './throttle';
+import { deriveKey, parseTokenKeys } from './token';
+import { type ConfirmResult, createWaitlist, type ReadResult, type WaitlistDeps } from './use-cases';
 
-// Zoho runs one data center per region: the account's address decides which one our keys belong to
-const dataCenters = ['com', 'eu', 'in', 'com.au', 'jp', 'ca', 'sa', 'com.cn'];
-const requestTimeout = 8000;
-const tokenMargin = 60_000;
+// The privacy policy version a subscriber consents to; the token carries it to Zoho
+const policyVersion = '2026-11-draft';
 
-type ZohoSettings = { dataCenter: string; clientId: string; clientSecret: string; refreshToken: string; listKey: string };
+type Waitlist = ReturnType<typeof createWaitlist>;
+// Reads a variable through its parser; a blank variable takes the fallback. A missing or unparsable value comes back undefined and its name is reported
+type Read = <T>(name: string, parse: (value: string) => T | undefined, fallback?: T) => T | undefined;
 
-const readSettings = (): ZohoSettings | undefined => {
-  const { ZOHO_DC = 'com', ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, ZOHO_REFRESH_TOKEN, ZOHO_LIST_KEY } = process.env;
-  if (!dataCenters.includes(ZOHO_DC) || !ZOHO_CLIENT_ID || !ZOHO_CLIENT_SECRET || !ZOHO_REFRESH_TOKEN || !ZOHO_LIST_KEY) return undefined;
+const text = (value: string) => value;
+const isComplete = <T extends object>(values: T): values is { [K in keyof T]: Exclude<T[K], undefined> } =>
+  Object.values(values).every((value) => value !== undefined);
 
-  return { dataCenter: ZOHO_DC, clientId: ZOHO_CLIENT_ID, clientSecret: ZOHO_CLIENT_SECRET, refreshToken: ZOHO_REFRESH_TOKEN, listKey: ZOHO_LIST_KEY };
+// Switching provider is one more entry here and its MAIL_PROVIDER value; each entry reads its own variables
+const mailers = {
+  cpaas: (read: Read) => {
+    const settings = { apiKey: read('CPAAS_API_KEY', text), fromAddress: read('MAIL_FROM_ADDRESS', text) };
+    return isComplete(settings) ? createCpaasMailer(settings) : undefined;
+  },
+} satisfies Record<string, (read: Read) => Mailer | undefined>;
+
+const isMailProvider = (value: string): value is keyof typeof mailers => Object.hasOwn(mailers, value);
+
+const confirmEmail: WaitlistDeps['confirmEmail'] = async (locale, confirmUrl) => {
+  const t = await getTranslations({ locale, namespace: 'ConfirmEmail' });
+  const copy = { sender: t('sender'), subject: t('subject'), preheader: t('preheader'), heading: t('heading'), paragraphs: [t('p1'), t('p2'), t('p3')], action: t('action') };
+  return buildConfirmEmail(copy, locale, confirmUrl);
 };
 
-// Tests run the form against a stand-in. It never runs on Netlify's production context, so a stray variable cannot fake signups
-const usesStandIn = () => process.env.WAITLIST_ADAPTER === 'fake' && process.env.CONTEXT !== 'production';
+const confirmUrl: WaitlistDeps['confirmUrl'] = (locale, token) =>
+  new URL(getPathname({ locale, href: { pathname: '/confirm', query: { t: token } } }), siteUrl).href;
 
-// Zoho limits how many access tokens one refresh token can mint, so a warm server reuses the one it has
-let cachedToken: { value: string; expiresAt: number } | undefined;
+const common = { policyVersion, confirmEmail, confirmUrl, now: Date.now, reference: randomUUID, log: console.error };
 
-const accessToken = async (settings: ZohoSettings) => {
-  if (cachedToken && cachedToken.expiresAt > Date.now()) return cachedToken.value;
-
-  const response = await fetch(`https://accounts.zoho.${settings.dataCenter}/oauth/v2/token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      grant_type: 'refresh_token',
-      refresh_token: settings.refreshToken,
-      client_id: settings.clientId,
-      client_secret: settings.clientSecret,
-    }),
-    cache: 'no-store',
-    signal: AbortSignal.timeout(requestTimeout),
-  });
-  const body: { access_token?: string; expires_in?: number } = await response.json();
-  if (!response.ok || !body.access_token) throw new Error(`token request failed (${response.status})`);
-
-  cachedToken = { value: body.access_token, expiresAt: Date.now() + Math.min(body.expires_in ?? 3600, 3600) * 1000 - tokenMargin };
-  return cachedToken.value;
+// Local runs, the e2e and deploy previews: nothing leaves the process. A random key when none is set means links die with the process
+const composeFake = (): Waitlist => {
+  const keys = parseTokenKeys(process.env.WAITLIST_TOKEN_KEY) ?? { current: new Uint8Array(randomBytes(32)) };
+  const throttle = createThrottle(createMemoryStore(), deriveKey(keys, 'waitlist/throttle'), defaultLimits);
+  return createWaitlist({ ...common, mailer: createFakeMailer(), audience: createFakeAudience(), throttle, keys });
 };
 
-// With the list's double opt-in on, Zoho emails the person and adds them only once they confirm
-const subscribe = async (settings: ZohoSettings, { name, email }: WaitlistValues) => {
-  const response = await fetch(`https://campaigns.zoho.${settings.dataCenter}/api/v1.1/json/listsubscribe`, {
-    method: 'POST',
-    headers: { Authorization: `Zoho-oauthtoken ${await accessToken(settings)}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      resfmt: 'JSON',
-      listkey: settings.listKey,
-      contactinfo: JSON.stringify({ 'First Name': name, 'Contact Email': email }),
-      source: 'rutaopta.org',
-    }),
-    cache: 'no-store',
-    signal: AbortSignal.timeout(requestTimeout),
-  });
-  const body: { status?: string; code?: string | number } = await response.json();
-  if (response.status === 401) cachedToken = undefined;
-  if (!response.ok || body.status !== 'success') throw new Error(`subscribe failed (${response.status}, code ${body.code ?? 'none'})`);
+// Returns the waitlist, or the names of the variables that are missing or invalid
+const composeLive = (): Waitlist | string[] => {
+  const invalid: string[] = [];
+  const read: Read = (name, parse, fallback) => {
+    const raw = process.env[name];
+    const value = raw ? parse(raw) : fallback;
+    if (value === undefined) invalid.push(name);
+    return value;
+  };
+
+  const provider = read('MAIL_PROVIDER', (value) => (isMailProvider(value) ? value : undefined));
+  const settings = {
+    mailer: provider && mailers[provider](read),
+    dataCenter: read('ZOHO_DC', (value) => zohoDataCenters.find((center) => center === value), 'com'),
+    clientId: read('ZOHO_CLIENT_ID', text),
+    clientSecret: read('ZOHO_CLIENT_SECRET', text),
+    refreshToken: read('ZOHO_REFRESH_TOKEN', text),
+    listKeyEs: read('ZOHO_LIST_KEY_ES', text),
+    listKeyEn: read('ZOHO_LIST_KEY_EN', text),
+    // Each key is parsed on its own, so a bad previous key is reported by its own name
+    currentKey: read('WAITLIST_TOKEN_KEY', (value) => parseTokenKeys(value)?.current),
+    previousKey: read('WAITLIST_TOKEN_KEY_PREVIOUS', (value) => parseTokenKeys(value)?.current, null),
+    dailyCap: read('WAITLIST_DAILY_CAP', (value) => (/^[1-9]\d*$/.test(value) ? Number(value) : undefined), defaultLimits.totalPerDay),
+  };
+  if (!isComplete(settings)) return invalid;
+
+  const { mailer, dataCenter, clientId, clientSecret, refreshToken, listKeyEs, listKeyEn, currentKey, previousKey, dailyCap } = settings;
+  const keys = previousKey ? { current: currentKey, previous: previousKey } : { current: currentKey };
+  // SITE_ID is set on Netlify only; a live run elsewhere keeps its state in memory
+  const store = process.env.SITE_ID ? createBlobsStore('waitlist') : createMemoryStore();
+  const audience = createZohoAudience({ dataCenter, clientId, clientSecret, refreshToken, listKeys: { es: listKeyEs, en: listKeyEn }, store, keys });
+  const throttle = createThrottle(store, deriveKey(keys, 'waitlist/throttle'), { ...defaultLimits, totalPerDay: dailyCap });
+  return createWaitlist({ ...common, mailer, audience, throttle, keys });
 };
 
-// Returns what the form needs to show. The log names the failure, never the person's data
-export const subscribeToWaitlist = async (values: WaitlistValues): Promise<'sent' | 'unavailable'> => {
-  if (usesStandIn()) return 'sent';
-
-  const settings = readSettings();
-  if (!settings) {
-    console.error('waitlist: the Zoho settings are missing or invalid');
-    return 'unavailable';
-  }
-
-  try {
-    await subscribe(settings, values);
-    return 'sent';
-  } catch (error) {
-    console.error('waitlist: Zoho did not accept the signup:', error instanceof Error ? error.message : 'unknown error');
-    return 'unavailable';
-  }
+// A live deploy with bad variables fails closed: nothing is sent, opened or subscribed
+const closed: Waitlist = {
+  requestConfirmation: async () => 'unavailable',
+  readConfirmation: () => ({ status: 'invalid' }),
+  confirmSubscription: async () => ({ status: 'unavailable' }),
 };
+
+const compose = () => {
+  if (process.env.WAITLIST_ADAPTER !== 'live') return { waitlist: composeFake(), live: false };
+  const waitlist = composeLive();
+  if (!Array.isArray(waitlist)) return { waitlist, live: true };
+  // The names only, never the values
+  console.error('waitlist:config-invalid', { variables: waitlist.join(',') });
+  return { waitlist: closed, live: true };
+};
+
+// Read at first use, not when the file loads: next build loads it on a machine without the production variables
+let composition: ReturnType<typeof compose> | undefined;
+const current = () => (composition ??= compose());
+
+export const requestConfirmation = (values: WaitlistValues, locale: Locale, ip: string | undefined): Promise<'sent' | 'unavailable'> => {
+  const { waitlist, live } = current();
+  // Live requests without the header share one 'unknown' bucket rather than skip the IP rule; the fake one skips it, so the e2e is unaffected
+  return waitlist.requestConfirmation(values, locale, live ? (ip ?? 'unknown') : ip);
+};
+
+export const readConfirmation = async (token: string): Promise<ReadResult> => current().waitlist.readConfirmation(token);
+
+export const confirmSubscription = (token: string): Promise<ConfirmResult> => current().waitlist.confirmSubscription(token);

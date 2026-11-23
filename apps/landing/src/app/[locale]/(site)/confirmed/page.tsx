@@ -13,7 +13,8 @@ export const generateMetadata = async (): Promise<Metadata> => {
 
   const t = await getTranslations('Confirmed');
 
-  return { title: t('metaTitle'), alternates: alternates('/confirmed') };
+  // Reached only after confirming, so search engines have nothing to list here
+  return { title: t('metaTitle'), alternates: alternates('/confirmed'), robots: { index: false, follow: false } };
 };
 
 const ConfirmedPage = () => {
@@ -26,6 +27,7 @@ const ConfirmedPage = () => {
     <main className={styles.page}>
       <h1 className="t-display-md">{t('title')}</h1>
       <p className="t-body-lg">{t('lead')}</p>
+      <p className="t-body-lg">{t('frequency')}</p>
       <Link className="t-body-lg" href="/">
         {t('home')}
       </Link>

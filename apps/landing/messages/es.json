@@ -89,7 +89,40 @@
     "metaTitle": "Inscripción confirmada",
     "title": "Listo, quedaste en la lista",
     "lead": "Te escribiremos cuando haya novedades.",
+    "frequency": "Serán pocos correos: cuándo abrimos y cómo ser parte. [PENDIENTE: copy de campaña]",
     "home": "Volver al inicio"
+  },
+  "Confirm": {
+    "metaTitle": "Confirma tu inscripción",
+    "title": "Confirma tu inscripción [PENDIENTE: copy de campaña]",
+    "greeting": "Hola, {name}.",
+    "lead": "Toca el botón para confirmar que quieres recibir las novedades de OPTA en este correo.",
+    "submit": "Confirmar mi inscripción",
+    "again": "Inscribirme de nuevo",
+    "expired": {
+      "title": "Este enlace ya venció",
+      "text": "Los enlaces de confirmación duran 7 días. Inscríbete de nuevo y te enviamos uno nuevo."
+    },
+    "invalid": {
+      "title": "No reconocemos este enlace",
+      "text": "Puede que esté incompleto. Copia el enlace completo del correo o inscríbete de nuevo."
+    },
+    "blocked": {
+      "text": "Este correo pidió no recibir mensajes de OPTA. Si quieres volver, escríbenos a privacidad@rutaopta.org."
+    },
+    "unavailable": {
+      "text": "No pudimos confirmar tu inscripción. Inténtalo de nuevo en unos minutos."
+    }
+  },
+  "ConfirmEmail": {
+    "sender": "Ruta OPTA",
+    "subject": "Confirma tu inscripción en OPTA [PENDIENTE: copy de campaña]",
+    "preheader": "Un clic y quedas en la lista.",
+    "heading": "Confirma tu inscripción",
+    "p1": "Alguien, ojalá tú, pidió recibir las novedades de OPTA en este correo.",
+    "p2": "Si fuiste tú, confirma con el botón. El enlace dura 7 días.",
+    "p3": "Si no fuiste tú, ignora este mensaje: no te escribiremos.",
+    "action": "Confirmar mi inscripción"
   },
   "NotFound": {
     "title": "No encontramos esta página",

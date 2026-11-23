@@ -6,7 +6,7 @@ import { routing } from './routing';
 export type Href = keyof typeof routing.pathnames;
 
 // D6: the namespace each route renders. A route exists only in the locales whose messages have that namespace
-const namespaces: Record<Href, keyof Messages> = { '/': 'Prelaunch', '/privacy': 'Privacy', '/confirmed': 'Confirmed' };
+const namespaces: Record<Href, keyof Messages> = { '/': 'Prelaunch', '/privacy': 'Privacy', '/confirmed': 'Confirmed', '/confirm': 'Confirm' };
 
 const catalogs: Record<Locale, object> = { es, en };
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, Checkbox, TextInput } from '@mantine/core';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 import { Link } from '@/i18n/navigation';
 import { initialWaitlistState } from '@/modules/waitlist';
@@ -10,6 +10,7 @@ import styles from './waitlist-form.module.css';
 
 export const WaitlistForm = () => {
   const t = useTranslations('Waitlist');
+  const locale = useLocale();
   const [state, action, pending] = useActionState(joinWaitlist, initialWaitlistState);
 
   if (state.status === 'sent') {
@@ -56,6 +57,8 @@ export const WaitlistForm = () => {
       <div hidden aria-hidden="true">
         <input name="company" tabIndex={-1} autoComplete="off" defaultValue="" />
       </div>
+      {/* The action cannot read the page's locale itself, and the confirmation email is written in it */}
+      <input type="hidden" name="locale" value={locale} />
       {state.status === 'unavailable' && (
         <p role="alert" className={`${styles.alert} t-body-md`}>
           {t('unavailable')}

@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { testTokenKey } from './e2e/fixtures';
 
 // Its own port, so the run never lands on a dev server on :3000, which reads .env.local and reaches Zoho
 const port = 3100;
@@ -25,7 +26,19 @@ export default defineConfig({
     url: baseURL,
     // Never a server it did not start: only this one gets the env below
     reuseExistingServer: false,
-    // The form answers as if Zoho accepted the signup. The blank keys win over .env.local (Next never overrides a set variable), so the real adapter fails closed if the stand-in is ever off
-    env: { WAITLIST_ADAPTER: 'fake', ZOHO_CLIENT_ID: '', ZOHO_CLIENT_SECRET: '', ZOHO_REFRESH_TOKEN: '', ZOHO_LIST_KEY: '' },
+    // Fake mailer and audience, and a known token key so tests seal their own links. The blank secrets win over .env.local (Next never overrides a set
+    // variable), so the live adapters fail closed if the fake ones are ever off
+    env: {
+      WAITLIST_ADAPTER: 'fake',
+      WAITLIST_TOKEN_KEY: testTokenKey,
+      MAIL_PROVIDER: '',
+      CPAAS_API_KEY: '',
+      MAIL_FROM_ADDRESS: '',
+      ZOHO_CLIENT_ID: '',
+      ZOHO_CLIENT_SECRET: '',
+      ZOHO_REFRESH_TOKEN: '',
+      ZOHO_LIST_KEY_ES: '',
+      ZOHO_LIST_KEY_EN: '',
+    },
   },
 });

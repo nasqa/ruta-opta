@@ -68,3 +68,8 @@ test('Lighthouse budgets every route in each locale that has it', async () => {
     }
   }
 });
+
+test('the confirmation link keeps its token in the query of the localized /confirm path', () => {
+  // server.ts builds the email's link this way; a dropped query would send every subscriber a dead link
+  assert.equal(getPathname({ locale: 'es', href: { pathname: '/confirm', query: { t: 'AQ_-x9' } } }), '/es/confirmar?t=AQ_-x9');
+});
