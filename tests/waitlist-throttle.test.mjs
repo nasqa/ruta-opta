@@ -39,6 +39,41 @@ test('case and spaces are one address', async () => {
   assert.equal(await throttle.admit(' ana@example.com', ip), 'skip');
 });
 
+test('aliases of one mailbox share its limit', async () => {
+  const { throttle } = setup();
+  assert.equal(await throttle.admit('victim@gmail.com', ip), 'send');
+  for (const alias of ['victim+1@gmail.com', 'v.i.c.t.i.m@gmail.com', 'victim@googlemail.com', 'V.ictim+news@GoogleMail.com']) {
+    assert.equal(await throttle.admit(alias, ip), 'skip', alias);
+  }
+  assert.equal(await throttle.admit('a@example.com', ip), 'send');
+  assert.equal(await throttle.admit('a+x@example.com', ip), 'skip');
+});
+
+test('dots count outside Gmail, and the tag is cut at the last @ only', async () => {
+  const { throttle } = setup();
+  assert.equal(await throttle.admit('ab@example.com', ip), 'send');
+  assert.equal(await throttle.admit('a.b@example.com', ip), 'send');
+  assert.equal(await throttle.admit('ab@gmail.com.example', ip), 'send');
+});
+
+test('IPv6 addresses count per /64, IPv4 per address', async () => {
+  const { throttle } = setup({ ...defaultLimits, ipPerHour: 1 });
+  assert.equal(await throttle.admit('a@example.com', '2001:db8:1:2::1'), 'send');
+  // The same /64 written differently: leading zeros, case and a different interface id
+  assert.equal(await throttle.admit('b@example.com', '2001:0DB8:0001:0002:ffff::9'), 'refuse');
+  assert.equal(await throttle.admit('c@example.com', '2001:db8:1:3::1'), 'send');
+  assert.equal(await throttle.admit('d@example.com', '2001:db8::1:2:0:0:1'), 'send');
+  assert.equal(await throttle.admit('e@example.com', '203.0.113.7'), 'send');
+  assert.equal(await throttle.admit('f@example.com', '203.0.113.8'), 'send');
+  // An IPv4-mapped address is its IPv4 address, not the shared ::ffff:0:0/96
+  assert.equal(await throttle.admit('g@example.com', '::ffff:198.51.100.1'), 'send');
+  assert.equal(await throttle.admit('h@example.com', '::ffff:198.51.100.2'), 'send');
+  assert.equal(await throttle.admit('i@example.com', '198.51.100.1'), 'refuse');
+  // Live mode's bucket for a missing header passes through as is
+  assert.equal(await throttle.admit('j@example.com', 'unknown'), 'send');
+  assert.equal(await throttle.admit('k@example.com', 'unknown'), 'refuse');
+});
+
 test('fourth send of the UTC day is skipped, next UTC day sends', async () => {
   const { throttle, clock } = setup();
   for (let i = 0; i < 3; i++) {
