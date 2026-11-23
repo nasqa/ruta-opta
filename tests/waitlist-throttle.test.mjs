@@ -90,11 +90,11 @@ test('concurrent submissions for one address send at most once', async () => {
 
 test('concurrent submissions never exceed 3 a day', async () => {
   const { throttle, clock } = setup();
-  let sends = 0;
-  for (let slot = 0; slot < 3; slot++) {
+  const sendsPerSlot = [];
+  for (let slot = 0; slot < 5; slot++) {
     const verdicts = await Promise.all(Array.from({ length: 5 }, () => throttle.admit('ana@example.com', undefined)));
-    sends += verdicts.filter((verdict) => verdict === 'send').length;
-    clock.now += 2 * minute;
+    sendsPerSlot.push(verdicts.filter((verdict) => verdict === 'send').length);
+    clock.now += defaultLimits.addressGapMs;
   }
-  assert.equal(sends, 3);
+  assert.deepEqual(sendsPerSlot, [1, 1, 1, 0, 0]);
 });
