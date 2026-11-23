@@ -1,0 +1,9 @@
+.page {
+  display: grid;
+  gap: var(--space-group);
+  padding: var(--space-inset-page);
+}
+
+.page > * {
+  margin: 0;
+}

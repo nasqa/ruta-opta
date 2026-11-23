@@ -4,7 +4,13 @@ export const routing = defineRouting({
   locales: ['es', 'en'],
   defaultLocale: 'es',
   localePrefix: 'always',
-  pathnames: { '/': '/' },
+  // The pages exist only in Spanish for now: an English browser at / must land on /es, not on the English 404
+  localeDetection: false,
+  pathnames: {
+    '/': '/',
+    '/privacy': { es: '/privacidad', en: '/privacy' },
+    '/confirmed': { es: '/confirmado', en: '/confirmed' },
+  },
   // Each page declares its hreflang alternates in its metadata; the proxy's Link header would duplicate them
   alternateLinks: false,
 });

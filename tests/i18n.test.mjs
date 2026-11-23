@@ -41,10 +41,10 @@ const proxyLinks = (pathnames, path) => {
 };
 
 test('a namespace exists in the locales whose messages have it', () => {
-  assert.deepEqual(localesWith('Home'), ['es', 'en']);
-  const { Home, ...enWithoutHome } = en;
-  assert.ok(Home);
-  assert.deepEqual(localesWith('Home', { es, en: enWithoutHome }), ['es']);
+  // The pre-launch pages are Spanish-only, so English has none of their namespaces
+  assert.deepEqual(localesWith('Prelaunch'), ['es']);
+  assert.ok(!('Prelaunch' in en));
+  assert.deepEqual(localesWith('Prelaunch', { es, en: { Prelaunch: es.Prelaunch } }), ['es', 'en']);
 });
 
 test('every route has its namespace in Spanish, the source of the types', () => {
@@ -52,13 +52,18 @@ test('every route has its namespace in Spanish, the source of the types', () => 
 });
 
 test('alternates list the covered locales and x-default, the unprefixed path where the proxy negotiates the locale', () => {
-  const home = alternates('/').languages;
+  // A page that exists in both locales, here the home as if it were translated
+  const home = alternates('/', ['es', 'en']).languages;
   assert.deepEqual(home, { es: '/es', en: '/en', 'x-default': '/' });
   assert.deepEqual(home, proxyLinks(routing.pathnames, '/es'));
   // Off home, x-default is the default locale's translated pathname without its prefix, as in the proxy's own links
   const aboutOpta = alternates('/about-opta', ['es', 'en'], translated.getPathname).languages;
   assert.deepEqual(aboutOpta, { es: '/es/conoce-opta', en: '/en/about-opta', 'x-default': '/conoce-opta' });
   assert.deepEqual(aboutOpta, proxyLinks(translatedPathnames, '/es/conoce-opta'));
+});
+
+test('the pre-launch home lists only Spanish, with no x-default', () => {
+  assert.deepEqual(alternates('/').languages, { es: '/es' });
 });
 
 test('a Spanish-only page lists only Spanish, with no x-default', () => {

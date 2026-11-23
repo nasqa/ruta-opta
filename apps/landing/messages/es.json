@@ -6,10 +6,90 @@
   "Common": {
     "close": "Cerrar"
   },
-  "Home": {
-    "title": "Hola desde Ruta Opta",
-    "lead": "Esta página comprueba el tema, las fuentes y los idiomas.",
-    "cta": "Empezar"
+  "Prelaunch": {
+    "metaDescription": "OPTA conecta el potencial de las personas con oportunidades para transformar sus territorios. Déjanos tu correo y te avisamos cuando abramos.",
+    "title": "El talento de las comunidades puede transformar sus territorios.",
+    "lead": "OPTA conecta el potencial de las personas con oportunidades para transformar sus territorios. Estamos construyendo la ruta y queremos avisarte cuando abra.",
+    "cta": "Quiero que me avisen",
+    "buildingTitle": "Lo que estamos construyendo",
+    "stages": {
+      "grow": {
+        "name": "Crecer",
+        "text": "Bienestar emocional y reconocimiento de las capacidades que cada persona ya tiene."
+      },
+      "create": {
+        "name": "Crear",
+        "text": "Formación en emprendimiento, finanzas, tecnología y comercialización."
+      },
+      "connect": {
+        "name": "Conectar",
+        "text": "Vínculos con empleo, mercados, financiación y aliados."
+      }
+    },
+    "territory": "Vamos a empezar por el Quindío.",
+    "listTitle": "Déjanos tu correo",
+    "listLead": "Déjanos tu nombre y tu correo y te avisamos cuando abramos.",
+    "privacyLink": "Política de tratamiento de datos"
+  },
+  "Waitlist": {
+    "name": {
+      "label": "¿Cómo te llamamos?",
+      "error": "Dinos cómo te llamamos."
+    },
+    "email": {
+      "label": "Tu correo",
+      "placeholder": "nombre@correo.com",
+      "error": "Revisa el correo: parece que le falta algo. Ejemplo: nombre@correo.com."
+    },
+    "consent": {
+      "label": "Autorizo a Fundación OPTA a tratar mis datos para enviarme novedades y avisarme cuando abramos. Puedo retirar mi autorización cuando quiera. Conoce la <privacy>política de tratamiento de datos</privacy>.",
+      "error": "Para inscribirte necesitamos tu autorización."
+    },
+    "submit": "Quiero que me avisen",
+    "note": "Pocos correos, solo los importantes.",
+    "sent": {
+      "title": "Casi listo, {name}.",
+      "text": "Te enviamos un correo para confirmar tu inscripción. Si no lo ves en unos minutos, revisa la carpeta de correo no deseado."
+    },
+    "unavailable": "No pudimos enviar tu inscripción. Tus datos siguen aquí: inténtalo de nuevo en unos minutos."
+  },
+  "Privacy": {
+    "metaTitle": "Política de tratamiento de datos",
+    "title": "Política de tratamiento de datos",
+    "intro": "Esta política explica qué datos personales recoge la lista de espera de OPTA, para qué los usamos y cómo puedes ejercer tus derechos.",
+    "sections": {
+      "controller": {
+        "title": "Responsable del tratamiento",
+        "text": "Fundación OPTA, NIT [PENDIENTE], con domicilio en [PENDIENTE]. Representante legal: Stephania Forero."
+      },
+      "data": {
+        "title": "Qué datos pedimos",
+        "text": "Tu nombre y tu correo electrónico. Si eliges una opción en «¿Cómo quieres ser parte de esta transformación?», también la guardamos."
+      },
+      "purpose": {
+        "title": "Para qué los usamos",
+        "text": "Para enviarte novedades de OPTA y avisarte cuando abramos. No los usamos para otra cosa."
+      },
+      "processor": {
+        "title": "Quién nos ayuda a enviar los correos",
+        "text": "Enviamos los correos con Zoho Campaigns, que puede guardar los datos en servidores fuera de Colombia."
+      },
+      "rights": {
+        "title": "Tus derechos",
+        "text": "Puedes conocer, actualizar y corregir tus datos, pedir que los eliminemos y retirar tu autorización cuando quieras. También puedes usar el enlace para darte de baja que trae cada correo."
+      }
+    },
+    "contactEs": "Escríbenos a",
+    "emailEs": "privacidad@rutaopta.org",
+    "contactEn": "Si prefieres escribir en inglés:",
+    "emailEn": "privacy@rutaopta.org",
+    "home": "Volver al inicio"
+  },
+  "Confirmed": {
+    "metaTitle": "Inscripción confirmada",
+    "title": "Listo, quedaste en la lista",
+    "lead": "Te escribiremos cuando haya novedades.",
+    "home": "Volver al inicio"
   },
   "NotFound": {
     "title": "No encontramos esta página",

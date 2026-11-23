@@ -8,7 +8,7 @@ npm workspaces monorepo: `apps/*` (landing now, platform later) and `packages/*`
 - `npm run lint`: ESLint (architecture, strict types, text from messages) and Stylelint (theme-only CSS).
 - `npm test`: architecture, hooks, i18n and messages tests. Runs serially because some tests write into `apps/landing/src`.
 - `npm run check`: all of the above.
-- Build, then e2e: `npm run build -w apps/landing`, then `npm run e2e -w apps/landing`. The e2e runs against `next start`, which serves the last build.
+- Build, then e2e: `npm run build -w apps/landing`, then `npm run e2e -w apps/landing`. The e2e runs against `next start`, which serves the last build. It never touches a real service: it starts its own server on port 3100 (never reuses one) with the waitlist stand-in and blank Zoho keys. Keep it that way.
 - `npm run budget -w apps/landing`: Lighthouse's per-route JS budget, also on the last build. The budget only goes down: never raise `maxNumericValue` in `lighthouserc.json`; ask Santiago.
 - Hooks run ESLint/Stylelint after every edit and typecheck + lint when you stop. Fix what they print; do not silence them.
 
@@ -59,3 +59,4 @@ A file is born next to the route that uses it (`app/**/_components`). It moves t
 
 - Decision record: `docs/decisions/0001-architecture.md`.
 - Landing conventions: `apps/landing/AGENTS.md`.
+- Campaign documents (Spanish; verbal brand kit, brief, roadmap): they live in the claude.ai Project "OPTA", not here. See `docs/campaign/README.md`.
