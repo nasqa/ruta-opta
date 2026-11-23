@@ -48,8 +48,8 @@ export const createWaitlist = ({ mailer, audience, throttle, keys, policyVersion
     return opened.status === 'valid' ? { status: 'valid', name: opened.payload.name, locale: opened.payload.locale } : { status: opened.status };
   };
 
-  const subscribe = async ({ email, name, locale }: ConfirmPayload): Promise<ConfirmResult> => {
-    const result = await audience.subscribe({ email, name }, locale, `rutaopta.org/${locale} · ${policyVersion}`);
+  const subscribe = async ({ email, name, locale, policyVersion: consentedVersion }: ConfirmPayload): Promise<ConfirmResult> => {
+    const result = await audience.subscribe({ email, name }, locale, `rutaopta.org/${locale} · ${consentedVersion}`);
     if (result.status === 'subscribed') return { status: 'subscribed', locale };
     if (result.status === 'unavailable') log('waitlist:subscribe-failed', { code: result.code });
     return { status: result.status };

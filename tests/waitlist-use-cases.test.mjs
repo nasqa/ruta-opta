@@ -10,7 +10,7 @@ const { createThrottle, defaultLimits } = await import(join(dir, 'throttle.ts'))
 const { createFakeMailer } = await import(join(dir, 'mailer-fake.ts'));
 const { createFakeAudience } = await import(join(dir, 'audience-fake.ts'));
 const { buildConfirmEmail } = await import(join(dir, 'confirm-email.ts'));
-const { sealToken, confirmTtlMs } = await import(join(dir, 'token.ts'));
+const { sealToken, openToken, confirmTtlMs } = await import(join(dir, 'token.ts'));
 
 const keys = { current: new Uint8Array(32).fill(7) };
 const start = Date.UTC(2026, 0, 10, 10, 0, 0);
@@ -43,7 +43,7 @@ test('a valid signup sends one email to the address with no name anywhere in it'
   const [email] = mailer.sent;
   assert.deepEqual(email.to, { address: values.email });
   assert.equal(email.reference, 'ref-1');
-  for (const part of [email.html, email.text, email.subject]) assert.ok(!part.includes('Ana') && !part.includes('Pérez'));
+  for (const part of [email.html, email.text, email.subject, email.senderName]) assert.ok(!part.includes(values.name) && !part.includes(values.email));
 });
 
 test('the emailed link round-trips', async () => {
@@ -67,6 +67,9 @@ test('the token payload carries consent time and policy version, sealed for 7 da
   const { mailer, waitlist, clock } = setup();
   await waitlist.requestConfirmation(values, 'es', ip);
   const token = tokenOf(mailer);
+  assert.deepEqual(openToken('confirm', token, keys, start), {
+    status: 'valid', payload: { email: values.email, name: values.name, locale: 'es', consentAt: start, policyVersion: '2026-01' },
+  });
   clock.now = start + confirmTtlMs - 1;
   assert.equal(waitlist.readConfirmation(token).status, 'valid');
   clock.now = start + confirmTtlMs;
@@ -150,4 +153,14 @@ test('an audience that throws answers unavailable and logs where', async () => {
   await waitlist.requestConfirmation(values, 'es', ip);
   assert.deepEqual(await waitlist.confirmSubscription(tokenOf(mailer)), { status: 'unavailable' });
   assert.deepEqual(logs, [{ event: 'waitlist:unexpected', detail: { where: 'confirm' } }]);
+});
+
+test("the source records the policy version sealed in the token, not the current one", async () => {
+  const { mailer, audience, waitlist } = setup();
+  await waitlist.requestConfirmation(values, 'es', ip);
+  const calls = [];
+  const later = setup({ policyVersion: '2027-02', audience: { subscribe: async (...args) => (calls.push(args), { status: 'subscribed' }) } });
+  await later.waitlist.confirmSubscription(tokenOf(mailer));
+  assert.equal(calls[0][2], 'rutaopta.org/es · 2026-01');
+  assert.equal(audience.contacts.size, 0);
 });
