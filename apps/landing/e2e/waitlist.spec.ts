@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 import es from '../messages/es.json';
 import { confirmTtlMs, sealToken } from '../src/modules/waitlist/token';
 import { testTokenKey } from './fixtures';
@@ -42,17 +42,42 @@ const seal = (now?: number) =>
     now,
   );
 
+const axe = async (page: Page) => {
+  const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
+  expect(violations).toEqual([]);
+};
+
 test.describe('the confirm page on /es/confirmar', () => {
   test('a valid link greets by name and confirming lands on /es/confirmado', async ({ page }) => {
     await page.goto(`/es/confirmar?t=${seal()}`);
     await expect(page.getByText(es.Confirm.greeting.replace('{name}', 'Ana'))).toBeVisible();
-
-    const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
-    expect(violations).toEqual([]);
+    await axe(page);
 
     await page.getByRole('button', { name: es.Confirm.submit }).click();
     await expect(page).toHaveURL('/es/confirmado');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(es.Confirmed.title);
+  });
+
+  test('confirming the same link again lands on /es/confirmado too', async ({ page }) => {
+    const link = `/es/confirmar?t=${seal()}`;
+    for (let round = 0; round < 2; round++) {
+      await page.goto(link);
+      await page.getByRole('button', { name: es.Confirm.submit }).click();
+      await expect(page, `round ${round + 1}`).toHaveURL('/es/confirmado');
+    }
+  });
+
+  test('a link that expires before the click says so and offers to sign up again', async ({ page }) => {
+    // Valid when the page opens, expired by the time the button is clicked
+    const expiresAt = Date.now() + 10_000;
+    await page.goto(`/es/confirmar?t=${seal(expiresAt - confirmTtlMs)}`);
+    await expect(page.getByText(es.Confirm.greeting.replace('{name}', 'Ana'))).toBeVisible();
+    await page.waitForTimeout(Math.max(0, expiresAt - Date.now() + 500));
+
+    await page.getByRole('button', { name: es.Confirm.submit }).click();
+    await expect(page.getByRole('alert')).toHaveText(es.Confirm.expired.text);
+    await expect(page.getByRole('link', { name: es.Confirm.again })).toHaveAttribute('href', '/es');
+    await axe(page);
   });
 
   test('an expired link says so and offers to sign up again', async ({ page }) => {
@@ -61,6 +86,7 @@ test.describe('the confirm page on /es/confirmar', () => {
 
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(es.Confirm.expired.title);
     await expect(page.getByRole('link', { name: es.Confirm.again })).toHaveAttribute('href', '/es');
+    await axe(page);
   });
 
   test('a broken link is invalid, not an error', async ({ page }) => {
@@ -69,6 +95,7 @@ test.describe('the confirm page on /es/confirmar', () => {
       expect(response?.status(), query).toBe(200);
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(es.Confirm.invalid.title);
     }
+    await axe(page);
   });
 
   test('the page is not indexed and sends no referrer', async ({ page }) => {

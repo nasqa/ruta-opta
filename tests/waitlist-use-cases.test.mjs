@@ -46,7 +46,8 @@ const counted = (audience) => {
   return calls;
 };
 
-const tokenOf = (mailer) => new URL(/https:\/\/x\/es\/confirm\?t=[\w-]+/.exec(mailer.sent[0].text)[0]).searchParams.get('t');
+// The token of the nth email, whatever its locale
+const tokenOf = (mailer, nth = 0) => new URL(/https:\/\/x\/[a-z]{2}\/confirm\?t=[\w-]+/.exec(mailer.sent[nth].text)[0]).searchParams.get('t');
 
 test('a valid signup sends one email to the address with no name anywhere in it', async () => {
   const { mailer, waitlist } = setup();
@@ -73,6 +74,17 @@ test("confirmation subscribes to the token's locale with source and policy", asy
   assert.deepEqual(await waitlist.confirmSubscription(tokenOf(mailer)), { status: 'subscribed', locale: 'es' });
   assert.deepEqual(audience.contacts.get(values.email), { name: values.name, locale: 'es' });
   assert.deepEqual(calls, [[{ email: values.email, name: values.name }, 'es', 'rutaopta.org/es · 2026-01']]);
+});
+
+test('an English signup round-trips to the English list, link to confirmation', async () => {
+  const { mailer, audience, waitlist } = setup();
+  const calls = counted(audience);
+  assert.equal(await waitlist.requestConfirmation(values, 'en', ip), 'sent');
+  assert.match(mailer.sent[0].text, /https:\/\/x\/en\/confirm\?t=/);
+  const token = tokenOf(mailer);
+  assert.deepEqual(waitlist.readConfirmation(token), { status: 'valid', name: values.name, locale: 'en' });
+  assert.deepEqual(await waitlist.confirmSubscription(token), { status: 'subscribed', locale: 'en' });
+  assert.deepEqual(calls, [[{ email: values.email, name: values.name }, 'en', 'rutaopta.org/en · 2026-01']]);
 });
 
 test('the token payload carries consent time and policy version, sealed for 7 days', async () => {
@@ -136,8 +148,7 @@ test('a new token for the same email still reaches the audience', async () => {
   clock.now += 2 * defaultLimits.addressGapMs;
   await waitlist.requestConfirmation(values, 'es', ip);
   assert.equal(mailer.sent.length, 2);
-  const second = new URL(/https:\/\/x\/es\/confirm\?t=[\w-]+/.exec(mailer.sent[1].text)[0]).searchParams.get('t');
-  assert.deepEqual(await waitlist.confirmSubscription(second), { status: 'subscribed', locale: 'es' });
+  assert.deepEqual(await waitlist.confirmSubscription(tokenOf(mailer, 1)), { status: 'subscribed', locale: 'es' });
   assert.equal(calls.length, 2);
 });
 
@@ -250,13 +261,18 @@ test('a send that works keeps its claims', async () => {
   assert.equal(released, 0);
 });
 
-test('a mailer or email builder that throws answers unavailable and logs where', async () => {
-  const mailerThrows = setup({ mailer: { send: async () => { throw new Error(values.email); } } });
+test('a mailer or email builder that throws answers unavailable and logs where and the error name, never its message', async () => {
+  const mailerThrows = setup({ mailer: { send: async () => { throw new TypeError(values.email); } } });
   assert.equal(await mailerThrows.waitlist.requestConfirmation(values, 'es', ip), 'unavailable');
-  assert.deepEqual(mailerThrows.logs, [{ event: 'waitlist:unexpected', detail: { where: 'request' } }]);
+  assert.deepEqual(mailerThrows.logs, [{ event: 'waitlist:unexpected', detail: { where: 'request', name: 'TypeError' } }]);
+  assert.ok(!leaks(mailerThrows.logs));
   const builderThrows = setup({ confirmEmail: async () => { throw new Error('boom'); } });
   assert.equal(await builderThrows.waitlist.requestConfirmation(values, 'es', ip), 'unavailable');
-  assert.deepEqual(builderThrows.logs, [{ event: 'waitlist:unexpected', detail: { where: 'request' } }]);
+  assert.deepEqual(builderThrows.logs, [{ event: 'waitlist:unexpected', detail: { where: 'request', name: 'Error' } }]);
+  // A thrown value that is not an Error is named by its type
+  const stringThrows = setup({ mailer: { send: async () => { throw values.email; } } });
+  assert.equal(await stringThrows.waitlist.requestConfirmation(values, 'es', ip), 'unavailable');
+  assert.deepEqual(stringThrows.logs, [{ event: 'waitlist:unexpected', detail: { where: 'request', name: 'string' } }]);
 });
 
 test('expired and invalid tokens are reported, not thrown', async () => {
@@ -285,10 +301,10 @@ test('an unavailable audience logs the code and answers unavailable', async () =
 });
 
 test('an audience that throws answers unavailable and logs where', async () => {
-  const { mailer, logs, waitlist } = setup({ audience: { subscribe: async () => { throw new Error('x'); } } });
+  const { mailer, logs, waitlist } = setup({ audience: { subscribe: async () => { throw new RangeError(values.email); } } });
   await waitlist.requestConfirmation(values, 'es', ip);
   assert.deepEqual(await waitlist.confirmSubscription(tokenOf(mailer)), { status: 'unavailable' });
-  assert.deepEqual(logs, [{ event: 'waitlist:unexpected', detail: { where: 'confirm' } }]);
+  assert.deepEqual(logs, [{ event: 'waitlist:unexpected', detail: { where: 'confirm', name: 'RangeError' } }]);
 });
 
 test("the source records the policy version sealed in the token, not the current one", async () => {

@@ -99,7 +99,9 @@ const composeLive = (): Waitlist | string[] => {
     previousKey: read('WAITLIST_TOKEN_KEY_PREVIOUS', (value) => parseTokenKeys(value)?.current, null),
     dailyCap: read('WAITLIST_DAILY_CAP', (value) => (/^[1-9]\d*$/.test(value) ? Number(value) : undefined), defaultLimits.totalPerDay),
   };
-  if (!isComplete(settings)) return invalid;
+  // The confirm links are built on URL, which falls back to localhost when unset: a live email must never carry that, or plain http
+  if (siteUrl.protocol !== 'https:') invalid.push('URL');
+  if (!isComplete(settings) || invalid.length > 0) return invalid;
 
   const { mailer, currentKey, previousKey, dailyCap } = settings;
   const keys = previousKey ? { current: currentKey, previous: previousKey } : { current: currentKey };
@@ -111,10 +113,11 @@ const composeLive = (): Waitlist | string[] => {
   return createWaitlist({ ...common, mailer, audience, throttle, guard: createConfirmGuard(store, hashKey), keys });
 };
 
-// A live deploy with bad variables fails closed: nothing is sent, opened or subscribed
+// A live deploy with bad variables fails closed: nothing is sent, opened or subscribed. A link says unavailable rather than invalid, since the
+// fault is ours, not the link's
 const closed: Waitlist = {
   requestConfirmation: async () => 'unavailable',
-  readConfirmation: () => ({ status: 'invalid' }),
+  readConfirmation: () => ({ status: 'unavailable' }),
   confirmSubscription: async () => ({ status: 'unavailable' }),
 };
 
@@ -130,10 +133,17 @@ const compose = () => {
 // Read at first use, not when the file loads: next build loads it on a machine without the production variables
 let composition: ReturnType<typeof compose> | undefined;
 const current = () => (composition ??= compose());
+// Once per instance is enough to notice, and the log carries no value
+let ipMissingLogged = false;
 
 export const requestConfirmation = (values: WaitlistValues, locale: Locale, ip: string | undefined): Promise<'sent' | 'unavailable'> => {
   const { waitlist, live } = current();
-  // Live requests without the header share one 'unknown' bucket rather than skip the IP rule; the fake one skips it, so the e2e is unaffected
+  if (live && ip === undefined && !ipMissingLogged) {
+    ipMissingLogged = true;
+    console.error('waitlist:ip-missing');
+  }
+  // Live requests without the header share one 'unknown' bucket rather than skip the IP rule. Fake mode passes the header through as it is,
+  // and without one the IP rule is skipped, so the e2e is unaffected
   return waitlist.requestConfirmation(values, locale, live ? (ip ?? 'unknown') : ip);
 };
 

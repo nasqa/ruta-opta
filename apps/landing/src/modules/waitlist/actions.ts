@@ -2,9 +2,9 @@
 
 import { hasLocale } from 'next-intl';
 import { headers } from 'next/headers';
-import { localesFor } from '@/i18n/coverage';
 import { redirect } from '@/i18n/navigation';
 import { confirmSubscription, requestConfirmation } from './server';
+import { signupLocales } from './signup-locales';
 import type { ConfirmState, WaitlistState } from './state';
 import { validateWaitlist } from './validate';
 
@@ -16,10 +16,10 @@ export const joinWaitlist = async (_previous: WaitlistState, form: FormData): Pr
   const validation = validateWaitlist(form);
   if (!validation.ok) return { status: 'invalid', errors: validation.errors, values: validation.values };
 
-  // The form sends its page's locale: getLocale() reads next/root-params, which Server Actions cannot. It must be one whose /confirm page exists,
-  // since it picks the email's language and the link's page
+  // The form sends its page's locale: getLocale() reads next/root-params, which Server Actions cannot. It picks the email's language and the
+  // link's page, so it must be a locale with the email, the confirm page and the confirmed page
   const locale = form.get('locale');
-  if (!hasLocale(localesFor('/confirm'), locale)) return { status: 'unavailable', values: validation.values };
+  if (!hasLocale(signupLocales(), locale)) return { status: 'unavailable', values: validation.values };
 
   const ip = (await headers()).get('x-nf-client-connection-ip') ?? undefined;
   const result = await requestConfirmation(validation.values, locale, ip);

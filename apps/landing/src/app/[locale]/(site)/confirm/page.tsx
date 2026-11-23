@@ -29,9 +29,11 @@ const ConfirmPage = async ({ searchParams }: PageProps<'/[locale]/confirm'>) => 
   const t = await getTranslations('Confirm');
 
   if (result.status !== 'valid') {
+    // Unavailable has no title of its own: the page keeps its usual heading and says it could not confirm now
+    const title = result.status === 'unavailable' ? t('title') : t(`${result.status}.title`);
     return (
       <main className={styles.page}>
-        <h1 className="t-display-md">{t(`${result.status}.title`)}</h1>
+        <h1 className="t-display-md">{title}</h1>
         <p className="t-body-lg">{t(`${result.status}.text`)}</p>
         <Link className="t-body-lg" href="/">
           {t('again')}

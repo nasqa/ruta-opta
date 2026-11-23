@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import es from '../apps/landing/messages/es.json' with { type: 'json' };
 import './support/next-resolution.mjs';
 
 const { validateWaitlist } = await import(join(import.meta.dirname, '../apps/landing/src/modules/waitlist/validate.ts'));
+const { signupLocales } = await import(join(import.meta.dirname, '../apps/landing/src/modules/waitlist/signup-locales.ts'));
 
 const form = (fields) => {
   const data = new FormData();
@@ -61,4 +63,14 @@ test('a long near-miss name is refused without backtracking', () => {
   const started = performance.now();
   assert.equal(validateWaitlist(form({ name: `${'a'.repeat(79)}2`, email: 'ana@example.com', consent: 'on' })).errors?.name, true);
   assert.ok(performance.now() - started < 100);
+});
+
+test('a locale takes signups only when its email, confirm page and confirmed page all exist', () => {
+  const { Confirm, ConfirmEmail, Confirmed } = es;
+  assert.deepEqual(signupLocales(), ['es']);
+  assert.deepEqual(signupLocales({ es, en: { Confirm, ConfirmEmail, Confirmed } }), ['es', 'en']);
+  // A partial English go-live: any missing namespace keeps English out, so no email goes out with raw keys
+  for (const en of [{ Confirm, Confirmed }, { ConfirmEmail, Confirmed }, { Confirm, ConfirmEmail }]) {
+    assert.deepEqual(signupLocales({ es, en }), ['es'], Object.keys(en).join(','));
+  }
 });

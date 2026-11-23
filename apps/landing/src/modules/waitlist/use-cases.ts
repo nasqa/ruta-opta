@@ -27,7 +27,8 @@ export type WaitlistDeps = {
   deadlineMs?: number;
 };
 
-export type ReadResult = { status: 'valid'; name: string; locale: Locale } | { status: 'expired' } | { status: 'invalid' };
+// unavailable comes only from a live deploy with broken configuration (server.ts): the link may be fine, so it is not called invalid
+export type ReadResult = { status: 'valid'; name: string; locale: Locale } | { status: 'expired' | 'invalid' | 'unavailable' };
 export type ConfirmResult = { status: 'subscribed'; locale: Locale } | { status: 'blocked' | 'expired' | 'invalid' | 'unavailable' };
 
 export const createWaitlist = ({ mailer, audience, throttle, guard, keys, policyVersion, confirmEmail, confirmUrl, now, reference, log, deadlineMs = useCaseDeadlineMs }: WaitlistDeps) => {
@@ -35,6 +36,9 @@ export const createWaitlist = ({ mailer, audience, throttle, guard, keys, policy
   // email may still go out
   const timed = <T>(where: 'request' | 'confirm', task: Promise<T>, fallback: T) =>
     withDeadline(task, deadlineMs, where).catch(() => (log('waitlist:deadline', { where }), fallback));
+
+  // The error's name says what broke; its message may carry the address, so it is never logged
+  const unexpected = (where: 'request' | 'confirm', error: unknown) => log('waitlist:unexpected', { where, name: error instanceof Error ? error.name : typeof error });
 
   const send = async (values: WaitlistValues, locale: Locale) => {
     const payload: ConfirmPayload = { email: values.email, name: values.name, locale, consentAt: now(), policyVersion };
@@ -52,7 +56,7 @@ export const createWaitlist = ({ mailer, audience, throttle, guard, keys, policy
     if (!admission) return log('waitlist:throttle-failed', {}), 'unavailable';
     if (admission.verdict === 'refuse') return log('waitlist:throttle-refused', { reason: admission.reason }), 'unavailable';
     if (admission.verdict === 'skip') return 'sent';
-    const result = await send(values, locale).catch(() => (log('waitlist:unexpected', { where: 'request' }), 'unavailable' as const));
+    const result = await send(values, locale).catch((error: unknown) => (unexpected('request', error), 'unavailable' as const));
     // The gap claims go back, so an immediate retry sends instead of answering "sent" with nothing sent. The day claim stays (see Admission)
     if (result === 'unavailable') await admission.release().catch(() => log('waitlist:release-failed', {}));
     return result;
@@ -83,7 +87,7 @@ export const createWaitlist = ({ mailer, audience, throttle, guard, keys, policy
     if (!state) return log('waitlist:guard-failed', {}), { status: 'unavailable' };
     if (state === 'confirmed') return { status: 'subscribed', locale: opened.payload.locale };
     if (state === 'busy') return log('waitlist:confirm-throttled', {}), { status: 'unavailable' };
-    const result = await subscribe(opened.payload).catch(() => (log('waitlist:unexpected', { where: 'confirm' }), { status: 'unavailable' as const }));
+    const result = await subscribe(opened.payload).catch((error: unknown) => (unexpected('confirm', error), { status: 'unavailable' as const }));
     if (result.status === 'subscribed') await guard.markConfirmed(token).catch(() => log('waitlist:mark-failed', {}));
     return result;
   };
