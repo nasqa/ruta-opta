@@ -79,3 +79,14 @@ test.describe('the confirm page on /es/confirmar', () => {
     await expect(page.locator('meta[name="referrer"]')).toHaveAttribute('content', 'no-referrer');
   });
 });
+
+test('the unsubscribe page exists at /es/baja and is not indexed', async ({ page }) => {
+  const response = await page.goto('/es/baja');
+
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(es.Unsubscribed.title);
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
+
+  const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
+  expect(violations).toEqual([]);
+});

@@ -72,7 +72,7 @@
       },
       "processor": {
         "title": "Quién nos ayuda a enviar los correos",
-        "text": "Enviamos los correos con Zoho Campaigns, que puede guardar los datos en servidores fuera de Colombia."
+        "text": "Enviamos los boletines con Zoho Campaigns y los correos de confirmación con Zoho CPaaS, ambos de Zoho Corporation. El sitio está alojado en Netlify. Estos proveedores pueden guardar datos en servidores fuera de Colombia."
       },
       "rights": {
         "title": "Tus derechos",
@@ -90,6 +90,12 @@
     "title": "Listo, quedaste en la lista",
     "lead": "Te escribiremos cuando haya novedades.",
     "frequency": "Serán pocos correos: cuándo abrimos y cómo ser parte. [PENDIENTE: copy de campaña]",
+    "home": "Volver al inicio"
+  },
+  "Unsubscribed": {
+    "metaTitle": "Te diste de baja",
+    "title": "Listo, ya no te escribiremos [PENDIENTE: copy de campaña]",
+    "lead": "Sacamos tu correo de la lista. Si fue un error, puedes inscribirte de nuevo desde el inicio.",
     "home": "Volver al inicio"
   },
   "Confirm": {
