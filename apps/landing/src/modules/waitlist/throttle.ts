@@ -5,7 +5,8 @@ import type { Store } from './store';
 export type ThrottleLimits = { addressGapMs: number; addressPerDay: number; ipPerHour: number; totalPerDay: number };
 export const defaultLimits: ThrottleLimits = { addressGapMs: 120_000, addressPerDay: 3, ipPerHour: 30, totalPerDay: 1_000 };
 
-// release gives back the gap and day claims of a send that failed, so a retry is not skipped. The IP and total counters stay counted
+// release gives back the gap claims of a send that failed, so an immediate retry is not skipped. The day claim stays: a timeout or a 5xx may still
+// have delivered the email, so every attempt counts toward the daily limit. The IP and total counters stay counted too
 export type Admission = { verdict: 'send'; release: () => Promise<void> } | { verdict: 'skip' } | { verdict: 'refuse'; reason: 'ip' | 'cap' };
 export type Throttle = { admit: (email: string, ip: string | undefined) => Promise<Admission> };
 
@@ -57,13 +58,12 @@ export const createThrottle = (store: Store, hashKey: Uint8Array, limits: Thrott
     if (!(await store.claim(gaps[0], 1))) return { verdict: 'skip' };
     if (!(await store.claim(gaps[1], 1))) return { verdict: 'skip' };
     for (let n = 1; n <= limits.addressPerDay; n++) {
-      const dayKey = `day:${address}:${day}:${n}`;
-      if (!(await store.claim(dayKey, 1))) continue;
+      if (!(await store.claim(`day:${address}:${day}:${n}`, 1))) continue;
       await store.setJSON(totalKey, { count: total + 1 });
       const release = async () => {
-        // every claim is tried, so one failed delete does not keep the others
-        const deletes = await Promise.allSettled([...gaps, dayKey].map((key) => store.delete(key)));
-        if (deletes.some(({ status }) => status === 'rejected')) throw new Error('A throttle claim could not be released');
+        // both are tried, so one failed delete does not keep the other
+        const deletes = await Promise.allSettled(gaps.map((key) => store.delete(key)));
+        if (deletes.some(({ status }) => status === 'rejected')) throw new Error('A throttle gap claim could not be released');
       };
       return { verdict: 'send', release };
     }

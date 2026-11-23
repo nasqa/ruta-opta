@@ -221,6 +221,17 @@ test('after a failed send, an immediate retry for the same address sends', async
   }
 });
 
+test('failed sends still count toward the 3 a day: after 3 failures the 4th attempt sends nothing', async () => {
+  let failing = true;
+  const sent = [];
+  const { waitlist } = setup({ mailer: { send: async (email) => (failing ? { ok: false, code: 'timeout' } : (sent.push(email), { ok: true })) } });
+  for (let i = 0; i < 3; i++) assert.equal(await waitlist.requestConfirmation(values, 'es', ip), 'unavailable', `attempt ${i + 1}`);
+  failing = false;
+  // skipped, so it answers sent like any repeat
+  assert.equal(await waitlist.requestConfirmation(values, 'es', ip), 'sent');
+  assert.equal(sent.length, 0);
+});
+
 test('a release that fails is logged and the answer stays unavailable', async () => {
   const release = async () => { throw new Error(`store down for ${values.email}`); };
   const { logs, waitlist } = setup({

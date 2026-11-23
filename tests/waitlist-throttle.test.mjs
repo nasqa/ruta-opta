@@ -166,38 +166,37 @@ test('releasing a send frees its gap, so an immediate retry sends', async () => 
   assert.equal(await admit('ana@example.com', ip), 'skip');
 });
 
-test('releasing a send frees its day claim', async () => {
-  const { throttle, admit, clock } = setup();
+test('releasing a send keeps its day claim, so failed sends still count toward the 3 a day', async () => {
+  const { throttle, admit } = setup();
+  // A timeout or a 5xx may still have delivered the email, so every attempt counts; only the gap is given back
   for (let i = 0; i < 3; i++) {
     const admission = await throttle.admit('ana@example.com', undefined);
-    assert.equal(admission.verdict, 'send');
+    assert.equal(admission.verdict, 'send', `attempt ${i + 1}`);
     await admission.release();
-    // past the gap, so only the day claim stands between this send and the next
-    clock.now += 2 * defaultLimits.addressGapMs;
-  }
-  for (let i = 0; i < 3; i++) {
-    assert.equal(await admit('ana@example.com', undefined), 'send');
-    clock.now += 2 * defaultLimits.addressGapMs;
   }
   assert.equal(await admit('ana@example.com', undefined), 'skip');
 });
 
-test('release deletes only the claims its send took, and keeps the counters', async () => {
+test('release deletes only the gap claims its send took, and keeps the day claim and the counters', async () => {
   const { throttle, store, clock } = setup();
   await throttle.admit('ana@example.com', ip);
   clock.now += 2 * defaultLimits.addressGapMs;
-  const kept = store.entries().map(([entry]) => entry).sort();
+  const before = store.entries().map(([entry]) => entry);
   await (await throttle.admit('ana@example.com', ip)).release();
-  assert.deepEqual(store.entries().map(([entry]) => entry).sort(), kept);
+  const added = store.entries().map(([entry]) => entry).filter((entry) => !before.includes(entry));
+  assert.equal(added.length, 1);
+  assert.match(added[0], /^day:[0-9a-f]+:\d{8}:2$/);
+  assert.ok(before.every((entry) => store.entries().some(([kept]) => kept === entry)));
   const counts = store.entries().filter(([entry]) => /^(ip|total):/.test(entry)).map(([, value]) => value.count);
   assert.deepEqual(counts, [2, 2]);
 });
 
-test('release tries every claim and rejects when one delete fails', async () => {
+test('release tries both gap claims and rejects when one delete fails', async () => {
   const { store, clock } = setup();
   const deleted = [];
-  const failing = { ...store, delete: async (entry) => { deleted.push(entry); if (entry.startsWith('day:')) throw new Error('down'); } };
+  const failing = { ...store, delete: async (entry) => { deleted.push(entry); if (deleted.length === 1) throw new Error('down'); } };
   const admission = await createThrottle(failing, key, defaultLimits, () => clock.now).admit('ana@example.com', ip);
   await assert.rejects(admission.release());
-  assert.equal(deleted.length, 3);
+  assert.equal(deleted.length, 2);
+  assert.ok(deleted.every((entry) => entry.startsWith('gap:')));
 });
