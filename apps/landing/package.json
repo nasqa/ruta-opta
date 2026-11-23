@@ -15,6 +15,7 @@
     "@mantine/hooks": "^9.8.2",
     "@nasqa/trama-react": "^0.1.0",
     "@nasqa/trama-theme-opta": "^0.1.2",
+    "@netlify/blobs": "^11.1.10",
     "next": "16.4.6",
     "next-intl": "^4.15.3",
     "react": "19.3.0",
