@@ -3,14 +3,15 @@ import type { Audience, SubscribeResult } from './audience';
 import type { Store } from './store';
 import { openToken, sealToken, type TokenKeys } from './token';
 
-export const zohoDataCenters = ['com', 'eu', 'in', 'com.au', 'jp', 'ca', 'sa', 'com.cn'] as const;
+// Canada is left out: its hosts are zohocloud.ca, not zoho.ca, and were never verified
+export const zohoDataCenters = ['com', 'eu', 'in', 'com.au', 'jp', 'sa', 'com.cn'] as const;
 
 export type ZohoConfig = {
   dataCenter: (typeof zohoDataCenters)[number]; clientId: string; clientSecret: string; refreshToken: string;
   listKeys: Record<Locale, string>; store: Store; keys: TokenKeys; fetch?: typeof fetch; timeoutMs?: number; now?: () => number;
 };
 
-type ZohoBody = { code?: unknown; access_token?: unknown; expires_in?: unknown };
+type ZohoBody = { code?: unknown; error?: unknown; access_token?: unknown; expires_in?: unknown };
 type Reply = { status: number; ok: boolean; body?: ZohoBody } | { failure: 'timeout' | 'network' };
 type Grant = { token: string } | { code: string };
 
@@ -29,6 +30,13 @@ const parse = (text: string): ZohoBody | undefined => {
 };
 
 const unavailable = (code: string): SubscribeResult => ({ status: 'unavailable', code });
+
+// Campaigns reports a rejected token as HTTP 401, or inside a 200 as code 401 or 1007 ("Unauthorized request")
+const isUnauthorized = (reply: Reply) => !('failure' in reply) && (reply.status === 401 || ['401', '1007'].includes(String(reply.body?.code)));
+
+// Zoho's OAuth errors are plain words such as invalid_code; anything else falls back to the status
+const tokenFailure = ({ status, body }: { status: number; body?: ZohoBody }) =>
+  `token_${typeof body?.error === 'string' && /^[a-z_]{1,40}$/i.test(body.error) ? body.error : status}`;
 
 // Zoho answers with its own code: a do-not-mail contact comes back as status "success" with code 2006, so only the code counts
 const toResult = (reply: Reply): SubscribeResult => {
@@ -73,7 +81,7 @@ export const createZohoAudience = ({
     });
     if ('failure' in reply) return { code: reply.failure };
     const token = reply.body?.access_token;
-    if (!reply.ok || typeof token !== 'string' || !token) return { code: `token_${reply.status}` };
+    if (!reply.ok || typeof token !== 'string' || !token) return { code: tokenFailure(reply) };
     const expiresIn = typeof reply.body?.expires_in === 'number' ? reply.body.expires_in : maxLifetimeSeconds;
     memory = sealToken('zoho-access-token', token, keys, Math.min(expiresIn, maxLifetimeSeconds) * 1000 - expiryMarginMs, now());
     // The store only spares other instances a refresh: when it is down, this instance still has its token
@@ -112,14 +120,14 @@ export const createZohoAudience = ({
     post(`https://campaigns.zoho.${dataCenter}/api/v1.1/json/listsubscribe`, params, { Authorization: `Zoho-oauthtoken ${token}` });
 
   return {
-    // At most four calls: token, subscribe, and after a 401 one more of each. Timeouts are never retried
+    // At most four calls: token, subscribe, and after a rejected token one more of each. Timeouts are never retried
     subscribe: async ({ email, name }, locale, source) => {
       const params = { resfmt: 'JSON', listkey: listKeys[locale], contactinfo: JSON.stringify({ 'Contact Email': email, 'First Name': name }), source };
       try {
         const auth = await grant();
         if ('code' in auth) return unavailable(auth.code);
         const reply = await listSubscribe(auth.token, params);
-        if ('failure' in reply || reply.status !== 401) return toResult(reply);
+        if (!isUnauthorized(reply)) return toResult(reply);
         const renewed = await renew(auth.token);
         return 'code' in renewed ? unavailable(renewed.code) : toResult(await listSubscribe(renewed.token, params));
       } catch {

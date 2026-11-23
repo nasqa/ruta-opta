@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import './support/next-resolution.mjs';
 
 const dir = join(import.meta.dirname, '../apps/landing/src/modules/waitlist');
-const { createZohoAudience } = await import(join(dir, 'audience-zoho.ts'));
+const { createZohoAudience, zohoDataCenters } = await import(join(dir, 'audience-zoho.ts'));
 const { createFakeAudience } = await import(join(dir, 'audience-fake.ts'));
 const { createMemoryStore } = await import(join(dir, 'store.ts'));
 const { openToken } = await import(join(dir, 'token.ts'));
@@ -19,6 +19,7 @@ const tokenReply = (n = 1, expiresIn = 3600) =>
   [200, JSON.stringify({ access_token: accessToken(n), api_domain: 'https://www.zohoapis.eu', token_type: 'Bearer', expires_in: expiresIn })];
 const subscribed = [200, JSON.stringify({ message: 'A confirmation email is sent to the user.', status: 'success', code: '0', uri: '/api/v1.1/json/listsubscribe', version: '1.1' })];
 const unauthorized = [401, '{"message":"Unauthorized"}'];
+const unauthorizedInBody = (code = '1007') => [200, JSON.stringify({ code, message: 'Unauthorized request.', status: 'error' })];
 
 // Answers token and listsubscribe calls from their own queues (the last reply repeats) and records every call in order
 const zoho = ({ tokens = [tokenReply()], subscribes = [subscribed] } = {}) => {
@@ -161,6 +162,24 @@ test('a 401 clears the stored token even when the refresh then fails', async () 
   assert.deepEqual(store.entries(), [['zoho:access-token', null]]);
 });
 
+test('a 200 with code 1007 or 401 in the body refreshes and retries once', async () => {
+  for (const code of ['1007', 1007, '401']) {
+    const store = createMemoryStore();
+    const api = zoho({ tokens: [tokenReply(1), tokenReply(2)], subscribes: [unauthorizedInBody(code), subscribed] });
+    assert.deepEqual(await audienceWith(api.fetch, { store }).subscribe(contact, 'es', 'src'), { status: 'subscribed' });
+    assert.deepEqual(api.kinds(), ['token', 'subscribe', 'token', 'subscribe']);
+    assert.equal(api.calls[3].init.headers.Authorization, `Zoho-oauthtoken ${accessToken(2)}`);
+    const [[, sealed]] = store.entries();
+    assert.deepEqual(openToken('zoho-access-token', sealed, keys), { status: 'valid', payload: accessToken(2) });
+  }
+});
+
+test('a persistent 1007 is unavailable with code 1007 after exactly one retry', async () => {
+  const api = zoho({ tokens: [tokenReply(1), tokenReply(2)], subscribes: [unauthorizedInBody()] });
+  assert.deepEqual(await audienceWith(api.fetch).subscribe(contact, 'es', 'src'), { status: 'unavailable', code: '1007' });
+  assert.deepEqual(api.kinds(), ['token', 'subscribe', 'token', 'subscribe']);
+});
+
 test('a stored token that gets a 401 is refreshed, not reopened from the store', async () => {
   const store = createMemoryStore();
   await audienceWith(zoho().fetch, { store }).subscribe(contact, 'es', 'src');
@@ -184,9 +203,20 @@ test('a failed refresh is unavailable with code token_400', async () => {
   assert.deepEqual(api.kinds(), ['token']);
 });
 
-test('a refresh without an access token is unavailable with code token_<status>', async () => {
-  const api = zoho({ tokens: [[200, '{"error":"invalid_code"}']] });
-  assert.deepEqual(await audienceWith(api.fetch).subscribe(contact, 'es', 'src'), { status: 'unavailable', code: 'token_200' });
+test('a refresh error names its code, or the status when it is not a plain word', async () => {
+  const cases = [
+    [[200, '{"error":"invalid_code"}'], 'token_invalid_code'],
+    [[400, '{"error":"invalid_client"}'], 'token_invalid_client'],
+    [[400, '{"error":"Access Denied"}'], 'token_400'],
+    [[400, `{"error":"${'a'.repeat(41)}"}`], 'token_400'],
+    [[200, '{"error":42}'], 'token_200'],
+    [[503, '<html>Unavailable</html>'], 'token_503'],
+  ];
+  for (const [reply, code] of cases) {
+    const api = zoho({ tokens: [reply] });
+    assert.deepEqual(await audienceWith(api.fetch).subscribe(contact, 'es', 'src'), { status: 'unavailable', code });
+    assert.deepEqual(api.kinds(), ['token']);
+  }
 });
 
 test('a timeout is not retried, a rejected fetch gives network', async () => {
@@ -210,6 +240,10 @@ test('a failing store is a cache miss, not a failure', async () => {
   assert.deepEqual(await audience.subscribe(contact, 'es', 'src'), { status: 'subscribed' });
   assert.deepEqual(await audience.subscribe(contact, 'es', 'src'), { status: 'subscribed' });
   assert.equal(api.tokenCalls(), 1);
+});
+
+test('only data centers with verified hosts are accepted', () => {
+  assert.deepEqual(zohoDataCenters, ['com', 'eu', 'in', 'com.au', 'jp', 'sa', 'com.cn']);
 });
 
 test('the fake subscribes everyone and records them', async () => {
