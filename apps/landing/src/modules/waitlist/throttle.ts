@@ -28,7 +28,10 @@ export const createThrottle = (store: Store, hashKey: Uint8Array, limits: Thrott
     if (ipKey) await store.setJSON(ipKey, { count: ipCount + 1 });
 
     const address = hash(email.trim().toLowerCase());
-    if (!(await store.claim(`gap:${address}:${Math.floor(time / limits.addressGapMs)}`, 1))) return 'skip';
+    // two consecutive slots, so a send blocks until slot s+2 and two sends never land closer than the gap
+    const slot = Math.floor(time / limits.addressGapMs);
+    if (!(await store.claim(`gap:${address}:${slot}`, 1))) return 'skip';
+    if (!(await store.claim(`gap:${address}:${slot + 1}`, 1))) return 'skip';
     for (let n = 1; n <= limits.addressPerDay; n++) {
       if (!(await store.claim(`day:${address}:${day}:${n}`, 1))) continue;
       await store.setJSON(totalKey, { count: total + 1 });

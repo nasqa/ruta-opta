@@ -29,7 +29,7 @@ test('same address within 2 minutes is skipped, after 2 minutes it sends', async
   assert.equal(await throttle.admit('ana@example.com', ip), 'send');
   clock.now += minute;
   assert.equal(await throttle.admit('ana@example.com', ip), 'skip');
-  clock.now += minute;
+  clock.now += 3 * minute;
   assert.equal(await throttle.admit('ana@example.com', ip), 'send');
 });
 
@@ -43,7 +43,7 @@ test('fourth send of the UTC day is skipped, next UTC day sends', async () => {
   const { throttle, clock } = setup();
   for (let i = 0; i < 3; i++) {
     assert.equal(await throttle.admit('ana@example.com', undefined), 'send');
-    clock.now += 3 * minute;
+    clock.now += 4 * minute;
   }
   assert.equal(await throttle.admit('ana@example.com', undefined), 'skip');
   clock.now = Date.UTC(2026, 0, 11, 0, 5, 0);
@@ -73,7 +73,7 @@ test('daily total refuses at the cap', async () => {
 test('nothing stored contains the address or IP', async () => {
   const { throttle, store, clock } = setup();
   await throttle.admit('Ana@Example.com', ip);
-  clock.now += 3 * minute;
+  clock.now += 4 * minute;
   await throttle.admit('ana@example.com', ip);
   const stored = store.entries();
   assert.ok(stored.length > 0);
@@ -94,7 +94,18 @@ test('concurrent submissions never exceed 3 a day', async () => {
   for (let slot = 0; slot < 5; slot++) {
     const verdicts = await Promise.all(Array.from({ length: 5 }, () => throttle.admit('ana@example.com', undefined)));
     sendsPerSlot.push(verdicts.filter((verdict) => verdict === 'send').length);
-    clock.now += defaultLimits.addressGapMs;
+    clock.now += 2 * defaultLimits.addressGapMs;
   }
   assert.deepEqual(sendsPerSlot, [1, 1, 1, 0, 0]);
+});
+
+test('two sends never land closer than the gap, even across a slot edge', async () => {
+  const { throttle, clock } = setup();
+  const gap = defaultLimits.addressGapMs;
+  clock.now = start + gap - 100;
+  assert.equal(await throttle.admit('ana@example.com', undefined), 'send');
+  clock.now = start + gap + 100;
+  assert.equal(await throttle.admit('ana@example.com', undefined), 'skip');
+  clock.now = start + 2 * gap;
+  assert.equal(await throttle.admit('ana@example.com', undefined), 'send');
 });
