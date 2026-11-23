@@ -81,3 +81,20 @@ test('nothing stored contains the address or IP', async () => {
   assert.ok(!text.includes('ana'));
   assert.ok(!text.includes('203.0.113.7'));
 });
+
+test('concurrent submissions for one address send at most once', async () => {
+  const { throttle } = setup();
+  const verdicts = await Promise.all(Array.from({ length: 10 }, (_, i) => throttle.admit('ana@example.com', `198.51.100.${i}`)));
+  assert.equal(verdicts.filter((verdict) => verdict === 'send').length, 1);
+});
+
+test('concurrent submissions never exceed 3 a day', async () => {
+  const { throttle, clock } = setup();
+  let sends = 0;
+  for (let slot = 0; slot < 3; slot++) {
+    const verdicts = await Promise.all(Array.from({ length: 5 }, () => throttle.admit('ana@example.com', undefined)));
+    sends += verdicts.filter((verdict) => verdict === 'send').length;
+    clock.now += 2 * minute;
+  }
+  assert.equal(sends, 3);
+});

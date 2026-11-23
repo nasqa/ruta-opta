@@ -1,6 +1,9 @@
 import { getStore } from '@netlify/blobs';
 
-export type Store = { getJSON: <T>(key: string) => Promise<T | undefined>; setJSON: (key: string, value: unknown) => Promise<void> };
+export type Store = { getJSON: <T>(key: string) => Promise<T | undefined>; setJSON: (key: string, value: unknown) => Promise<void>;
+  // Create-only write: true when this call created the key, false when it already existed
+  claim: (key: string, value: unknown) => Promise<boolean>;
+};
 export type MemoryStore = Store & { entries: () => [string, unknown][] };
 
 export const createMemoryStore = (): MemoryStore => {
@@ -13,6 +16,12 @@ export const createMemoryStore = (): MemoryStore => {
     setJSON: async (key, value) => {
       data.set(key, JSON.stringify(value));
     },
+    claim: async (key, value) => {
+      // no await between the check and the set, so concurrent claims cannot both win
+      if (data.has(key)) return false;
+      data.set(key, JSON.stringify(value));
+      return true;
+    },
     entries: () => [...data].map(([key, raw]): [string, unknown] => [key, JSON.parse(raw)]),
   };
 };
@@ -23,4 +32,5 @@ export const createBlobsStore = (name: string): Store => ({
   setJSON: async (key, value) => {
     await getStore({ name, consistency: 'strong' }).setJSON(key, value);
   },
+  claim: async (key, value) => (await getStore({ name, consistency: 'strong' }).setJSON(key, value, { onlyIfNew: true })).modified,
 });
