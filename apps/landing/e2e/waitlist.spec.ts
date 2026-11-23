@@ -75,7 +75,8 @@ test.describe('the confirm page on /es/confirmar', () => {
     await page.waitForTimeout(Math.max(0, expiresAt - Date.now() + 500));
 
     await page.getByRole('button', { name: es.Confirm.submit }).click();
-    await expect(page.getByRole('alert')).toHaveText(es.Confirm.expired.text);
+    // Next's route announcer is an alert too, so the form's is picked by its text
+    await expect(page.getByRole('alert').filter({ hasText: es.Confirm.expired.text })).toBeVisible();
     await expect(page.getByRole('link', { name: es.Confirm.again })).toHaveAttribute('href', '/es');
     await axe(page);
   });
