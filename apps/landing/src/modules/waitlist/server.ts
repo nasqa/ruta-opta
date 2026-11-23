@@ -8,6 +8,7 @@ import type { Audience } from './audience';
 import { createFakeAudience } from './audience-fake';
 import { createZohoAudience, zohoDataCenters } from './audience-zoho';
 import { buildConfirmEmail } from './confirm-email';
+import { createConfirmGuard } from './confirm-guard';
 import type { Mailer } from './mailer';
 import { createCpaasMailer } from './mailer-cpaas';
 import { createFakeMailer } from './mailer-fake';
@@ -72,8 +73,10 @@ const common = { policyVersion, confirmEmail, confirmUrl, now: Date.now, referen
 // Local runs, the e2e and deploy previews: nothing leaves the process. A random key when none is set means links die with the process
 const composeFake = (): Waitlist => {
   const keys = parseTokenKeys(process.env.WAITLIST_TOKEN_KEY) ?? { current: new Uint8Array(randomBytes(32)) };
-  const throttle = createThrottle(createMemoryStore(), deriveKey(keys, 'waitlist/throttle'), defaultLimits);
-  return createWaitlist({ ...common, mailer: createFakeMailer(), audience: createFakeAudience(), throttle, keys });
+  const store = createMemoryStore();
+  const hashKey = deriveKey(keys, 'waitlist/throttle');
+  const throttle = createThrottle(store, hashKey, defaultLimits);
+  return createWaitlist({ ...common, mailer: createFakeMailer(), audience: createFakeAudience(), throttle, guard: createConfirmGuard(store, hashKey), keys });
 };
 
 // Returns the waitlist, or the names of the variables that are missing or invalid
@@ -103,8 +106,9 @@ const composeLive = (): Waitlist | string[] => {
   // SITE_ID is set on Netlify only; a live run elsewhere keeps its state in memory
   const store = process.env.SITE_ID ? createBlobsStore('waitlist') : createMemoryStore();
   const audience = settings.audience({ store, keys });
-  const throttle = createThrottle(store, deriveKey(keys, 'waitlist/throttle'), { ...defaultLimits, totalPerDay: dailyCap });
-  return createWaitlist({ ...common, mailer, audience, throttle, keys });
+  const hashKey = deriveKey(keys, 'waitlist/throttle');
+  const throttle = createThrottle(store, hashKey, { ...defaultLimits, totalPerDay: dailyCap });
+  return createWaitlist({ ...common, mailer, audience, throttle, guard: createConfirmGuard(store, hashKey), keys });
 };
 
 // A live deploy with bad variables fails closed: nothing is sent, opened or subscribed

@@ -1,5 +1,6 @@
 import type { Locale } from 'next-intl';
 import type { Audience } from './audience';
+import type { ConfirmGuard } from './confirm-guard';
 import type { Mailer, OutgoingEmail } from './mailer';
 import type { WaitlistValues } from './state';
 import type { Throttle } from './throttle';
@@ -11,6 +12,7 @@ export type WaitlistDeps = {
   mailer: Mailer;
   audience: Audience;
   throttle: Throttle;
+  guard: ConfirmGuard;
   keys: TokenKeys;
   policyVersion: string;
   confirmEmail: (locale: Locale, confirmUrl: string) => Promise<Omit<OutgoingEmail, 'to' | 'reference'>>;
@@ -23,7 +25,7 @@ export type WaitlistDeps = {
 export type ReadResult = { status: 'valid'; name: string; locale: Locale } | { status: 'expired' } | { status: 'invalid' };
 export type ConfirmResult = { status: 'subscribed'; locale: Locale } | { status: 'blocked' | 'expired' | 'invalid' | 'unavailable' };
 
-export const createWaitlist = ({ mailer, audience, throttle, keys, policyVersion, confirmEmail, confirmUrl, now, reference, log }: WaitlistDeps) => {
+export const createWaitlist = ({ mailer, audience, throttle, guard, keys, policyVersion, confirmEmail, confirmUrl, now, reference, log }: WaitlistDeps) => {
   const send = async (values: WaitlistValues, locale: Locale) => {
     const payload: ConfirmPayload = { email: values.email, name: values.name, locale, consentAt: now(), policyVersion };
     const token = sealToken('confirm', payload, keys, confirmTtlMs, payload.consentAt);
@@ -58,10 +60,19 @@ export const createWaitlist = ({ mailer, audience, throttle, keys, policyVersion
     return { status: result.status };
   };
 
+  // A token confirmed before answers from its marker; a second try within the minute waits, so a replayed link cannot hammer Zoho
+  const gate = async (token: string) => ((await guard.alreadyConfirmed(token)) ? 'confirmed' : (await guard.admit(token)) ? 'open' : 'busy');
+
   const confirmSubscription = async (token: string): Promise<ConfirmResult> => {
     const opened = openToken<ConfirmPayload>('confirm', token, keys, now());
     if (opened.status !== 'valid') return { status: opened.status };
-    return subscribe(opened.payload).catch(() => (log('waitlist:unexpected', { where: 'confirm' }), { status: 'unavailable' as const }));
+    const state = await gate(token).catch(() => undefined);
+    if (!state) return log('waitlist:guard-failed', {}), { status: 'unavailable' };
+    if (state === 'confirmed') return { status: 'subscribed', locale: opened.payload.locale };
+    if (state === 'busy') return log('waitlist:confirm-throttled', {}), { status: 'unavailable' };
+    const result = await subscribe(opened.payload).catch(() => (log('waitlist:unexpected', { where: 'confirm' }), { status: 'unavailable' as const }));
+    if (result.status === 'subscribed') await guard.markConfirmed(token).catch(() => log('waitlist:mark-failed', {}));
+    return result;
   };
 
   return { requestConfirmation, readConfirmation, confirmSubscription };

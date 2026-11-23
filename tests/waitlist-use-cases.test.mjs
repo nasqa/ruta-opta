@@ -7,6 +7,7 @@ const dir = join(import.meta.dirname, '../apps/landing/src/modules/waitlist');
 const { createWaitlist } = await import(join(dir, 'use-cases.ts'));
 const { createMemoryStore } = await import(join(dir, 'store.ts'));
 const { createThrottle, defaultLimits } = await import(join(dir, 'throttle.ts'));
+const { createConfirmGuard } = await import(join(dir, 'confirm-guard.ts'));
 const { createFakeMailer } = await import(join(dir, 'mailer-fake.ts'));
 const { createFakeAudience } = await import(join(dir, 'audience-fake.ts'));
 const { buildConfirmEmail } = await import(join(dir, 'confirm-email.ts'));
@@ -23,15 +24,26 @@ const setup = (overrides = {}) => {
   const mailer = createFakeMailer();
   const audience = createFakeAudience();
   const logs = [];
-  const throttle = createThrottle(createMemoryStore(), new Uint8Array(32).fill(5), defaultLimits, () => clock.now);
+  const store = createMemoryStore();
+  const hashKey = new Uint8Array(32).fill(5);
+  const throttle = createThrottle(store, hashKey, defaultLimits, () => clock.now);
+  const guard = createConfirmGuard(store, hashKey, () => clock.now);
   const waitlist = createWaitlist({
-    mailer, audience, throttle, keys, policyVersion: '2026-01', now: () => clock.now, reference: () => 'ref-1',
+    mailer, audience, throttle, guard, keys, policyVersion: '2026-01', now: () => clock.now, reference: () => 'ref-1',
     confirmEmail: (locale, url) => buildConfirmEmail(copy, locale, url),
     confirmUrl: (locale, token) => `https://x/${locale}/confirm?t=${token}`,
     log: (event, detail) => logs.push({ event, detail }),
     ...overrides,
   });
-  return { clock, mailer, audience, logs, waitlist, throttle };
+  return { clock, mailer, audience, logs, waitlist, throttle, store };
+};
+
+// Counts the audience's subscribe calls and passes them on
+const counted = (audience) => {
+  const calls = [];
+  const subscribe = audience.subscribe;
+  audience.subscribe = async (...args) => (calls.push(args), subscribe(...args));
+  return calls;
 };
 
 const tokenOf = (mailer) => new URL(/https:\/\/x\/es\/confirm\?t=[\w-]+/.exec(mailer.sent[0].text)[0]).searchParams.get('t');
@@ -76,12 +88,87 @@ test('the token payload carries consent time and policy version, sealed for 7 da
   assert.equal(waitlist.readConfirmation(token).status, 'expired');
 });
 
-test('confirming twice is subscribed twice', async () => {
-  const { mailer, waitlist } = setup();
+test('a replayed token answers subscribed from its marker, with no second audience call', async () => {
+  const { mailer, audience, waitlist, clock } = setup();
+  const calls = counted(audience);
   await waitlist.requestConfirmation(values, 'es', ip);
   const token = tokenOf(mailer);
-  assert.equal((await waitlist.confirmSubscription(token)).status, 'subscribed');
-  assert.equal((await waitlist.confirmSubscription(token)).status, 'subscribed');
+  assert.deepEqual(await waitlist.confirmSubscription(token), { status: 'subscribed', locale: 'es' });
+  assert.deepEqual(await waitlist.confirmSubscription(token), { status: 'subscribed', locale: 'es' });
+  clock.now += 60 * 60_000;
+  assert.deepEqual(await waitlist.confirmSubscription(token), { status: 'subscribed', locale: 'es' });
+  assert.equal(calls.length, 1);
+});
+
+test('a token written another way is the same token', async () => {
+  const { mailer, audience, waitlist } = setup();
+  const calls = counted(audience);
+  await waitlist.requestConfirmation(values, 'es', ip);
+  const token = tokenOf(mailer);
+  await waitlist.confirmSubscription(token);
+  // base64url decoding skips these, so each one opens as the same token
+  for (const variant of [`${token}=`, `${token.slice(0, 10)}!${token.slice(10)}`, `${token} `]) {
+    assert.deepEqual(await waitlist.confirmSubscription(variant), { status: 'subscribed', locale: 'es' }, variant);
+  }
+  assert.equal(calls.length, 1);
+});
+
+test('a second try of one token within the minute is unavailable with no audience call', async () => {
+  const outcomes = [{ status: 'unavailable', code: 'Z_1' }, { status: 'subscribed' }];
+  const calls = [];
+  const { mailer, logs, waitlist, clock } = setup({ audience: { subscribe: async (...args) => (calls.push(args), outcomes[calls.length - 1]) } });
+  await waitlist.requestConfirmation(values, 'es', ip);
+  const token = tokenOf(mailer);
+  assert.deepEqual(await waitlist.confirmSubscription(token), { status: 'unavailable' });
+  assert.deepEqual(await waitlist.confirmSubscription(token), { status: 'unavailable' });
+  assert.equal(calls.length, 1);
+  assert.deepEqual(logs.map((l) => l.event), ['waitlist:subscribe-failed', 'waitlist:confirm-throttled']);
+  clock.now += 60_000;
+  assert.deepEqual(await waitlist.confirmSubscription(token), { status: 'subscribed', locale: 'es' });
+  assert.equal(calls.length, 2);
+});
+
+test('a new token for the same email still reaches the audience', async () => {
+  const { mailer, audience, waitlist, clock } = setup();
+  const calls = counted(audience);
+  await waitlist.requestConfirmation(values, 'es', ip);
+  await waitlist.confirmSubscription(tokenOf(mailer));
+  clock.now += 2 * defaultLimits.addressGapMs;
+  await waitlist.requestConfirmation(values, 'es', ip);
+  assert.equal(mailer.sent.length, 2);
+  const second = new URL(/https:\/\/x\/es\/confirm\?t=[\w-]+/.exec(mailer.sent[1].text)[0]).searchParams.get('t');
+  assert.deepEqual(await waitlist.confirmSubscription(second), { status: 'subscribed', locale: 'es' });
+  assert.equal(calls.length, 2);
+});
+
+test('a guard that fails answers unavailable with no audience call', async () => {
+  const down = async () => { throw new Error('store down'); };
+  for (const guard of [{ alreadyConfirmed: down, admit: async () => true }, { alreadyConfirmed: async () => false, admit: down }]) {
+    const { mailer, audience, logs, waitlist } = setup({ guard: { ...guard, markConfirmed: async () => {} } });
+    const calls = counted(audience);
+    await waitlist.requestConfirmation(values, 'es', ip);
+    assert.deepEqual(await waitlist.confirmSubscription(tokenOf(mailer)), { status: 'unavailable' });
+    assert.equal(calls.length, 0);
+    assert.deepEqual(logs, [{ event: 'waitlist:guard-failed', detail: {} }]);
+  }
+});
+
+test('a marker that cannot be written is logged and the confirmation still counts', async () => {
+  const guard = { alreadyConfirmed: async () => false, admit: async () => true, markConfirmed: async () => { throw new Error('store down'); } };
+  const { mailer, logs, waitlist } = setup({ guard });
+  await waitlist.requestConfirmation(values, 'es', ip);
+  assert.deepEqual(await waitlist.confirmSubscription(tokenOf(mailer)), { status: 'subscribed', locale: 'es' });
+  assert.deepEqual(logs, [{ event: 'waitlist:mark-failed', detail: {} }]);
+});
+
+test('the guard stores no token', async () => {
+  const { mailer, store, waitlist } = setup();
+  await waitlist.requestConfirmation(values, 'es', ip);
+  const token = tokenOf(mailer);
+  await waitlist.confirmSubscription(token);
+  const keysStored = store.entries().map(([entry]) => entry);
+  assert.ok(keysStored.some((entry) => entry.startsWith('confirmed:')));
+  assert.ok(!JSON.stringify(store.entries()).includes(token.slice(0, 16)));
 });
 
 test('a skipped repeat still answers sent and sends nothing', async () => {
