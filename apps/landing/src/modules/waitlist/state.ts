@@ -10,3 +10,7 @@ export type WaitlistState =
   | { status: 'sent'; name: string };
 
 export const initialWaitlistState: WaitlistState = { status: 'idle' };
+
+export type ConfirmState = { status: 'idle' } | { status: 'blocked' | 'expired' | 'invalid' | 'unavailable' };
+
+export const initialConfirmState: ConfirmState = { status: 'idle' };
