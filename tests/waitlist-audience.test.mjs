@@ -19,6 +19,7 @@ const tokenReply = (n = 1, expiresIn = 3600) =>
   [200, JSON.stringify({ access_token: accessToken(n), api_domain: 'https://www.zohoapis.eu', token_type: 'Bearer', expires_in: expiresIn })];
 const subscribed = [200, JSON.stringify({ message: 'A confirmation email is sent to the user.', status: 'success', code: '0', uri: '/api/v1.1/json/listsubscribe', version: '1.1' })];
 const unauthorized = [401, '{"message":"Unauthorized"}'];
+const brokenStore = () => ({ getJSON: () => Promise.reject(new Error('down')), setJSON: () => Promise.reject(new Error('down')), claim: async () => false });
 const unauthorizedInBody = (code = '1007') => [200, JSON.stringify({ code, message: 'Unauthorized request.', status: 'error' })];
 
 // Answers token and listsubscribe calls from their own queues (the last reply repeats) and records every call in order
@@ -188,6 +189,59 @@ test('a stored token that gets a 401 is refreshed, not reopened from the store',
   assert.deepEqual(api.kinds(), ['subscribe', 'token', 'subscribe']);
 });
 
+test('five parallel 401s on a warm instance share one renewal', async () => {
+  const api = zoho({ tokens: [tokenReply(1), tokenReply(2), tokenReply(3)], subscribes: [subscribed, ...Array(5).fill(unauthorized), subscribed] });
+  const audience = audienceWith(api.fetch);
+  await audience.subscribe(contact, 'es', 'src');
+  const results = await Promise.all(Array.from({ length: 5 }, () => audience.subscribe(contact, 'es', 'src')));
+  assert.deepEqual(results, Array(5).fill({ status: 'subscribed' }));
+  assert.equal(api.tokenCalls(), 2);
+  const retries = api.calls.slice(-5);
+  assert.ok(retries.every(({ url, init }) => url === subscribeUrl && init.headers.Authorization === `Zoho-oauthtoken ${accessToken(2)}`));
+});
+
+test('a 401 that lands after the renewal reuses the renewed token', async () => {
+  // With a store that is down, only the in-memory guard can keep the late 401 from refreshing again
+  for (const store of [createMemoryStore(), brokenStore()]) {
+    let lateCallStarted;
+    const lateCall = new Promise((resolve) => { lateCallStarted = resolve; });
+    let answerLateCall;
+    const lateReply = () => (lateCallStarted(), new Promise((resolve) => { answerLateCall = resolve; }));
+    const api = zoho({ tokens: [tokenReply(1), tokenReply(2), tokenReply(3)], subscribes: [subscribed, lateReply, unauthorized, subscribed] });
+    const audience = audienceWith(api.fetch, { store });
+    await audience.subscribe(contact, 'es', 'src');
+
+    const late = audience.subscribe(contact, 'es', 'src');
+    await lateCall;
+    assert.deepEqual(await audience.subscribe(contact, 'es', 'src'), { status: 'subscribed' });
+    assert.equal(api.tokenCalls(), 2);
+    answerLateCall(new Response(unauthorized[1], { status: 401 }));
+    assert.deepEqual(await late, { status: 'subscribed' });
+    assert.equal(api.tokenCalls(), 2);
+    assert.equal(api.calls[2].init.headers.Authorization, `Zoho-oauthtoken ${accessToken(1)}`);
+    assert.equal(api.calls.at(-1).init.headers.Authorization, `Zoho-oauthtoken ${accessToken(2)}`);
+  }
+});
+
+test('a stale instance adopts the token another instance renewed instead of wiping it', async () => {
+  const store = createMemoryStore();
+  const x = zoho({ tokens: [tokenReply(1), tokenReply(2)], subscribes: [subscribed, unauthorized, subscribed] });
+  const y = zoho({ tokens: [tokenReply(3)], subscribes: [subscribed, unauthorized, subscribed] });
+  const first = audienceWith(x.fetch, { store });
+  const second = audienceWith(y.fetch, { store });
+  await first.subscribe(contact, 'es', 'src');
+  await second.subscribe(contact, 'es', 'src');
+  assert.deepEqual(await first.subscribe(contact, 'es', 'src'), { status: 'subscribed' });
+  assert.equal(x.tokenCalls(), 2);
+
+  assert.deepEqual(await second.subscribe(contact, 'es', 'src'), { status: 'subscribed' });
+  assert.deepEqual(y.kinds(), ['subscribe', 'subscribe', 'subscribe']);
+  assert.equal(y.calls[1].init.headers.Authorization, `Zoho-oauthtoken ${accessToken(1)}`);
+  assert.equal(y.calls[2].init.headers.Authorization, `Zoho-oauthtoken ${accessToken(2)}`);
+  const [[, sealed]] = store.entries();
+  assert.deepEqual(openToken('zoho-access-token', sealed, keys), { status: 'valid', payload: accessToken(2) });
+});
+
 test('concurrent subscribes share one refresh', async () => {
   const api = zoho();
   const audience = audienceWith(api.fetch);
@@ -234,9 +288,8 @@ test('a timeout is not retried, a rejected fetch gives network', async () => {
 });
 
 test('a failing store is a cache miss, not a failure', async () => {
-  const broken = { getJSON: () => Promise.reject(new Error('down')), setJSON: () => Promise.reject(new Error('down')), claim: async () => false };
   const api = zoho();
-  const audience = audienceWith(api.fetch, { store: broken });
+  const audience = audienceWith(api.fetch, { store: brokenStore() });
   assert.deepEqual(await audience.subscribe(contact, 'es', 'src'), { status: 'subscribed' });
   assert.deepEqual(await audience.subscribe(contact, 'es', 'src'), { status: 'subscribed' });
   assert.equal(api.tokenCalls(), 1);

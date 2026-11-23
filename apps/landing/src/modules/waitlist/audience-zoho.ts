@@ -89,13 +89,16 @@ export const createZohoAudience = ({
     return { token };
   };
 
-  const loadToken = async (): Promise<Grant> => {
+  // Adopts the token another instance stored, unless it is the one Zoho just rejected
+  const adoptStored = async (rejected?: string): Promise<Grant | undefined> => {
     const stored = await store.getJSON<string>(storeKey).catch(() => undefined);
     const token = open(stored);
-    if (!token) return requestToken();
+    if (!token || token === rejected) return undefined;
     memory = stored;
     return { token };
   };
+
+  const loadToken = async (): Promise<Grant> => (await adoptStored()) ?? requestToken();
 
   // Zoho allows 10 refreshes per 10 minutes per refresh token, so concurrent callers in one instance share one lookup
   const once = (task: () => Promise<Grant>) => (inflight ??= task().finally(() => { inflight = undefined; }));
@@ -105,12 +108,14 @@ export const createZohoAudience = ({
     return cached ? Promise.resolve({ token: cached }) : once(loadToken);
   };
 
-  // A concurrent caller may already have replaced the rejected token. Otherwise both caches are cleared and the store is not read again
+  // A concurrent caller, or another instance, may already have replaced the rejected token. Only when neither has are both caches cleared and a new token requested
   const renew = (rejected: string): Promise<Grant> => {
     const current = open(memory);
     if (current && current !== rejected) return Promise.resolve({ token: current });
     memory = undefined;
     return once(async () => {
+      const adopted = await adoptStored(rejected);
+      if (adopted) return adopted;
       await store.setJSON(storeKey, null).catch(() => undefined);
       return requestToken();
     });
