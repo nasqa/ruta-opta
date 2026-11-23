@@ -29,3 +29,12 @@ test('next.config.ts throws for a production build without WAITLIST_ADAPTER=live
   await withEnv({ CONTEXT: undefined, WAITLIST_ADAPTER: undefined }, () => assert.doesNotReject(load()));
   await withEnv({ CONTEXT: 'deploy-preview', WAITLIST_ADAPTER: 'fake' }, () => assert.doesNotReject(load()));
 });
+
+test('next.config.ts throws for a deploy preview or branch deploy with WAITLIST_ADAPTER=live', async () => {
+  const message = 'Deploy previews and branch deploys must not run WAITLIST_ADAPTER=live: set it for the Production context only.';
+  await withEnv({ CONTEXT: 'deploy-preview', WAITLIST_ADAPTER: 'live' }, () => assert.rejects(load(), { message }));
+  await withEnv({ CONTEXT: 'branch-deploy', WAITLIST_ADAPTER: 'live' }, () => assert.rejects(load(), { message }));
+  // netlify dev sets CONTEXT=dev, and testing live locally stays possible
+  await withEnv({ CONTEXT: 'dev', WAITLIST_ADAPTER: 'live' }, () => assert.doesNotReject(load()));
+  await withEnv({ CONTEXT: 'deploy-preview', WAITLIST_ADAPTER: 'fake' }, () => assert.doesNotReject(load()));
+});
