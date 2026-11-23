@@ -1,4 +1,5 @@
 import { getStore } from '@netlify/blobs';
+import { withDeadline } from './deadline';
 
 export type Store = { getJSON: <T>(key: string) => Promise<T | undefined>; setJSON: (key: string, value: unknown) => Promise<void>;
   // Create-only write: true when this call created the key, false when it already existed
@@ -31,12 +32,22 @@ export const createMemoryStore = (): MemoryStore => {
   };
 };
 
+// @netlify/blobs sets no request timeout and retries a failed request 5 times, 5 s apart, so one operation during an outage can outlast a
+// Function. Each operation is raced against this instead; an AbortSignal in a custom fetch would not do, because the retry loop catches the abort
+export const blobsTimeoutMs = 2_000;
+
+type BlobsOptions = { open?: () => Pick<ReturnType<typeof getStore>, 'get' | 'setJSON' | 'delete'>; timeoutMs?: number };
+
 // Netlify injects the credentials per request, so the store is opened inside each call
-export const createBlobsStore = (name: string): Store => ({
-  getJSON: async <T>(key: string) => (await getStore({ name, consistency: 'strong' }).get(key, { type: 'json' }) as T | null) ?? undefined,
-  setJSON: async (key, value) => {
-    await getStore({ name, consistency: 'strong' }).setJSON(key, value);
-  },
-  claim: async (key, value) => (await getStore({ name, consistency: 'strong' }).setJSON(key, value, { onlyIfNew: true })).modified,
-  delete: (key) => getStore({ name, consistency: 'strong' }).delete(key),
-});
+export const createBlobsStore = (name: string, { open = () => getStore({ name, consistency: 'strong' }), timeoutMs = blobsTimeoutMs }: BlobsOptions = {}): Store => {
+  // Opening runs inside the race too, so a throw from getStore becomes a rejection like any other failure
+  const timed = <T>(operation: string, task: () => Promise<T>) => withDeadline(Promise.resolve().then(task), timeoutMs, `Netlify Blobs ${operation}`);
+  return {
+    getJSON: <T>(key: string) => timed('get', async () => ((await open().get(key, { type: 'json' })) as T | null) ?? undefined),
+    setJSON: (key, value) => timed('set', async () => {
+      await open().setJSON(key, value);
+    }),
+    claim: (key, value) => timed('claim', async () => (await open().setJSON(key, value, { onlyIfNew: true })).modified),
+    delete: (key) => timed('delete', () => open().delete(key)),
+  };
+};

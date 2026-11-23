@@ -300,3 +300,43 @@ test("the source records the policy version sealed in the token, not the current
   assert.equal(calls[0][2], 'rutaopta.org/es · 2026-01');
   assert.equal(audience.contacts.size, 0);
 });
+
+// A store whose every operation hangs, as Netlify Blobs does while it retries an outage
+const hanging = () => {
+  const never = () => new Promise(() => {});
+  return { getJSON: never, setJSON: never, claim: never, delete: never };
+};
+
+test('the use cases give up at a 20 second deadline', async () => {
+  const { useCaseDeadlineMs } = await import(join(dir, 'use-cases.ts'));
+  assert.equal(useCaseDeadlineMs, 20_000);
+});
+
+test('a store that never answers makes a signup unavailable within the deadline', async () => {
+  const slow = setup({ deadlineMs: 30, throttle: createThrottle(hanging(), new Uint8Array(32).fill(5), defaultLimits, () => start) });
+  const started = performance.now();
+  assert.equal(await slow.waitlist.requestConfirmation(values, 'es', ip), 'unavailable');
+  assert.ok(performance.now() - started < 1_000);
+  assert.deepEqual(slow.logs, [{ event: 'waitlist:deadline', detail: { where: 'request' } }]);
+  assert.equal(slow.mailer.sent.length, 0);
+});
+
+test('a store that never answers makes a confirmation unavailable within the deadline, with no audience call', async () => {
+  const { mailer, waitlist, clock } = setup();
+  await waitlist.requestConfirmation(values, 'es', ip);
+  const slow = setup({ deadlineMs: 30, guard: createConfirmGuard(hanging(), new Uint8Array(32).fill(5), () => clock.now) });
+  const calls = counted(slow.audience);
+  const started = performance.now();
+  assert.deepEqual(await slow.waitlist.confirmSubscription(tokenOf(mailer)), { status: 'unavailable' });
+  assert.ok(performance.now() - started < 1_000);
+  assert.deepEqual(slow.logs, [{ event: 'waitlist:deadline', detail: { where: 'confirm' } }]);
+  assert.equal(calls.length, 0);
+});
+
+test('an audience that never answers makes a confirmation unavailable within the deadline', async () => {
+  const { mailer, waitlist } = setup();
+  await waitlist.requestConfirmation(values, 'es', ip);
+  const slow = setup({ deadlineMs: 30, audience: { subscribe: () => new Promise(() => {}) } });
+  assert.deepEqual(await slow.waitlist.confirmSubscription(tokenOf(mailer)), { status: 'unavailable' });
+  assert.deepEqual(slow.logs, [{ event: 'waitlist:deadline', detail: { where: 'confirm' } }]);
+});
