@@ -36,11 +36,14 @@ export const createWaitlist = ({ mailer, audience, throttle, keys, policyVersion
   };
 
   const requestConfirmation = async (values: WaitlistValues, locale: Locale, ip: string | undefined): Promise<'sent' | 'unavailable'> => {
-    const verdict = await throttle.admit(values.email, ip).catch(() => undefined);
-    if (!verdict) return log('waitlist:throttle-failed', {}), 'unavailable';
-    if (verdict === 'refuse') return log('waitlist:throttle-refused', {}), 'unavailable';
-    if (verdict === 'skip') return 'sent';
-    return send(values, locale).catch(() => (log('waitlist:unexpected', { where: 'request' }), 'unavailable' as const));
+    const admission = await throttle.admit(values.email, ip).catch(() => undefined);
+    if (!admission) return log('waitlist:throttle-failed', {}), 'unavailable';
+    if (admission.verdict === 'refuse') return log('waitlist:throttle-refused', { reason: admission.reason }), 'unavailable';
+    if (admission.verdict === 'skip') return 'sent';
+    const result = await send(values, locale).catch(() => (log('waitlist:unexpected', { where: 'request' }), 'unavailable' as const));
+    // Nothing went out, so the claims go back: a retry inside the gap must send, not answer "sent" with nothing sent
+    if (result === 'unavailable') await admission.release().catch(() => log('waitlist:release-failed', {}));
+    return result;
   };
 
   const readConfirmation = (token: string): ReadResult => {

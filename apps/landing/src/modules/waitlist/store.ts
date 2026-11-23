@@ -3,6 +3,8 @@ import { getStore } from '@netlify/blobs';
 export type Store = { getJSON: <T>(key: string) => Promise<T | undefined>; setJSON: (key: string, value: unknown) => Promise<void>;
   // Create-only write: true when this call created the key, false when it already existed
   claim: (key: string, value: unknown) => Promise<boolean>;
+  // Resolves whether or not the key existed
+  delete: (key: string) => Promise<void>;
 };
 export type MemoryStore = Store & { entries: () => [string, unknown][] };
 
@@ -22,6 +24,9 @@ export const createMemoryStore = (): MemoryStore => {
       data.set(key, JSON.stringify(value));
       return true;
     },
+    delete: async (key) => {
+      data.delete(key);
+    },
     entries: () => [...data].map(([key, raw]): [string, unknown] => [key, JSON.parse(raw)]),
   };
 };
@@ -33,4 +38,5 @@ export const createBlobsStore = (name: string): Store => ({
     await getStore({ name, consistency: 'strong' }).setJSON(key, value);
   },
   claim: async (key, value) => (await getStore({ name, consistency: 'strong' }).setJSON(key, value, { onlyIfNew: true })).modified,
+  delete: (key) => getStore({ name, consistency: 'strong' }).delete(key),
 });

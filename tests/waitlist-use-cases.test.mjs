@@ -93,12 +93,14 @@ test('a skipped repeat still answers sent and sends nothing', async () => {
 
 const leaks = (logs) => logs.flatMap(({ detail }) => Object.values(detail)).some((v) => [values.email, values.name, ip].some((s) => v.includes(s)));
 
-test('a refused submission answers unavailable and logs without personal data', async () => {
-  const { mailer, logs, waitlist } = setup({ throttle: { admit: async () => 'refuse' } });
-  assert.equal(await waitlist.requestConfirmation(values, 'es', ip), 'unavailable');
-  assert.equal(mailer.sent.length, 0);
-  assert.deepEqual(logs.map((l) => l.event), ['waitlist:throttle-refused']);
-  assert.ok(!leaks(logs));
+test('a refused submission answers unavailable and logs its reason without personal data', async () => {
+  for (const reason of ['ip', 'cap']) {
+    const { mailer, logs, waitlist } = setup({ throttle: { admit: async () => ({ verdict: 'refuse', reason }) } });
+    assert.equal(await waitlist.requestConfirmation(values, 'es', ip), 'unavailable');
+    assert.equal(mailer.sent.length, 0);
+    assert.deepEqual(logs, [{ event: 'waitlist:throttle-refused', detail: { reason } }]);
+    assert.ok(!leaks(logs));
+  }
 });
 
 test('a throttle that throws answers unavailable and logs without personal data', async () => {
@@ -112,6 +114,42 @@ test('a failed send answers unavailable and logs the provider code and reference
   assert.equal(await waitlist.requestConfirmation(values, 'es', ip), 'unavailable');
   assert.deepEqual(logs, [{ event: 'waitlist:send-failed', detail: { code: 'TM_4001', reference: 'ref-1' } }]);
   assert.ok(!leaks(logs));
+});
+
+// A mailer that fails the first time and works after, over the real throttle
+const flaky = (failure) => {
+  const mailer = createFakeMailer();
+  let calls = 0;
+  return { sent: mailer.sent, send: async (email) => (++calls === 1 ? failure() : mailer.send(email)) };
+};
+
+test('after a failed send, an immediate retry for the same address sends', async () => {
+  const failures = { 'a provider error': () => ({ ok: false, code: 'TM_4001' }), 'a throw': () => { throw new Error('down'); } };
+  for (const [name, failure] of Object.entries(failures)) {
+    const mailer = flaky(failure);
+    const { waitlist } = setup({ mailer });
+    assert.equal(await waitlist.requestConfirmation(values, 'es', ip), 'unavailable', name);
+    assert.equal(await waitlist.requestConfirmation(values, 'es', ip), 'sent', name);
+    assert.equal(mailer.sent.length, 1, name);
+  }
+});
+
+test('a release that fails is logged and the answer stays unavailable', async () => {
+  const release = async () => { throw new Error(`store down for ${values.email}`); };
+  const { logs, waitlist } = setup({
+    throttle: { admit: async () => ({ verdict: 'send', release }) },
+    mailer: { send: async () => ({ ok: false, code: 'TM_4001' }) },
+  });
+  assert.equal(await waitlist.requestConfirmation(values, 'es', ip), 'unavailable');
+  assert.deepEqual(logs.map((l) => l.event), ['waitlist:send-failed', 'waitlist:release-failed']);
+  assert.ok(!leaks(logs));
+});
+
+test('a send that works keeps its claims', async () => {
+  let released = 0;
+  const { waitlist } = setup({ throttle: { admit: async () => ({ verdict: 'send', release: async () => { released++; } }) } });
+  assert.equal(await waitlist.requestConfirmation(values, 'es', ip), 'sent');
+  assert.equal(released, 0);
 });
 
 test('a mailer or email builder that throws answers unavailable and logs where', async () => {

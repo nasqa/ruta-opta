@@ -5,8 +5,9 @@ import type { Store } from './store';
 export type ThrottleLimits = { addressGapMs: number; addressPerDay: number; ipPerHour: number; totalPerDay: number };
 export const defaultLimits: ThrottleLimits = { addressGapMs: 120_000, addressPerDay: 3, ipPerHour: 30, totalPerDay: 1_000 };
 
-export type Verdict = 'send' | 'skip' | 'refuse';
-export type Throttle = { admit: (email: string, ip: string | undefined) => Promise<Verdict> };
+// release gives back the gap and day claims of a send that failed, so a retry is not skipped. The IP and total counters stay counted
+export type Admission = { verdict: 'send'; release: () => Promise<void> } | { verdict: 'skip' } | { verdict: 'refuse'; reason: 'ip' | 'cap' };
+export type Throttle = { admit: (email: string, ip: string | undefined) => Promise<Admission> };
 
 type Counter = { count: number };
 
@@ -44,22 +45,29 @@ export const createThrottle = (store: Store, hashKey: Uint8Array, limits: Thrott
     const totalKey = `total:${day}`;
 
     const ipCount = ipKey ? ((await store.getJSON<Counter>(ipKey))?.count ?? 0) : 0;
-    if (ipCount >= limits.ipPerHour) return 'refuse';
+    if (ipCount >= limits.ipPerHour) return { verdict: 'refuse', reason: 'ip' };
     const total = (await store.getJSON<Counter>(totalKey))?.count ?? 0;
-    if (total >= limits.totalPerDay) return 'refuse';
+    if (total >= limits.totalPerDay) return { verdict: 'refuse', reason: 'cap' };
     if (ipKey) await store.setJSON(ipKey, { count: ipCount + 1 });
 
     const address = hash(canonicalAddress(email));
     // two consecutive slots, so a send blocks until slot s+2 and two sends never land closer than the gap
     const slot = Math.floor(time / limits.addressGapMs);
-    if (!(await store.claim(`gap:${address}:${slot}`, 1))) return 'skip';
-    if (!(await store.claim(`gap:${address}:${slot + 1}`, 1))) return 'skip';
+    const gaps = [`gap:${address}:${slot}`, `gap:${address}:${slot + 1}`];
+    if (!(await store.claim(gaps[0], 1))) return { verdict: 'skip' };
+    if (!(await store.claim(gaps[1], 1))) return { verdict: 'skip' };
     for (let n = 1; n <= limits.addressPerDay; n++) {
-      if (!(await store.claim(`day:${address}:${day}:${n}`, 1))) continue;
+      const dayKey = `day:${address}:${day}:${n}`;
+      if (!(await store.claim(dayKey, 1))) continue;
       await store.setJSON(totalKey, { count: total + 1 });
-      return 'send';
+      const release = async () => {
+        // every claim is tried, so one failed delete does not keep the others
+        const deletes = await Promise.allSettled([...gaps, dayKey].map((key) => store.delete(key)));
+        if (deletes.some(({ status }) => status === 'rejected')) throw new Error('A throttle claim could not be released');
+      };
+      return { verdict: 'send', release };
     }
-    return 'skip';
+    return { verdict: 'skip' };
   };
 
   return { admit };
