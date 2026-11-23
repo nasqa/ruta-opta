@@ -34,6 +34,7 @@ export default defineConfig({
       MAIL_PROVIDER: '',
       CPAAS_API_KEY: '',
       MAIL_FROM_ADDRESS: '',
+      AUDIENCE_PROVIDER: '',
       ZOHO_CLIENT_ID: '',
       ZOHO_CLIENT_SECRET: '',
       ZOHO_REFRESH_TOKEN: '',

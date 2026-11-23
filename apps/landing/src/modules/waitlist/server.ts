@@ -4,6 +4,7 @@ import type { Locale } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { getPathname } from '@/i18n/navigation';
 import { siteUrl } from '@/shared/env';
+import type { Audience } from './audience';
 import { createFakeAudience } from './audience-fake';
 import { createZohoAudience, zohoDataCenters } from './audience-zoho';
 import { buildConfirmEmail } from './confirm-email';
@@ -11,9 +12,9 @@ import type { Mailer } from './mailer';
 import { createCpaasMailer } from './mailer-cpaas';
 import { createFakeMailer } from './mailer-fake';
 import type { WaitlistValues } from './state';
-import { createBlobsStore, createMemoryStore } from './store';
+import { createBlobsStore, createMemoryStore, type Store } from './store';
 import { createThrottle, defaultLimits } from './throttle';
-import { deriveKey, parseTokenKeys } from './token';
+import { deriveKey, parseTokenKeys, type TokenKeys } from './token';
 import { type ConfirmResult, createWaitlist, type ReadResult, type WaitlistDeps } from './use-cases';
 
 // The privacy policy version a subscriber consents to; the token carries it to Zoho
@@ -35,7 +36,27 @@ const mailers = {
   },
 } satisfies Record<string, (read: Read) => Mailer | undefined>;
 
+// Switching newsletter tool is the same with AUDIENCE_PROVIDER. An entry reads its own variables first, so every missing one is reported in one log,
+// and then builds on the shared store and token keys
+type Shared = { store: Store; keys: TokenKeys };
+const audiences = {
+  zoho: (read: Read) => {
+    const settings = {
+      dataCenter: read('ZOHO_DC', (value) => zohoDataCenters.find((center) => center === value), 'com'),
+      clientId: read('ZOHO_CLIENT_ID', text),
+      clientSecret: read('ZOHO_CLIENT_SECRET', text),
+      refreshToken: read('ZOHO_REFRESH_TOKEN', text),
+      es: read('ZOHO_LIST_KEY_ES', text),
+      en: read('ZOHO_LIST_KEY_EN', text),
+    };
+    if (!isComplete(settings)) return undefined;
+    const { es, en, ...zoho } = settings;
+    return (shared: Shared) => createZohoAudience({ ...zoho, listKeys: { es, en }, ...shared });
+  },
+} satisfies Record<string, (read: Read) => ((shared: Shared) => Audience) | undefined>;
+
 const isMailProvider = (value: string): value is keyof typeof mailers => Object.hasOwn(mailers, value);
+const isAudienceProvider = (value: string): value is keyof typeof audiences => Object.hasOwn(audiences, value);
 
 const confirmEmail: WaitlistDeps['confirmEmail'] = async (locale, confirmUrl) => {
   const t = await getTranslations({ locale, namespace: 'ConfirmEmail' });
@@ -65,15 +86,11 @@ const composeLive = (): Waitlist | string[] => {
     return value;
   };
 
-  const provider = read('MAIL_PROVIDER', (value) => (isMailProvider(value) ? value : undefined));
+  const mailProvider = read('MAIL_PROVIDER', (value) => (isMailProvider(value) ? value : undefined));
+  const audienceProvider = read('AUDIENCE_PROVIDER', (value) => (isAudienceProvider(value) ? value : undefined), 'zoho');
   const settings = {
-    mailer: provider && mailers[provider](read),
-    dataCenter: read('ZOHO_DC', (value) => zohoDataCenters.find((center) => center === value), 'com'),
-    clientId: read('ZOHO_CLIENT_ID', text),
-    clientSecret: read('ZOHO_CLIENT_SECRET', text),
-    refreshToken: read('ZOHO_REFRESH_TOKEN', text),
-    listKeyEs: read('ZOHO_LIST_KEY_ES', text),
-    listKeyEn: read('ZOHO_LIST_KEY_EN', text),
+    mailer: mailProvider && mailers[mailProvider](read),
+    audience: audienceProvider && audiences[audienceProvider](read),
     // Each key is parsed on its own, so a bad previous key is reported by its own name
     currentKey: read('WAITLIST_TOKEN_KEY', (value) => parseTokenKeys(value)?.current),
     previousKey: read('WAITLIST_TOKEN_KEY_PREVIOUS', (value) => parseTokenKeys(value)?.current, null),
@@ -81,11 +98,11 @@ const composeLive = (): Waitlist | string[] => {
   };
   if (!isComplete(settings)) return invalid;
 
-  const { mailer, dataCenter, clientId, clientSecret, refreshToken, listKeyEs, listKeyEn, currentKey, previousKey, dailyCap } = settings;
+  const { mailer, currentKey, previousKey, dailyCap } = settings;
   const keys = previousKey ? { current: currentKey, previous: previousKey } : { current: currentKey };
   // SITE_ID is set on Netlify only; a live run elsewhere keeps its state in memory
   const store = process.env.SITE_ID ? createBlobsStore('waitlist') : createMemoryStore();
-  const audience = createZohoAudience({ dataCenter, clientId, clientSecret, refreshToken, listKeys: { es: listKeyEs, en: listKeyEn }, store, keys });
+  const audience = settings.audience({ store, keys });
   const throttle = createThrottle(store, deriveKey(keys, 'waitlist/throttle'), { ...defaultLimits, totalPerDay: dailyCap });
   return createWaitlist({ ...common, mailer, audience, throttle, keys });
 };
