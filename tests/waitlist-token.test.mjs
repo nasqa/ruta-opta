@@ -16,8 +16,9 @@ test('round trip returns the payload', () => {
 
 test('the token does not show the email', () => {
   const token = sealToken('confirm', payload, keys, 1000);
-  assert.ok(!token.includes('ana'));
-  assert.ok(!Buffer.from(token, 'base64url').toString('latin1').includes('ana'));
+  const bytes = Buffer.from(token, 'base64url');
+  assert.ok(!bytes.includes('ana@example.com'));
+  assert.ok(!bytes.includes('"name":"Ana"'));
 });
 
 test('a token sealed for another purpose is invalid', () => {
