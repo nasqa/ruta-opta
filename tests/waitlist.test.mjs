@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import './support/next-resolution.mjs';
 
 const { validateWaitlist } = await import(join(import.meta.dirname, '../apps/landing/src/modules/waitlist/validate.ts'));
 
@@ -36,4 +37,28 @@ test('a missing field or a file upload counts as empty', () => {
   const data = new FormData();
   data.set('name', new File(['x'], 'x.txt'));
   assert.deepEqual(validateWaitlist(data).errors, { name: true, email: true, consent: true });
+});
+
+test('real names pass', () => {
+  for (const name of ['Ana', 'María José', 'Nguyễn', "D'Angelo", 'D’Angelo', 'Jean-Luc', 'J. R. Tolkien', 'Jr.']) {
+    assert.equal(validateWaitlist(form({ name, email: 'ana@example.com', consent: 'on' })).ok, true, name);
+  }
+});
+
+test('a decomposed name passes and comes back composed', () => {
+  const result = validateWaitlist(form({ name: 'Jose\u0301', email: 'ana@example.com', consent: 'on' }));
+  assert.equal(result.ok, true);
+  assert.equal(result.values.name, 'José');
+});
+
+test('link-shaped or odd names are refused', () => {
+  for (const name of ['spamsite.com', 'visit http://x', 'a/b', '<b>', 'ana@x', 'Ana2', '--', '. Ana']) {
+    assert.equal(validateWaitlist(form({ name, email: 'ana@example.com', consent: 'on' })).errors?.name, true, name);
+  }
+});
+
+test('a long near-miss name is refused without backtracking', () => {
+  const started = performance.now();
+  assert.equal(validateWaitlist(form({ name: `${'a'.repeat(79)}2`, email: 'ana@example.com', consent: 'on' })).errors?.name, true);
+  assert.ok(performance.now() - started < 100);
 });
