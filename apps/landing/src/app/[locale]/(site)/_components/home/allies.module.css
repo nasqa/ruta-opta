@@ -8,7 +8,7 @@
 }
 
 .section > p {
-  max-width: var(--mantine-breakpoint-sm);
+  max-width: var(--mantine-breakpoint-xs);
 }
 
 .cards {
@@ -30,6 +30,10 @@
 
 .card > * {
   margin: 0;
+}
+
+.card > p {
+  overflow-wrap: anywhere;
 }
 
 @media (min-width: 48em) {

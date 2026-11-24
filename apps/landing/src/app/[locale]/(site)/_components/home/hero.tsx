@@ -18,7 +18,10 @@ export const Hero = () => {
           {t('cta')}
         </Button>
       </div>
-      <SceneBand scene={heroArt} height="hero" sun />
+      {/* Reserved and tinted before the art arrives, so a slow connection shows a panel and not a floating sun */}
+      <div className={styles.art}>
+        <SceneBand scene={heroArt} height="hero" sun />
+      </div>
     </section>
   );
 };

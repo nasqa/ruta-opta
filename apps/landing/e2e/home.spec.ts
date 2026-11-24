@@ -64,12 +64,15 @@ for (const locale of locales) {
 
     test('the allies reach Ruta Opta by WhatsApp and by email', async ({ page }) => {
       await page.goto(`/${locale}`);
-      const whatsapp = page.getByRole('link', { name: Prelaunch.allies.whatsapp.label, exact: true });
+      const whatsapp = page.getByRole('link', { name: new RegExp(`^${Prelaunch.allies.whatsapp.label}`) });
       const email = page.getByRole('link', { name: Prelaunch.allies.email.label, exact: true });
 
       await expect(whatsapp).toHaveAttribute('href', /^https:\/\/wa\.me\/573105874657\?text=/);
       await expect(whatsapp).toHaveAttribute('target', '_blank');
       await expect(whatsapp).toHaveAttribute('rel', /noopener/);
+      // The new tab is announced, and the visible label stays inside the accessible name (WCAG 2.5.3)
+      await expect(whatsapp).toHaveAttribute('aria-label', new RegExp(`^${Prelaunch.allies.whatsapp.label} \\(.+\\)$`));
+      await expect(page.locator('section[aria-labelledby="allies-title"]').getByText(Prelaunch.allies.email.address, { exact: true })).toBeVisible();
       await expect(email).toHaveAttribute('href', /^mailto:info@rutaopta\.org\?subject=/);
     });
 
@@ -106,7 +109,15 @@ for (const locale of locales) {
       const hrefs = await page.locator('link[rel="alternate"][hreflang]').evaluateAll((links) => links.map((link) => link.getAttribute('href') ?? ''));
 
       expect(hrefs).toHaveLength(3);
-      for (const href of hrefs) expect((await request.get(new URL(href).pathname)).status(), href).toBe(200);
+      for (const href of hrefs) {
+        const { pathname } = new URL(href);
+        const response = await request.get(pathname, { maxRedirects: 0 });
+        // x-default is the unprefixed root: the proxy answers a 307 to the browser's language (a post-launch item with the shell's owner)
+        if (pathname === '/') {
+          expect(response.status(), href).toBe(307);
+          expect(['/es', '/en']).toContain(new URL(response.headers().location ?? '', site).pathname);
+        } else expect(response.status(), href).toBe(200);
+      }
     });
 
     test('the structured data parses and names the organization once', async ({ page, request }) => {
@@ -227,6 +238,10 @@ for (const locale of locales) {
       await page.evaluate(() => document.fonts.ready);
 
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      const art = page.locator('section[aria-labelledby="hero-title"] img:not([src*="sun"])');
+      expect(await art.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth), 'the hero image really failed').toBe(0);
+      const placeholder = await page.locator('section[aria-labelledby="hero-title"] > div:last-child').evaluate((element) => getComputedStyle(element).backgroundImage);
+      expect(placeholder, 'a quiet fill sits behind the art while it loads').not.toBe('none');
       expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(before);
       expect(await layoutShift(page)).toBeLessThanOrEqual(0.1);
     });
@@ -252,5 +267,56 @@ for (const locale of locales) {
     for (const right of rights) expect(right).toBeLessThanOrEqual(296.01);
     const clipped = await page.locator('h1, .mantine-Button-label').evaluateAll((elements) => elements.filter((element) => element.scrollWidth > element.clientWidth).map((element) => element.textContent));
     expect(clipped, 'text wider than its box').toEqual([]);
+  });
+}
+
+for (const locale of locales) {
+  const { Prelaunch } = messages[locale];
+
+  test.describe(`/${locale} reading and keyboard`, () => {
+    test('the territory list keeps its list role and the paragraphs keep a readable measure', async ({ page }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto(`/${locale}`);
+
+      await expect(page.locator('ul[role="list"][aria-label]')).toHaveCount(1);
+      for (const selector of ['thesis-title', 'tourism-title', 'who-title', 'allies-title']) {
+        const paragraph = await page.locator(`section[aria-labelledby="${selector}"] > p`).first().boundingBox();
+        if (!paragraph) throw new Error(`${selector} has no paragraph`);
+        // 36em of the paragraph's own 18 px type is 648 px: about 70 characters a line (it was 48em, 864 px)
+        expect(paragraph.width, selector).toBeLessThanOrEqual(649);
+      }
+    });
+
+    test('tab goes from the hero button to the policy, WhatsApp and email in order, with a visible focus ring', async ({ page }) => {
+      await page.goto(`/${locale}`);
+      const cta = page.getByRole('link', { name: Prelaunch.cta, exact: true });
+      await cta.focus();
+      await page.keyboard.press('Tab');
+      await page.keyboard.press('Shift+Tab');
+      await expect(cta).toBeFocused();
+
+      const ring = await cta.evaluate((element) => {
+        const { outlineWidth, outlineStyle, outlineColor } = getComputedStyle(element);
+        const probe = (color: string) => {
+          const context = document.createElement('canvas').getContext('2d');
+          if (!context) throw new Error('no canvas');
+          context.fillStyle = color;
+          context.fillRect(0, 0, 1, 1);
+          const [red = 0, green = 0, blue = 0] = context.getImageData(0, 0, 1, 1).data;
+          return [red, green, blue] satisfies Rgb;
+        };
+        return { width: Number.parseFloat(outlineWidth), style: outlineStyle, color: probe(outlineColor), page: probe(getComputedStyle(document.body).backgroundColor) };
+      });
+      expect(ring.style).not.toBe('none');
+      expect(ring.width).toBeGreaterThanOrEqual(2);
+      expect(contrastRatio(ring.color, ring.page)).toBeGreaterThanOrEqual(3);
+
+      const order: string[] = [];
+      for (let step = 0; step < 4; step++) {
+        await page.keyboard.press('Tab');
+        order.push(await page.evaluate(() => document.activeElement?.getAttribute('href') ?? document.activeElement?.tagName ?? ''));
+      }
+      expect(order.map((href) => (href.startsWith('https://wa.me') ? 'whatsapp' : href.startsWith('mailto:') ? 'email' : /privacy|privacidad/.test(href) ? 'policy' : href))).toEqual(['policy', 'whatsapp', 'email', 'INPUT']);
+    });
   });
 }

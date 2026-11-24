@@ -20,12 +20,15 @@ export const Allies = () => {
             href={whatsappHref(t('allies.whatsapp.number'), t('allies.whatsapp.message'))}
             target="_blank"
             rel="noopener noreferrer"
+            aria-label={t('allies.whatsapp.opensNewTab', { label: t('allies.whatsapp.label') })}
           >
             {t('allies.whatsapp.label')}
           </Button>
         </div>
         <div className={styles.card}>
           <h3 className="t-heading-md">{t('allies.email.title')}</h3>
+          {/* Many phones have no mail app set up: the address stays readable and copyable next to the button */}
+          <p className="t-body-md">{t('allies.email.address')}</p>
           <Button component="a" href={mailtoHref(t('allies.email.address'), t('allies.email.subject'))}>
             {t('allies.email.label')}
           </Button>

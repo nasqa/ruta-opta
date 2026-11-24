@@ -12,7 +12,8 @@ export const Thesis = () => {
         {t('thesis.title')}
       </h2>
       <p className="t-body-lg">{t('thesis.text')}</p>
-      <ul className={styles.territories} aria-label={t('thesis.territoriesLabel')}>
+      {/* list-style: none drops the list role in Safari */}
+      <ul className={styles.territories} role="list" aria-label={t('thesis.territoriesLabel')}>
         {territories.map((territory) => (
           <li key={territory} className={`${styles.territory} t-title`}>
             {t(`thesis.territories.${territory}`)}

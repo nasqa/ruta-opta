@@ -35,7 +35,7 @@
       "create": {
         "name": "Create",
         "tagline": "Turn knowledge and talents into proposals.",
-        "text": "We help so that what you know how to do gets its costs, a price and a good presentation."
+        "text": "We help you put costs, a price and a good presentation on what you already know how to do."
       },
       "connect": {
         "name": "Connect",
@@ -61,6 +61,7 @@
       "whatsapp": {
         "title": "WhatsApp",
         "label": "Message us on WhatsApp",
+        "opensNewTab": "{label} (opens in a new tab)",
         "number": "573105874657",
         "message": "Hello, I would like to learn about Ruta Opta as an ally."
       },

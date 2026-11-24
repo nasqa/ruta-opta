@@ -19,7 +19,7 @@ const homeKeys = [
   'tourism.title', 'tourism.text', 'tourism.status',
   'who.title', 'who.text', 'who.legalName', 'who.locality', 'who.region',
   'allies.title', 'allies.text',
-  ...['title', 'label', 'number', 'message'].map((field) => `allies.whatsapp.${field}`),
+  ...['title', 'label', 'opensNewTab', 'number', 'message'].map((field) => `allies.whatsapp.${field}`),
   ...['title', 'label', 'address', 'subject'].map((field) => `allies.email.${field}`),
   'listTitle', 'listLead', 'privacyLink',
 ];
@@ -86,5 +86,11 @@ test('Opta is never written alone, and the course organizer is never named', () 
       const named = text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter((word) => unnamedWords.has(sha256(word)));
       assert.deepEqual(named, [], `${locale}: names the course organizer in: ${text}`);
     }
+  }
+});
+
+test('the WhatsApp link announces its new tab around the visible label', () => {
+  for (const [locale, messages] of Object.entries(locales)) {
+    assert.match(messages.Prelaunch.allies.whatsapp.opensNewTab, /^\{label\} \(.+\)$/, `${locale}: opensNewTab wraps {label}`);
   }
 });

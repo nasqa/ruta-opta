@@ -61,6 +61,7 @@
       "whatsapp": {
         "title": "WhatsApp",
         "label": "Escríbenos por WhatsApp",
+        "opensNewTab": "{label} (se abre en una pestaña nueva)",
         "number": "573105874657",
         "message": "Hola, quiero conocer Ruta Opta como aliado."
       },

@@ -28,6 +28,11 @@
   }
 }
 
+/* The same fade as the art's top edge, so the panel and the picture blend into the page together */
+.art {
+  background: linear-gradient(to bottom, transparent, var(--color-surface-subtle) var(--space-9));
+}
+
 /* A thumb-sized, full-width button right after the lead on phones */
 @media (max-width: 30em) {
   .cta {
