@@ -55,8 +55,11 @@
   },
   "Privacy": {
     "metaTitle": "Data protection policy",
+    "overline": "Fundación Embajadores de la Paz",
     "title": "Data protection policy",
     "intro": "This policy explains what personal data the OPTA waitlist collects, what we use it for and how you can exercise your rights.",
+    "effective": "Effective from [PENDIENTE]",
+    "toc": "On this page",
     "sections": {
       "controller": {
         "title": "Data controller",
@@ -64,7 +67,7 @@
       },
       "data": {
         "title": "What data we ask for",
-        "text": "Your name and your email address. If you choose an option under «How do you want to be part of this transformation?», we keep that too."
+        "text": "Your name and your email address."
       },
       "purpose": {
         "title": "What we use it for",
@@ -79,6 +82,7 @@
         "text": "You can access, update and correct your data, ask us to delete it and withdraw your authorization at any time. You can also use the unsubscribe link in every email."
       }
     },
+    "questions": "Questions about your data?",
     "contactEs": "Write to us at",
     "emailEs": "privacidad@rutaopta.org",
     "contactEn": "If you prefer to write in English:",

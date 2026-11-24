@@ -1,24 +1,169 @@
+/* The document ends the page with room before the footer */
 .page {
-  display: grid;
-  gap: var(--space-group);
-  padding: var(--space-inset-page);
+  padding-bottom: var(--space-8);
 }
 
-.page > * {
+/* The strip is much wider than the art: it keeps the misty middle ridges and loses sky */
+.ridge {
+  object-position: 50% 75%;
+}
+
+.page h1 {
+  text-wrap: balance;
+}
+
+.page a {
+  text-decoration-thickness: var(--border-width-hairline);
+  text-underline-offset: var(--space-1);
+}
+
+.secondary {
+  color: var(--color-text-secondary);
+}
+
+/* 36em at body-lg's 18 px is 648 px: at most 60 characters a line (60ch measures 677 px) */
+.intro {
+  max-width: var(--mantine-breakpoint-xs);
+}
+
+/* Lined up with the title card above: the same width and the same cap. Two columns: the contents (240 px) and the text at a
+   reading measure of 640 px, about 65 characters (65ch of body-md measures 654 px) */
+.doc {
+  display: grid;
+  grid-template-columns: calc(2 * var(--space-9) + var(--space-7)) minmax(0, calc(var(--mantine-breakpoint-xs) + var(--space-8)));
+  gap: var(--space-8);
+  align-items: start;
+  width: calc(100% - 2 * var(--space-inset-page));
+  max-width: var(--mantine-breakpoint-md);
+  margin: var(--space-7) auto 0;
+}
+
+/* Trama's card drawn with its own tokens; it stays in view while the text scrolls past */
+.toc {
+  position: sticky;
+  top: var(--space-5);
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-inset-container);
+  border: var(--border-width-hairline) solid var(--card-border);
+  border-radius: var(--card-border-radius);
+  background: var(--card-bg-rest);
+}
+
+.toc > * {
   margin: 0;
 }
 
+.toc ol {
+  display: grid;
+  gap: var(--space-2);
+  padding-inline-start: var(--space-5);
+}
+
+.toc li::marker {
+  color: var(--color-text-secondary);
+}
+
+.toc a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.toc a:hover {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+}
+
+.body {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-6);
+}
+
+.article {
+  display: grid;
+  counter-reset: section;
+}
+
+/* Numbered sections with hairlines between them; the contents link to their ids */
 .section {
   display: grid;
   gap: var(--space-related);
+  padding-block: var(--space-5);
+  counter-increment: section;
+}
+
+.section:first-child {
+  padding-top: 0;
+}
+
+.section + .section {
+  border-top: var(--border-width-hairline) solid var(--color-border-subtle);
 }
 
 .section > * {
   margin: 0;
 }
 
+/* The two-digit number is decoration (the contents already number the sections), so its alternative text is empty */
+.section h2::before {
+  content: counter(section, decimal-leading-zero) / '';
+  margin-inline-end: var(--space-3);
+  color: var(--color-action-solid);
+  font-family: var(--font-family-body);
+  font-size: var(--text-title-font-size);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Questions go to a card in the accent family */
 .contact {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-inline-tight);
+  display: grid;
+  gap: var(--space-related);
+  margin-top: var(--space-5);
+  padding: var(--space-inset-container);
+  border: var(--border-width-hairline) solid var(--color-accent-line);
+  border-radius: var(--card-border-radius);
+  background: var(--color-accent-bg-subtle);
+}
+
+.contact > * {
+  margin: 0;
+}
+
+.contact a {
+  color: var(--color-accent-text-low);
+}
+
+.home {
+  color: var(--color-action-text-low);
+}
+
+/* One column, flush with the title card: the contents above the text, no longer sticky */
+@media (max-width: 48em) {
+  .doc {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+
+  .toc {
+    position: static;
+  }
+}
+
+@media (max-width: 30em) {
+  .page {
+    padding-bottom: var(--space-6);
+  }
+
+  /* The mockup's phone size (heading-lg's), as on /confirm and /confirmed */
+  .page h1 {
+    font-size: var(--text-heading-lg-font-size);
+    line-height: var(--text-heading-lg-line-height);
+    letter-spacing: var(--text-heading-lg-letter-spacing);
+  }
+
+  .doc {
+    width: calc(100% - 2 * var(--space-4));
+    margin-top: var(--space-6);
+  }
 }

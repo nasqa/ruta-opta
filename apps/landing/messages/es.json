@@ -55,8 +55,11 @@
   },
   "Privacy": {
     "metaTitle": "Política de tratamiento de datos",
+    "overline": "Fundación Embajadores de la Paz",
     "title": "Política de tratamiento de datos",
     "intro": "Esta política explica qué datos personales recoge la lista de espera de OPTA, para qué los usamos y cómo puedes ejercer tus derechos.",
+    "effective": "Vigente desde [PENDIENTE]",
+    "toc": "En esta página",
     "sections": {
       "controller": {
         "title": "Responsable del tratamiento",
@@ -64,7 +67,7 @@
       },
       "data": {
         "title": "Qué datos pedimos",
-        "text": "Tu nombre y tu correo electrónico. Si eliges una opción en «¿Cómo quieres ser parte de esta transformación?», también la guardamos."
+        "text": "Tu nombre y tu correo electrónico."
       },
       "purpose": {
         "title": "Para qué los usamos",
@@ -79,6 +82,7 @@
         "text": "Puedes conocer, actualizar y corregir tus datos, pedir que los eliminemos y retirar tu autorización cuando quieras. También puedes usar el enlace para darte de baja que trae cada correo."
       }
     },
+    "questions": "¿Preguntas sobre tus datos?",
     "contactEs": "Escríbenos a",
     "emailEs": "privacidad@rutaopta.org",
     "contactEn": "Si prefieres escribir en inglés:",
