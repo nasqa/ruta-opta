@@ -1,3 +1,4 @@
+export { ArtImage } from './art-image';
 export { SceneBand } from './scene-band';
 export { SceneCard } from './scene-card';
 export { SiteFrame } from './site-frame';

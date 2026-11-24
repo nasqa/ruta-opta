@@ -32,6 +32,17 @@
   mask-image: linear-gradient(to bottom, transparent, var(--color-surface-canvas) var(--space-9));
 }
 
+/* Beside the home's headline (two columns from 62em) the art also fades in from its left edge, so the valley opens out of the
+   paper instead of ending in a hard line next to the text */
+@media (min-width: 62em) {
+  .hero .scene {
+    mask-image:
+      linear-gradient(to bottom, transparent, var(--color-surface-canvas) var(--space-9)),
+      linear-gradient(to right, transparent, var(--color-surface-canvas) var(--space-9));
+    mask-composite: intersect;
+  }
+}
+
 /* The real mark as its own layer: the ring is 300 of sun.svg's 420 units, so 16.1 % of the band makes an 11.5 % ring */
 .sun {
   position: absolute;
