@@ -7,7 +7,7 @@ const race = <T>(task: Promise<T>, ms: number) =>
 const probe = async (label: string, task: () => Promise<unknown>) => {
   const started = Date.now();
   try {
-    const value = await race(Promise.resolve().then(task), 8_000);
+    const value = await race(Promise.resolve().then(task), 6_000);
     return { label, ms: Date.now() - started, ok: true, value: JSON.stringify(value ?? null) };
   } catch (error) {
     return { label, ms: Date.now() - started, ok: false, error: error instanceof Error ? `${error.name}: ${error.message}` : String(error) };
@@ -52,6 +52,9 @@ export const GET = async () => {
     await probe('raw GET missing then body.cancel()', cancelProbe),
     await probe('getStore fetch=no-store get missing', () => getStore({ name: 'waitlist-diag', consistency: 'strong', fetch: noStore }).get(key)),
     await probe('getStore fetch=buffered get missing', () => getStore({ name: 'waitlist-diag', consistency: 'strong', fetch: buffered }).get(key)),
+  ];
+  if (results.length) return Response.json({ results });
+  const unused = [
     await probe('raw uncached GET missing', rawFetch(ctx.uncachedEdgeURL ?? '', key)),
     await probe('raw cached GET missing', rawFetch(ctx.edgeURL ?? '', key)),
     await probe('getStore region get missing', () => getStore({ name: 'waitlist-diag', consistency: 'strong', region: ctx.primaryRegion as never } as never).get(key)),
