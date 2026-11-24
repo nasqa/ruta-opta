@@ -356,7 +356,8 @@
       "rights": "© {year} Fundación Embajadores de la Paz"
     },
     "whatsappFloat": {
-      "label": "Contact us on WhatsApp (opens in a new tab)"
+      "label": "Contact us on WhatsApp (opens in a new tab)",
+      "message": "Hello, I saw the Ruta Opta website and would like more information."
     },
     "sections": {
       "label": "On this page",

@@ -72,6 +72,7 @@ const PrelaunchPage = () => {
     email: t('allies.email.address'),
     phone: t('allies.whatsapp.number'),
     parent: t('who.legalName'),
+    sameAs: [shell('footer.instagramUrl')],
   });
 
   return (

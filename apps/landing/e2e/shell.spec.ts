@@ -67,9 +67,9 @@ for (const { locale, href, path } of pages) {
     }
     await expect(footer.getByRole('link', { name: SiteShell.footer.whatsapp, exact: true })).toHaveAttribute('href', `https://wa.me/${SiteShell.footer.whatsappNumber}`);
     await expect(footer.getByRole('link', { name: SiteShell.footer.infoEmail, exact: true })).toHaveAttribute('href', `mailto:${SiteShell.footer.infoEmail}`);
-    // The round WhatsApp button floats over every page: a plain link to the same number, in a new tab
+    // The round WhatsApp button floats over every page: a plain link to the same number with its own written message, in a new tab
     const floating = page.getByRole('link', { name: SiteShell.whatsappFloat.label, exact: true });
-    await expect(floating).toHaveAttribute('href', `https://wa.me/${SiteShell.footer.whatsappNumber}`);
+    await expect(floating).toHaveAttribute('href', `https://wa.me/${SiteShell.footer.whatsappNumber}?text=${encodeURIComponent(SiteShell.whatsappFloat.message)}`);
     await expect(floating).toHaveAttribute('target', '_blank');
     await expect(floating).toHaveAttribute('rel', /noopener/);
     await expect(floating).toBeInViewport();

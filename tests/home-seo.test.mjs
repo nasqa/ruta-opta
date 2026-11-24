@@ -20,6 +20,7 @@ const org = {
   email: 'info@rutaopta.org',
   phone: '573105874657',
   parent: 'Fundación Embajadores de la Paz',
+  sameAs: ['https://www.instagram.com/rutaopta/'],
 };
 
 const keysDeep = (value) =>
@@ -75,6 +76,11 @@ test('Ruta Opta is an initiative of the foundation, not the foundation: the lega
   assert.deepEqual(organization.parentOrganization, { '@type': 'Organization', name: 'Fundación Embajadores de la Paz', address });
 });
 
+test('the Organization lists its Instagram profile as sameAs, the one profile the owner confirmed, and the WebSite lists none', () => {
+  assert.deepEqual(organization.sameAs, ['https://www.instagram.com/rutaopta/']);
+  assert.ok(!('sameAs' in website), 'the WebSite carries no sameAs');
+});
+
 test('every node is a plain schema.org type: no NGO, whose status we have not confirmed, and no FAQPage or Tourist* type', () => {
   assert.deepEqual([...new Set(typesDeep(graph))].sort(), ['AdministrativeArea', 'ContactPoint', 'Organization', 'PostalAddress', 'WebSite']);
 });
@@ -88,7 +94,7 @@ test('the WebSite names itself, its domain as the alternate name, and its langua
 
 test('no field that is not confirmed appears anywhere in the graph', () => {
   const present = new Set(keysDeep(graph));
-  for (const key of ['sameAs', 'aggregateRating', 'review', 'taxID', 'foundingDate', 'potentialAction', 'streetAddress', 'legalName']) {
+  for (const key of ['aggregateRating', 'review', 'taxID', 'foundingDate', 'potentialAction', 'streetAddress', 'legalName']) {
     assert.ok(!present.has(key), `JSON-LD must not carry ${key}`);
   }
 });

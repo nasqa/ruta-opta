@@ -39,7 +39,7 @@ const homeKeys = [
 
 const shellKeys = [
   ...['label', 'places', 'method', 'tourism', 'allies', 'faq'].map((key) => `sections.${key}`),
-  'whatsappFloat.label',
+  'whatsappFloat.label', 'whatsappFloat.message',
   ...['initiative', 'privacy', 'email', 'mission', 'explore', 'contact', 'legal', 'whatsapp', 'whatsappNumber', 'infoEmail', 'instagram', 'instagramUrl', 'place', 'rights'].map(
     (key) => `footer.${key}`,
   ),
@@ -104,6 +104,9 @@ test('the footer, the allies, the FAQ and the policy agree on every contact, in 
     assert.ok(footer.rights.includes(Prelaunch.who.legalName) && footer.rights.includes('{year}'), `${locale}: footer.rights`);
     // The floating button names WhatsApp and warns that it opens a new tab
     assert.ok(SiteShell.whatsappFloat.label.includes('WhatsApp'), `${locale}: the floating WhatsApp button's label names WhatsApp`);
+    // The floating button's message names the brand in full, and is not the allies' message: it tells us the contact came from the button
+    assert.ok(SiteShell.whatsappFloat.message.includes('Ruta Opta'), `${locale}: the floating button's message names Ruta Opta`);
+    assert.notEqual(SiteShell.whatsappFloat.message, Prelaunch.allies.whatsapp.message, `${locale}: the floating button's message is its own`);
     // Two links to WhatsApp on one page must not share a name: the allies' button opens a written message, the floating one does not
     const alliesName = Prelaunch.allies.whatsapp.opensNewTab.replace('{label}', Prelaunch.allies.whatsapp.label);
     assert.notEqual(SiteShell.whatsappFloat.label, alliesName, `${locale}: the floating WhatsApp button needs a name of its own`);

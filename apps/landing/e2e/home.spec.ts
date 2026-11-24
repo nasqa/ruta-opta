@@ -276,6 +276,7 @@ for (const locale of locales) {
       expect(website['@id']).toBe(`${site.origin}/${locale}#website`);
       expect(website.alternateName).toEqual(['rutaopta.org']);
       expect(website.inLanguage).toBe(locale);
+      expect(organization.sameAs).toEqual([SiteShell.footer.instagramUrl]);
       expect(organization.contactPoint).toMatchObject({ email: Prelaunch.allies.email.address, telephone: `+${Prelaunch.allies.whatsapp.number}` });
       expect((await request.get(new URL(organization.logo).pathname)).status()).toBe(200);
     });
