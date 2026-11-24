@@ -1,0 +1,24 @@
+.page {
+  display: grid;
+  gap: var(--space-group);
+  padding: var(--space-inset-page);
+}
+
+.page > * {
+  margin: 0;
+}
+
+.section {
+  display: grid;
+  gap: var(--space-related);
+}
+
+.section > * {
+  margin: 0;
+}
+
+.contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-inline-tight);
+}

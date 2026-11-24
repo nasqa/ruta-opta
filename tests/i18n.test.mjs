@@ -1,25 +1,12 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { registerHooks } from 'node:module';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import en from '../apps/landing/messages/en.json' with { type: 'json' };
 import es from '../apps/landing/messages/es.json' with { type: 'json' };
+import './support/next-resolution.mjs';
 
 const landing = join(import.meta.dirname, '../apps/landing');
-
-// The app's TypeScript is resolved by Next's bundler: imports without extensions, JSON without import attributes, and
-// next/* subpaths without an exports map. These hooks give plain Node the same resolution, so the tests run the real modules.
-registerHooks({
-  resolve: (specifier, context, nextResolve) => {
-    if (/^next\/[\w-]+$/.test(specifier)) return nextResolve(`${specifier}.js`, context);
-    if (specifier.endsWith('.json')) return { ...nextResolve(specifier, context), importAttributes: { type: 'json' } };
-    const extensionless = /^\.\.?\//.test(specifier) && !/\.\w+$/.test(specifier);
-    const resolved = nextResolve(extensionless && context.parentURL?.endsWith('.ts') ? `${specifier}.ts` : specifier, context);
-    // apps/landing/package.json declares no "type", so name the format instead of letting Node guess and warn
-    return resolved.url.endsWith('.ts') ? { ...resolved, format: 'module-typescript' } : resolved;
-  },
-});
 
 const { routing } = await import(join(landing, 'src/i18n/routing.ts'));
 const { localesFor, localesWith } = await import(join(landing, 'src/i18n/coverage.ts'));
@@ -41,10 +28,10 @@ const proxyLinks = (pathnames, path) => {
 };
 
 test('a namespace exists in the locales whose messages have it', () => {
-  assert.deepEqual(localesWith('Home'), ['es', 'en']);
-  const { Home, ...enWithoutHome } = en;
-  assert.ok(Home);
-  assert.deepEqual(localesWith('Home', { es, en: enWithoutHome }), ['es']);
+  // The pre-launch pages are Spanish-only, so English has none of their namespaces
+  assert.deepEqual(localesWith('Prelaunch'), ['es']);
+  assert.ok(!('Prelaunch' in en));
+  assert.deepEqual(localesWith('Prelaunch', { es, en: { Prelaunch: es.Prelaunch } }), ['es', 'en']);
 });
 
 test('every route has its namespace in Spanish, the source of the types', () => {
@@ -52,13 +39,18 @@ test('every route has its namespace in Spanish, the source of the types', () => 
 });
 
 test('alternates list the covered locales and x-default, the unprefixed path where the proxy negotiates the locale', () => {
-  const home = alternates('/').languages;
+  // A page that exists in both locales, here the home as if it were translated
+  const home = alternates('/', ['es', 'en']).languages;
   assert.deepEqual(home, { es: '/es', en: '/en', 'x-default': '/' });
   assert.deepEqual(home, proxyLinks(routing.pathnames, '/es'));
   // Off home, x-default is the default locale's translated pathname without its prefix, as in the proxy's own links
   const aboutOpta = alternates('/about-opta', ['es', 'en'], translated.getPathname).languages;
   assert.deepEqual(aboutOpta, { es: '/es/conoce-opta', en: '/en/about-opta', 'x-default': '/conoce-opta' });
   assert.deepEqual(aboutOpta, proxyLinks(translatedPathnames, '/es/conoce-opta'));
+});
+
+test('the pre-launch home lists only Spanish, with no x-default', () => {
+  assert.deepEqual(alternates('/').languages, { es: '/es' });
 });
 
 test('a Spanish-only page lists only Spanish, with no x-default', () => {
@@ -75,4 +67,9 @@ test('Lighthouse budgets every route in each locale that has it', async () => {
       assert.ok(urls.includes(url), `lighthouserc.json collect.url is missing ${url}: add it so the JS budget covers the route`);
     }
   }
+});
+
+test('the confirmation link keeps its token in the query of the localized /confirm path', () => {
+  // server.ts builds the email's link this way; a dropped query would send every subscriber a dead link
+  assert.equal(getPathname({ locale: 'es', href: { pathname: '/confirm', query: { t: 'AQ_-x9' } } }), '/es/confirmar?t=AQ_-x9');
 });

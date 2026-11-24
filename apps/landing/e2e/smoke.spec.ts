@@ -58,7 +58,7 @@ test.describe('smoke page on /es', () => {
   test('paints the Mantine button with the Opta action color', async ({ page }) => {
     await page.goto('/es');
     const [background, actionFilled] = await page
-      .getByRole('button', { name: es.Home.cta })
+      .getByRole('button', { name: es.Prelaunch.cta })
       .evaluate((button) => {
         // A probe next to the button resolves the variable in the same cascade
         const probe = document.createElement('div');

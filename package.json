@@ -14,6 +14,7 @@
     "lint": "eslint . && stylelint \"apps/**/*.css\" \"packages/**/*.css\" --allow-empty-input",
     "test": "node --test --test-concurrency=1 \"tests/**/*.test.mjs\"",
     "e2e": "npm run e2e --workspaces --if-present",
+    "check:pending": "node scripts/check-pending.mjs",
     "build": "npm run build --workspaces --if-present",
     "prepare": "simple-git-hooks"
   },
