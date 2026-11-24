@@ -1,6 +1,7 @@
 import { expect, type Page, test } from '@playwright/test';
 import en from '../messages/en.json';
 import es from '../messages/es.json';
+import { contrastRatio, type Rgb } from './contrast';
 
 const messages = { es, en };
 const locales = ['es', 'en'] as const;
@@ -121,6 +122,121 @@ for (const locale of locales) {
       expect(organization.url).toBe(`${site.origin}/${locale}`);
       expect(data['@graph'].find((node: { '@type': string }) => node['@type'] === 'WebSite').inLanguage).toBe(locale);
       expect((await request.get(new URL(organization.logo).pathname)).status()).toBe(200);
+    });
+  });
+}
+
+test('contrastRatio follows WCAG: black on white is 21, equal colours are 1', () => {
+  expect(contrastRatio([0, 0, 0], [255, 255, 255])).toBeCloseTo(21, 5);
+  expect(contrastRatio([255, 255, 255], [0, 0, 0])).toBeCloseTo(21, 5);
+  expect(contrastRatio([118, 118, 118], [118, 118, 118])).toBe(1);
+  expect(contrastRatio([118, 118, 118], [255, 255, 255])).toBeCloseTo(4.54, 2);
+});
+
+// The colour a CSS colour resolves to in sRGB, whatever space the theme wrote it in
+const textColor = (page: Page, selector: string) =>
+  page.locator(selector).evaluate((element): Rgb => {
+    const context = document.createElement('canvas').getContext('2d');
+    if (!context) throw new Error('no canvas');
+    context.fillStyle = getComputedStyle(element).color;
+    context.fillRect(0, 0, 1, 1);
+    const [red = 0, green = 0, blue = 0] = context.getImageData(0, 0, 1, 1).data;
+    return [red, green, blue];
+  });
+
+// Every distinct colour painted in the element's box once its text is hidden: the real pixels the text sits on
+const backdrop = async (page: Page, selector: string): Promise<Rgb[]> => {
+  const box = await page.locator(selector).boundingBox();
+  if (!box) throw new Error(`${selector} has no box`);
+  const base64 = (await page.screenshot({ clip: box })).toString('base64');
+  const packed = await page.evaluate(async (data) => {
+    const image = await createImageBitmap(await (await fetch(`data:image/png;base64,${data}`)).blob());
+    const context = new OffscreenCanvas(image.width, image.height).getContext('2d');
+    if (!context) throw new Error('no canvas');
+    context.drawImage(image, 0, 0);
+    const pixels = context.getImageData(0, 0, image.width, image.height).data;
+    const seen = new Set<number>();
+    for (let index = 0; index < pixels.length; index += 4) seen.add(((pixels[index] ?? 0) << 16) | ((pixels[index + 1] ?? 0) << 8) | (pixels[index + 2] ?? 0));
+    return [...seen];
+  }, base64);
+  return packed.map((value): Rgb => [(value >> 16) & 255, (value >> 8) & 255, value & 255]);
+};
+
+const widths = [375, 768, 1440];
+
+for (const locale of locales) {
+  test.describe(`/${locale} hero text contrast on the real pixels`, () => {
+    for (const width of widths) {
+      test(`the headline and the lead keep 7:1 at ${width} px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(`/${locale}`);
+        await page.evaluate(() => document.fonts.ready);
+
+        const targets = ['#hero-title', '#hero-title + p'];
+        const colors = await Promise.all(targets.map((selector) => textColor(page, selector)));
+        await page.addStyleTag({ content: '#hero-title, #hero-title + p { color: transparent !important; }' });
+        for (const [index, selector] of targets.entries()) {
+          const text = colors[index];
+          if (!text) throw new Error(`no colour for ${selector}`);
+          const worst = Math.min(...(await backdrop(page, selector)).map((pixel) => contrastRatio(text, pixel)));
+          expect(worst, `${selector} worst pixel contrast`).toBeGreaterThanOrEqual(7);
+        }
+      });
+    }
+  });
+}
+
+test.describe('without JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+
+  for (const locale of locales) {
+    test(`/${locale} renders the whole page and the hero button reaches the form`, async ({ page }) => {
+      await page.goto(`/${locale}`, { waitUntil: 'networkidle' });
+
+      // The context really runs no scripts: Next's client runtime never started
+      expect(await page.evaluate(() => Reflect.get(window, 'next'))).toBeUndefined();
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText(messages[locale].Prelaunch.title);
+      await expect(page.locator('section[aria-labelledby="method-title"] ol > li')).toHaveCount(3);
+      await page.getByRole('link', { name: messages[locale].Prelaunch.cta, exact: true }).click();
+      await expect(page).toHaveURL(/#lista$/);
+      await expect(page.locator('#lista')).toBeInViewport();
+    });
+  }
+});
+
+type LayoutShift = PerformanceEntry & { value: number; hadRecentInput: boolean };
+
+const watchLayoutShift = (page: Page) =>
+  page.addInitScript(() => {
+    Object.assign(window, { shift: 0 });
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries() as LayoutShift[]) if (!entry.hadRecentInput) Object.assign(window, { shift: Number(Reflect.get(window, 'shift')) + entry.value });
+    }).observe({ type: 'layout-shift', buffered: true });
+  });
+
+const layoutShift = (page: Page) => page.evaluate(() => Number(Reflect.get(window, 'shift')));
+
+for (const locale of locales) {
+  test.describe(`/${locale} with the hero image blocked`, () => {
+    test('the text stays readable and nothing moves when the image never arrives', async ({ page }) => {
+      await watchLayoutShift(page);
+      await page.route(/\/_next\/(image|static\/media\/home-hero)/, (route) => route.abort());
+      await page.goto(`/${locale}`, { waitUntil: 'domcontentloaded' });
+      const before = await page.evaluate(() => document.documentElement.scrollHeight);
+      await page.waitForLoadState('networkidle');
+      await page.evaluate(() => document.fonts.ready);
+
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(before);
+      expect(await layoutShift(page)).toBeLessThanOrEqual(0.1);
+    });
+
+    test('the layout shift with the image is within the 0.1 budget', async ({ page }) => {
+      await watchLayoutShift(page);
+      await page.goto(`/${locale}`, { waitUntil: 'networkidle' });
+      await page.evaluate(() => document.fonts.ready);
+
+      expect(await layoutShift(page)).toBeLessThanOrEqual(0.1);
     });
   });
 }
