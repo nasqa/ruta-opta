@@ -4,8 +4,8 @@ export const routing = defineRouting({
   locales: ['es', 'en'],
   defaultLocale: 'es',
   localePrefix: 'always',
-  // The pages exist only in Spanish for now: an English browser at / must land on /es, not on the English 404
-  localeDetection: false,
+  // Every page exists in both locales: an English browser at / lands on /en, any other on /es
+  localeDetection: true,
   pathnames: {
     '/': '/',
     '/privacy': { es: '/privacidad', en: '/privacy' },

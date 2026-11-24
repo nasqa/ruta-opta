@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, type Page, test } from '@playwright/test';
+import en from '../messages/en.json';
 import es from '../messages/es.json';
 import { confirmTtlMs, sealToken } from '../src/modules/waitlist/token';
 import { testTokenKey } from './fixtures';
@@ -33,10 +34,10 @@ test.describe('the waitlist form on /es', () => {
 });
 
 // Links sealed with the key the e2e server runs with, as the confirmation email would carry them
-const seal = (now?: number) =>
+const seal = (now?: number, locale: 'es' | 'en' = 'es') =>
   sealToken(
     'confirm',
-    { email: 'ana@example.com', name: 'Ana', locale: 'es', consentAt: 0, policyVersion: 'test' },
+    { email: 'ana@example.com', name: 'Ana', locale, consentAt: 0, policyVersion: 'test' },
     { current: Buffer.from(testTokenKey, 'base64') },
     confirmTtlMs,
     now,
@@ -117,4 +118,22 @@ test('the unsubscribe page exists at /es/baja and is not indexed', async ({ page
 
   const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
   expect(violations).toEqual([]);
+});
+
+test.describe('the waitlist round trip on /en', () => {
+  test('signs up in English, then confirming the English link lands on /en/confirmed', async ({ page }) => {
+    await page.goto('/en');
+    await page.getByLabel(en.Waitlist.name.label).fill('Ana');
+    await page.getByLabel(en.Waitlist.email.label, { exact: true }).fill('ana@example.com');
+    await page.getByRole('checkbox').check();
+    await page.getByRole('button', { name: en.Waitlist.submit }).click();
+    await expect(page.getByRole('status')).toContainText(en.Waitlist.sent.title.replace('{name}', 'Ana'));
+
+    // The fake mailer lives in the server process, so the e2e cannot read the email it "sent": it opens the link the email would carry
+    await page.goto(`/en/confirm?t=${seal(undefined, 'en')}`);
+    await expect(page.getByText(en.Confirm.greeting.replace('{name}', 'Ana'))).toBeVisible();
+    await page.getByRole('button', { name: en.Confirm.submit }).click();
+    await expect(page).toHaveURL('/en/confirmed');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(en.Confirmed.title);
+  });
 });

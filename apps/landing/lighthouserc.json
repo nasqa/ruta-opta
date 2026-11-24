@@ -8,7 +8,12 @@
         "http://localhost:3000/es/privacidad",
         "http://localhost:3000/es/confirmado",
         "http://localhost:3000/es/confirmar",
-        "http://localhost:3000/es/baja"
+        "http://localhost:3000/es/baja",
+        "http://localhost:3000/en",
+        "http://localhost:3000/en/privacy",
+        "http://localhost:3000/en/confirmed",
+        "http://localhost:3000/en/confirm",
+        "http://localhost:3000/en/unsubscribed"
       ],
       "numberOfRuns": 5
     },
