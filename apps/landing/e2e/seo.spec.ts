@@ -22,7 +22,9 @@ test('sitemap.xml lists the four localized pages with their hreflang alternates'
   const urls = [...xml.matchAll(/<url>\s*<loc>([^<]+)<\/loc>/g)].map(([, loc]) => new URL(loc).pathname);
   expect(urls).toEqual(locs);
   for (const language of ['es', 'en', 'x-default']) expect(xml).toContain(`<xhtml:link rel="alternate" hreflang="${language}"`);
-  expect(xml).toMatch(/hreflang="x-default" href="https?:\/\/[^/"]+\/"/);
+  // x-default is the Spanish page itself: the unprefixed / serves it too, but with /es as its canonical
+  expect(xml).toMatch(/hreflang="x-default" href="https?:\/\/[^/"]+\/es"/);
+  expect(xml).not.toMatch(/href="https?:\/\/[^/"]+\/"/);
   const paths = [...xml.matchAll(/(?:<loc>|href=")([^<"]+)/g)].map(([, url]) => new URL(url).pathname);
   for (const path of noindexPaths) expect(paths).not.toContain(path);
   for (const path of noindexPaths) expect(paths.some((listed) => listed.startsWith(`${path}/`))).toBe(false);

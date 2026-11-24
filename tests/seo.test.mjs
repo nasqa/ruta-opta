@@ -32,7 +32,7 @@ test('each entry carries the absolute form of the pages own hreflang set', () =>
     assert.deepEqual(languages, Object.fromEntries(Object.entries(alternates(href).languages).map(([language, path]) => [language, absolute(path)])));
     assert.deepEqual(Object.keys(languages), ['es', 'en', 'x-default']);
   }
-  assert.equal(sitemap()[0].alternates.languages['x-default'], absolute('/'));
+  assert.equal(sitemap()[0].alternates.languages['x-default'], absolute('/es'));
 });
 
 test('entries have no lastModified, changeFrequency or priority', () => {

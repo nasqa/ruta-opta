@@ -111,12 +111,8 @@ for (const locale of locales) {
       expect(hrefs).toHaveLength(3);
       for (const href of hrefs) {
         const { pathname } = new URL(href);
-        const response = await request.get(pathname, { maxRedirects: 0 });
-        // x-default is the unprefixed root: the proxy answers a 307 to the browser's language (a post-launch item with the shell's owner)
-        if (pathname === '/') {
-          expect(response.status(), href).toBe(307);
-          expect(['/es', '/en']).toContain(new URL(response.headers().location ?? '', site).pathname);
-        } else expect(response.status(), href).toBe(200);
+        // x-default is the Spanish page itself, so every alternate is a page, never a redirect
+        expect((await request.get(pathname, { maxRedirects: 0 })).status(), href).toBe(200);
       }
     });
 
