@@ -31,7 +31,15 @@ export const GET = async () => {
   }
   const key = `probe-${Date.now()}`;
   const strong = () => getStore({ name: 'waitlist-diag', consistency: 'strong' });
+  const ctx = raw ? (JSON.parse(Buffer.from(raw, 'base64').toString()) as Record<string, string>) : {};
+  const rawFetch = (base: string, path: string) => async () => {
+    const res = await fetch(new URL(`/${ctx.siteID}/site:waitlist-diag/${path}`, base), { headers: { authorization: `Bearer ${ctx.token}` } });
+    return { status: res.status, server: res.headers.get('server'), xcache: res.headers.get('x-nf-request-id') ? 'has-request-id' : null, body: (await res.text()).slice(0, 120) };
+  };
   const results = [
+    await probe('raw uncached GET missing', rawFetch(ctx.uncachedEdgeURL ?? '', key)),
+    await probe('raw cached GET missing', rawFetch(ctx.edgeURL ?? '', key)),
+    await probe('getStore region get missing', () => getStore({ name: 'waitlist-diag', consistency: 'strong', region: ctx.primaryRegion as never } as never).get(key)),
     await probe('eventual get', () => getStore({ name: 'waitlist-diag' }).get(key, { type: 'json' })),
     await probe('strong get', () => strong().get(key, { type: 'json' })),
     await probe('setJSON', () => strong().setJSON(key, { at: Date.now() })),
