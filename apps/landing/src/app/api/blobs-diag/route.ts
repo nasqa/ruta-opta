@@ -36,7 +36,22 @@ export const GET = async () => {
     const res = await fetch(new URL(`/${ctx.siteID}/site:waitlist-diag/${path}`, base), { headers: { authorization: `Bearer ${ctx.token}` } });
     return { status: res.status, server: res.headers.get('server'), xcache: res.headers.get('x-nf-request-id') ? 'has-request-id' : null, body: (await res.text()).slice(0, 120) };
   };
+  const noStore: typeof fetch = (url, init) => fetch(url, { ...init, cache: 'no-store' });
+  const nullBody = new Set([101, 204, 205, 304]);
+  const buffered: typeof fetch = async (url, init) => {
+    const res = await fetch(url, { ...init, cache: 'no-store' });
+    const body = nullBody.has(res.status) ? null : await res.arrayBuffer();
+    return new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers });
+  };
+  const cancelProbe = async () => {
+    const res = await fetch(new URL(`/${ctx.siteID}/site:waitlist-diag/${key}`, ctx.uncachedEdgeURL), { headers: { authorization: `Bearer ${ctx.token}` } });
+    await res.body?.cancel();
+    return res.status;
+  };
   const results = [
+    await probe('raw GET missing then body.cancel()', cancelProbe),
+    await probe('getStore fetch=no-store get missing', () => getStore({ name: 'waitlist-diag', consistency: 'strong', fetch: noStore }).get(key)),
+    await probe('getStore fetch=buffered get missing', () => getStore({ name: 'waitlist-diag', consistency: 'strong', fetch: buffered }).get(key)),
     await probe('raw uncached GET missing', rawFetch(ctx.uncachedEdgeURL ?? '', key)),
     await probe('raw cached GET missing', rawFetch(ctx.edgeURL ?? '', key)),
     await probe('getStore region get missing', () => getStore({ name: 'waitlist-diag', consistency: 'strong', region: ctx.primaryRegion as never } as never).get(key)),
