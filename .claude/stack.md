@@ -1,7 +1,7 @@
 # Tech stack brief
 
 stack-fingerprint: 0940dd52ce97
-updated: 2026-11-23
+updated: 2026-11-24
 
 Installed: next 16.4.6, react 19.3.0, @mantine/core 9.8.2, @nasqa/trama-react 0.1.1, @nasqa/trama-theme-opta (dist in node_modules), next-intl 4.15.3, typescript 6.0.3 (pinned 6.0.x), eslint 9.39.5, stylelint 18.1.0. Also node:test, Playwright, Lighthouse CI. Node 24. CI: actions/checkout, setup-node, upload-artifact v7.
 
@@ -9,7 +9,7 @@ Installed: next 16.4.6, react 19.3.0, @mantine/core 9.8.2, @nasqa/trama-react 0.
 - **Use:** `getImageProps()` from `next/image` and render a plain `<img {...props} alt="" />` in the Server Component. No client `Image`. `@next/next/no-img-element` is off only for `apps/*/src/modules/site-shell/**/*.tsx`, so these images live in site-shell.
 - **Patterns:** above the fold use `loading="eager"` or `fetchPriority="high"`. With art direction (several `<source>`/`<picture>`), `fetchPriority="high"` on the `<img>`; `preload` and `loading="eager"` would load both images.
 - **Avoid:** `priority` (deprecated in 16 in favour of `preload`). The docs advise `loading="eager"` / `fetchPriority="high"` over `preload` in most cases, and never `preload` alongside `loading` or `fetchPriority`.
-- **Hosting:** Netlify serves `next/image` through its Image CDN via the OpenNext adapter with no config (given by Santiago; not re-verified here).
+- **Hosting:** Netlify serves `next/image` through its Image CDN via the OpenNext adapter with no config. VERIFIED 2026-11-24: the adapter's `setImageConfig` (opennextjs-netlify `src/build/image-cdn.ts`) rewrites `/_next/image` to `/.netlify/images?url=:url&w=:width&q=:quality` and never reads `images.formats`; with no `fm`, Image CDN serves WebP when the `Accept` header allows it, else AVIF, else the original (docs.netlify.com/build/image-cdn/overview, Format). So `images.formats` changes only local `next start` (default `['image/webp']`), not production; Chrome gets WebP in both.
 - **Sources:** `node_modules/next/dist/docs/01-app/03-api-reference/02-components/image.md` (`preload`, `priority`, `getImageProps`, art direction sections; changelog row v16.0.0).
 
 ## Mantine 9.8.2 in React Server Components
@@ -17,7 +17,8 @@ Installed: next 16.4.6, react 19.3.0, @mantine/core 9.8.2, @nasqa/trama-react 0.
 - **Compound parts:** `Popover.Target` etc. fail in server files; use the flat export (`PopoverTarget`) or put the file behind `'use client'`.
 - **Polymorphic:** `component="a" href="..."` retypes the props to the element's. A string `component` is safe from a server page; a component reference is not (see the next-intl fact).
 - **Container sizes are not global:** `--container-size-{xs..xl}` are declared only on the Container root class (`.m_7485cace` in `styles.css`), so `var(--container-size-xs)` outside a `Container` is invalid at computed time (Stylelint still passes it). `--mantine-breakpoint-*` and `--mantine-z-index-*` are on `:root`. `Container` is not imported by Trama's theme, so rendering it adds client JS.
-- **Title:** `order` picks the element (h1-h6, default 1) and its theme size; `size` changes only font size (and line height only between h1-h6 sizes). Choose `order` for semantics, `size` for visual override. Trama keys letter-spacing off `order`.
+- **Title:** `order` picks the element (h1-h6, default 1) and its theme size; `size` changes only font size (and line height only between h1-h6 sizes). Choose `order` for semantics, `size` for visual override. Trama keys letter-spacing off `order`, through the theme's `styles`, which Mantine renders as an inline `style`: a `.t-*` class sets the size but cannot override that letter-spacing (measured: `Title order={1} className="t-display-md"` computes -0.704px, display-lg's).
+- **Chunk split (MEASURED 2026-11-24, Turbopack, `next build`):** Trama's theme imports Mantine components to `.extend` them, so they sit in the provider's shared chunk. Referencing one of them (here `Title`) from a server page splits it into its own chunk that every route then loads: +757 B script transfer on every route, including routes that never render it. For headings use a plain `<h1 className="t-display-md">` (AGENTS.md's `.t-*` classes); measure with a probe before adding any new Mantine component to a server page.
 - **Sources:** Context7 `/mantinedev/mantine/9.0.0` (guides/next, help q/server-components, core/title, guides/polymorphic), 2026-11-23; installed `@mantine/core/esm`.
 
 ## VERIFIED in this repo 2026-11-23: `Button component={Link}` breaks the build

@@ -43,6 +43,12 @@ const seal = (now?: number, locale: 'es' | 'en' = 'es') =>
     now,
   );
 
+// The header's link to this page in English; its name starts with the visible code (WCAG 2.5.3)
+const englishLink = (page: Page) =>
+  page
+    .getByRole('navigation', { name: es.SiteShell.languageNav, exact: true })
+    .getByRole('link', { name: `EN ${es.SiteShell.languages.en}`, exact: true });
+
 const axe = async (page: Page) => {
   const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
   expect(violations).toEqual([]);
@@ -78,7 +84,9 @@ test.describe('the confirm page on /es/confirmar', () => {
     await page.getByRole('button', { name: es.Confirm.submit }).click();
     // Next's route announcer is an alert too, so the form's is picked by its text
     await expect(page.getByRole('alert').filter({ hasText: es.Confirm.expired.text })).toBeVisible();
-    await expect(page.getByRole('link', { name: es.Confirm.again })).toHaveAttribute('href', '/es');
+    // A final answer: retrying cannot change it, so the only way on is signing up again, at the home's form
+    await expect(page.getByRole('button', { name: es.Confirm.submit })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: es.Confirm.again })).toHaveAttribute('href', '/es#lista');
     await axe(page);
   });
 
@@ -87,8 +95,54 @@ test.describe('the confirm page on /es/confirmar', () => {
     await page.goto(`/es/confirmar?t=${seal(0)}`);
 
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(es.Confirm.expired.title);
-    await expect(page.getByRole('link', { name: es.Confirm.again })).toHaveAttribute('href', '/es');
+    await expect(page.getByRole('link', { name: es.Confirm.again })).toHaveAttribute('href', '/es#lista');
     await axe(page);
+  });
+
+  test('the switch on the confirm page keeps the token', async ({ page }) => {
+    const token = seal();
+    await page.goto(`/es/confirmar?t=${token}`);
+
+    await expect(englishLink(page)).toHaveAttribute('href', `/en/confirm?t=${token}`);
+  });
+
+  test('the switch on a tokenless confirm page carries no token', async ({ page }) => {
+    await page.goto('/es/confirmar');
+
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(es.Confirm.invalid.title);
+    await expect(englishLink(page)).toHaveAttribute('href', '/en/confirm');
+  });
+
+  test('the card is readable and nothing shifts when the art never loads', async ({ page }) => {
+    let aborted = 0;
+    await page.route('**/_next/image**', (route) => {
+      aborted++;
+      return route.abort();
+    });
+    await page.goto(`/es/confirmar?t=${seal()}`);
+    await page.waitForLoadState('load');
+
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    // The band asked for its art, so the test really ran without it
+    expect(aborted).toBeGreaterThan(0);
+    const shift = await page.evaluate(async () => {
+      await document.fonts.ready;
+      return new Promise<number>((resolve) => {
+        let sum = 0;
+        const observer = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean })[]) {
+            if (!entry.hadRecentInput) sum += entry.value;
+          }
+        });
+        observer.observe({ type: 'layout-shift', buffered: true });
+        // Buffered entries arrive in a callback; if none comes, nothing shifted
+        setTimeout(() => {
+          observer.disconnect();
+          resolve(sum);
+        }, 1000);
+      });
+    });
+    expect(shift).toBeLessThan(0.1);
   });
 
   test('a broken link is invalid, not an error', async ({ page }) => {
@@ -133,6 +187,15 @@ test.describe('the waitlist round trip on /en', () => {
     await page.goto(`/en/confirm?t=${seal(undefined, 'en')}`);
     await expect(page.getByText(en.Confirm.greeting.replace('{name}', 'Ana'))).toBeVisible();
     await page.getByRole('button', { name: en.Confirm.submit }).click();
+    await expect(page).toHaveURL('/en/confirmed');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(en.Confirmed.title);
+  });
+
+  test('confirming an es link from /en/confirm lands on /en/confirmed', async ({ page }) => {
+    // The page's language picks where the confirmation lands; the list is still the signup's (the token's), which the e2e cannot see
+    await page.goto(`/en/confirm?t=${seal()}`);
+    await page.getByRole('button', { name: en.Confirm.submit }).click();
+
     await expect(page).toHaveURL('/en/confirmed');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(en.Confirmed.title);
   });

@@ -19,6 +19,14 @@
   margin: 0;
 }
 
+/* Its width and height attributes give the 56 px; it keeps its size where the card stretches its children (phones) */
+.mark {
+  display: block;
+  flex: none;
+  align-self: flex-start;
+  height: auto;
+}
+
 /* Mantine's container sizes exist only inside a Container; its breakpoints are declared on :root */
 .narrow {
   max-width: var(--mantine-breakpoint-xs);
@@ -43,5 +51,9 @@
 
   .card :global(.mantine-Button-root) {
     width: 100%;
+  }
+
+  .mark {
+    width: var(--space-7);
   }
 }

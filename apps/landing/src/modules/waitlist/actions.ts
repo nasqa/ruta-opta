@@ -3,6 +3,7 @@
 import { hasLocale } from 'next-intl';
 import { headers } from 'next/headers';
 import { redirect } from '@/i18n/navigation';
+import { routing } from '@/i18n/routing';
 import { confirmSubscription, requestConfirmation } from './server';
 import { signupLocales } from './signup-locales';
 import type { ConfirmState, WaitlistState } from './state';
@@ -31,6 +32,8 @@ export const confirmWaitlist = async (_previous: ConfirmState, form: FormData): 
   const token = form.get('token');
   const result = await confirmSubscription(typeof token === 'string' ? token : '');
   if (result.status !== 'subscribed') return { status: result.status };
-  // Post/redirect/get: reloading /confirmed does not resubscribe. The token's locale is the language the subscriber signed up in
-  return redirect({ href: '/confirmed', locale: result.locale });
+  // Post/redirect/get: reloading /confirmed does not resubscribe. It opens in the page's language, which the form sends (an action cannot read
+  // it); the list stays the token's, the language the subscriber signed up in, which is also the fallback for a missing or forged field
+  const locale = form.get('locale');
+  return redirect({ href: '/confirmed', locale: hasLocale(routing.locales, locale) ? locale : result.locale });
 };
