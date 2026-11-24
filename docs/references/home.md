@@ -1,7 +1,7 @@
 # Reference ledger: home page and collage pieces (2026-11-24)
 
 Brief: the home of rutaopta.org (hero, how we work, platform, transparency, allies, newsletter band) plus the simple conceptual cut-paper pieces; visitor goal: understand what Ruta Opta is and how it works, then leave an email or reach out; business goal: lead capture (CTA still open, swappable from the messages) and trust with allies.
-Refero calls used: 20 of 8,000 per month (1 language-switcher probe, 4 searches by me, 2 thumbnails by me, 3 style reads and 10 section calls by two extraction agents). Header and footer are not researched: the `ruta-opta-46` session owns them (decisions 1 and 12 of its branding design).
+Refero calls used: 32 of 8,000 per month (20 in round 1, 12 in round 2) (1 language-switcher probe, 4 searches by me, 2 thumbnails by me, 3 style reads and 10 section calls by two extraction agents). Header and footer are not researched: the `ruta-opta-46` session owns them (decisions 1 and 12 of its branding design).
 
 Status of each entry: SEEN = the title, description and layout were read in a Refero result by this session (and, where marked, the thumbnail was viewed); REPORTED = extracted by a Haiku agent from the Refero tool output and not re-checked here. Quotes under "Collage and art principles" are REPORTED.
 
@@ -54,3 +54,17 @@ Sources: Refero styles for Givingli (62f904b0-0d6e-47dd-b78c-6f097a7259bc), Craf
 
 ## Rules followed
 Links and notes only; no Refero images stored or used as generation references; no Refero colours, fonts or radii used; copy invents no proof. Refero results skew toward SaaS and corporate sites, so they confirm structure but give almost no nonprofit paper-art precedent.
+
+## Round 2 (2026-11-24, 12 calls; thumbnails viewed by this session, so status SEEN)
+Queries: hero with headline above illustration on mobile; contact via WhatsApp; partner form with organization type; honest early-stage; three numbered steps with art. Results were again mostly SaaS; six screens were worth viewing.
+
+| # | Refero id | Product and page | What it does | Adjustment taken |
+|---|---|---|---|---|
+| 9 | 7d3715c9-223b-4413-a764-15a066f92a1c | Hers, "Almost done, here's what's next" | Three stacked step cards joined by a vertical line, a marker, a title, one sentence and an image slot per step | Method = vertical timeline with numbered circle markers and a hairline connector; an optional art column that collapses |
+| 10 | 4ed39ecb-b79c-42a3-9ce8-087d61119b8d | Hers, intake landing step | Headline, short paragraph, one illustration, then a wide full-width primary button | Hero button full width and 48 px on phones, right after the lead |
+| 11 | f323996a-0052-4c86-95bb-de1ba294a5f8 | Mangomint, contact us | Two equal rounded cards (chat, call), each a title, a sentence and one button | Allies = two equal cards (WhatsApp, email), stacked on phones, no icons in v1 |
+| 12 | 88e30bc2-7bef-4f56-b270-8464bfafa350 | Navia, "Where are you today?" | Three stacked selectable cards with title and one line each | For v1.1 "¿Qué te describe?": stacked selectable cards on phones, not a dropdown. Avoid its fake-looking star rating |
+| 13 | 75fb8b8a-7d42-4400-8b93-71a0f1e47dd4 | Kinhive, development roadmap | Plain bordered cards titled with what is being worked on and what is next | Honest "in progress" presented as a status tag on the Turismo Vivo card |
+| 14 | 54278d59-9e4a-4e48-8646-7cbe622391f3 | Todoist, private beta | A small "Private beta" tag by the logo and an invitation to "help shape" it | Optional: a small "En construcción" status in the hero; needs Santiago's OK |
+
+Not found again: a nonprofit paper-art precedent, and any WhatsApp-first contact pattern (the results were chat widgets and phone pages), so the WhatsApp card is designed from the repo's own rules. Reference lock: leading direction is the approved paper relief and Trama; traits carried are the six adjustments above as principles; rejects are star ratings, testimonial strips, carousels and modals.
