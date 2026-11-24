@@ -1,10 +1,37 @@
-/* One line at every width, so a misfit shows as overflow instead of a second row */
+/* One line at every width, so a misfit shows as overflow instead of a second row. It stays at the top while the page scrolls, on
+   the canvas, and lines up with the pages' widest container (Mantine's lg breakpoint) */
 .header {
+  position: sticky;
+  top: 0;
+  z-index: var(--mantine-z-index-app);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-4) var(--space-inset-page);
+  padding: var(--space-4) max(var(--space-inset-page), calc((100% - var(--mantine-breakpoint-lg)) / 2 + var(--space-inset-page)));
+  border-bottom: var(--border-width-hairline) solid var(--color-border-subtle);
+  background: var(--color-surface-canvas);
+}
+
+/* The hairline appears only once the header sits over content: scroll-driven, no JS. Without support it is always drawn */
+@supports (animation-timeline: scroll()) {
+  .header {
+    animation: header-edge linear both;
+    animation-timeline: scroll();
+    animation-range: 0 var(--space-6);
+  }
+
+  @keyframes header-edge {
+    from {
+      border-bottom-color: transparent;
+    }
+  }
+}
+
+/* In-page links and focus land below the header instead of under it: its height is the 48 px link target, its padding and its
+   hairline */
+html:has(.header) {
+  scroll-padding-top: calc(var(--control-height-lg) + 2 * var(--space-4) + var(--border-width-hairline));
 }
 
 .brand {
@@ -32,6 +59,40 @@
 .product {
   color: var(--color-text-secondary);
   white-space: nowrap;
+}
+
+/* Right-aligned beside the language switch, with a hairline between the two groups */
+.sections {
+  display: none;
+  align-items: center;
+  margin-inline-start: auto;
+  padding-inline-end: var(--space-2);
+  border-inline-end: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+/* A 48 px target around the label; the hairline underline is the hover and focus cue (focus also gets the theme's ring) */
+.section {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height-lg);
+  padding-inline: var(--space-3);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  text-decoration: none;
+  text-decoration-thickness: var(--border-width-hairline);
+  text-underline-offset: var(--space-2);
+}
+
+.section:hover,
+.section:focus-visible {
+  color: var(--color-text-primary);
+  text-decoration-line: underline;
+}
+
+@media (min-width: 62em) {
+  .sections {
+    display: flex;
+  }
 }
 
 .switcher {

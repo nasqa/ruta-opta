@@ -1,28 +1,96 @@
-.section {
-  display: grid;
-  gap: var(--space-group);
-}
-
-.section > * {
+.layout > * {
   margin: 0;
 }
 
-.section > p {
+.title {
+  text-wrap: balance;
+}
+
+.text {
   max-width: var(--mantine-breakpoint-xs);
 }
 
-.territories {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-inline);
+/* The founder's sentence: a state-width rule in the action colour on its left, and her name under it */
+.stance {
+  display: grid;
+  gap: var(--space-3);
+  max-width: var(--mantine-breakpoint-xs);
+  padding-inline-start: var(--space-5);
+  border-inline-start: var(--border-width-state) solid var(--color-action-solid);
+}
+
+.quote {
+  margin: 0;
+  text-wrap: balance;
+}
+
+.quote > p {
+  margin: 0;
+}
+
+.stance > figcaption {
+  color: var(--color-text-secondary);
+}
+
+/* The four commitments between hairlines: two columns from tablets, one row of four on wide screens */
+.commitments {
+  display: grid;
+  gap: var(--space-4);
+  padding-block-start: var(--space-5);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.commitmentsLabel {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5) var(--space-6);
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* Soft rectangles, not pills; no territory colour, since it belongs on whole sections only */
-.territory {
-  padding: var(--space-2) var(--space-4);
-  border: var(--border-width-hairline) solid var(--color-border-subtle);
-  border-radius: var(--shape-item);
-  background: var(--color-surface-raised);
+.commitment {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+}
+
+.commitment > * {
+  margin: 0;
+}
+
+.commitment > p {
+  color: var(--color-text-secondary);
+}
+
+@media (min-width: 30em) {
+  .list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* The origin and its argument side by side, the founder's sentence under the argument, the commitments across the foot */
+@media (min-width: 62em) {
+  .layout {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: var(--space-8);
+    align-items: start;
+  }
+
+  .stance {
+    grid-column: 2;
+  }
+
+  .commitments {
+    grid-column: 1 / -1;
+  }
+
+  .list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }

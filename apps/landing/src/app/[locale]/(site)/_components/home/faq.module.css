@@ -1,0 +1,62 @@
+/* One narrow column: the questions read as a list, not as a grid */
+.layout {
+  max-width: calc(var(--mantine-breakpoint-sm) + 2 * var(--space-inset-page));
+  gap: var(--space-6);
+}
+
+.layout > h2 {
+  margin: 0;
+}
+
+/* Hairlines between the questions, from the theme's border token */
+.accordion {
+  border-top: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.accordion :global(.mantine-Accordion-item) {
+  border-bottom: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.accordion :global(.mantine-Accordion-control) {
+  padding-inline: 0;
+}
+
+.content {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  max-width: var(--mantine-breakpoint-xs);
+  margin: 0;
+  padding-bottom: var(--space-3);
+}
+
+.content > * {
+  margin: 0;
+}
+
+.content > p {
+  color: var(--color-text-secondary);
+}
+
+.content > a {
+  color: var(--color-action-text-low);
+  text-decoration-thickness: var(--border-width-hairline);
+  text-underline-offset: var(--space-1);
+}
+
+.accordion .content {
+  padding-inline: 0;
+}
+
+/* The list shown without JavaScript: every answer open */
+.fallback {
+  display: grid;
+  gap: var(--space-5);
+  margin: 0;
+  padding-top: var(--space-5);
+  border-top: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.fallback dt {
+  margin-bottom: var(--space-2);
+}

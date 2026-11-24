@@ -1,23 +1,42 @@
-.section {
-  display: grid;
-  gap: var(--space-related);
-  justify-items: start;
-  padding: var(--space-inset-container);
-  border: var(--border-width-hairline) solid var(--color-border-subtle);
-  border-radius: var(--shape-item);
-  background: var(--color-surface-raised);
+/* It continues the allies' band: no top padding of its own, and a hairline marks where it starts */
+.band {
+  padding-block-start: 0;
 }
 
-.section > * {
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  padding-block-start: var(--space-7);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.layout > *,
+.body > * {
   margin: 0;
 }
 
-.section > p {
-  max-width: var(--mantine-breakpoint-xs);
+.layout > h2 {
+  text-wrap: balance;
 }
 
-.section a {
+.body {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+  max-width: var(--mantine-breakpoint-sm);
+}
+
+.link {
   color: var(--color-action-text-low);
   text-decoration-thickness: var(--border-width-hairline);
   text-underline-offset: var(--space-1);
+}
+
+/* Title left, text right, as in the manifesto */
+@media (min-width: 62em) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-7);
+  }
 }

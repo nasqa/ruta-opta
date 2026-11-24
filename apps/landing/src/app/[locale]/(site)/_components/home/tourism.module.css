@@ -1,21 +1,127 @@
-.section {
+/* Trama's card drawn with its tokens (raised surface, hairline, container corner) as one inset panel: the art fills one side, the
+   words the other; on phones the art is a 3:2 strip on top */
+.panel {
   display: grid;
-  gap: var(--space-related);
-  justify-items: start;
-  padding: var(--space-inset-container);
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
   border: var(--border-width-hairline) solid var(--color-border-subtle);
-  border-radius: var(--shape-item);
+  border-radius: var(--shape-container);
   background: var(--color-surface-raised);
 }
 
-.section > * {
+.media {
+  position: relative;
+  aspect-ratio: 3 / 2;
+}
+
+/* The veranda and its table sit right of centre; a narrow crop keeps them */
+.art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 70% 50%;
+}
+
+.body {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+  align-content: center;
+  padding: var(--space-6) var(--space-inset-container);
+}
+
+.body > * {
   margin: 0;
 }
 
-.section > p {
+.body > p {
   max-width: var(--mantine-breakpoint-xs);
 }
 
-.status {
-  margin-block: var(--space-related);
+.body > h2 {
+  text-wrap: balance;
+}
+
+.overline {
+  color: var(--color-text-secondary);
+}
+
+.principles {
+  display: grid;
+  gap: var(--space-3);
+  justify-self: stretch;
+  padding-top: var(--space-4);
+  border-top: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.principles > *,
+.principles li {
+  margin: 0;
+}
+
+.principles > p {
+  color: var(--color-text-secondary);
+}
+
+.principles ul {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.principles li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+/* A small tick drawn with two borders in the action colour; no icon font */
+.principles li::before {
+  content: '';
+  flex: none;
+  width: var(--space-2);
+  height: var(--space-3);
+  margin: var(--space-1) var(--space-1) 0;
+  border: solid var(--color-action-solid);
+  border-width: 0 var(--border-width-state) var(--border-width-state) 0;
+  rotate: 45deg;
+}
+
+.link {
+  color: var(--color-action-text-low);
+  text-decoration-thickness: var(--border-width-hairline);
+  text-underline-offset: var(--space-1);
+}
+
+/* The arrow is decoration: its alternative text is empty (the plain declaration first, for browsers without it) */
+.link::after {
+  content: '→';
+  content: '→' / '';
+  margin-inline-start: var(--space-2);
+}
+
+/* The panel's own inset narrows a phone's column: the title takes the next heading size so it keeps to three or four lines */
+@media (max-width: 30em) {
+  .body > h2 {
+    font-size: var(--text-heading-md-font-size);
+    line-height: var(--text-heading-md-line-height);
+    letter-spacing: var(--text-heading-md-letter-spacing);
+  }
+}
+
+@media (min-width: 62em) {
+  .panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .media {
+    aspect-ratio: auto;
+  }
+
+  .body {
+    padding: var(--space-8) var(--space-7);
+  }
 }

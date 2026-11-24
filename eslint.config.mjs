@@ -152,7 +152,8 @@ const restrictedSyntax = {
 };
 
 const eslintConfig = defineConfig([
-  globalIgnores(['**/.next/**', '**/out/**', '**/next-env.d.ts', '**/playwright-report/**', '**/.lighthouseci/**']),
+  // Agent worktrees under .claude/worktrees are separate checkouts, linted in their own tree
+  globalIgnores(['**/.next/**', '**/out/**', '**/next-env.d.ts', '**/playwright-report/**', '**/.lighthouseci/**', '.claude/worktrees/**']),
   ...warnToError(nextVitals),
   ...warnToError(nextTs),
   {

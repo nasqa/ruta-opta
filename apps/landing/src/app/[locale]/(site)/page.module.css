@@ -1,28 +1,43 @@
-.page {
-  display: grid;
-  /* A zero minimum, so a long word can never stretch the column past the page inset */
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-section);
-  max-width: var(--mantine-breakpoint-lg);
-  margin-inline: auto;
-  padding: var(--space-inset-page);
-}
-
-/* Spacing comes from the gap token, not from browser margins */
-.page > * {
-  margin: 0;
-}
-
+/* The sign-up band: centred and on its own card, the page's last word before the footer. Its subtle surface fades to the canvas at
+   the foot, the colour the footer's horizon fades into */
 .list {
+  background: linear-gradient(to bottom, var(--color-surface-subtle) 70%, var(--color-surface-canvas));
+}
+
+.listInner {
+  justify-items: center;
+  gap: var(--space-6);
+}
+
+.listHead {
   display: grid;
-  gap: var(--space-related);
-  align-content: start;
-  padding: var(--space-inset-container);
+  gap: var(--space-3);
+  justify-items: center;
+  max-width: var(--mantine-breakpoint-xs);
+  text-align: center;
+}
+
+.listHead > * {
+  margin: 0;
+  text-wrap: balance;
+}
+
+.promise {
+  color: var(--color-text-secondary);
+}
+
+/* Trama's card drawn with its tokens; as wide as the two fields need */
+.formCard {
+  width: 100%;
+  max-width: var(--mantine-breakpoint-sm);
+  padding: var(--space-6) var(--space-inset-container);
   border: var(--border-width-hairline) solid var(--color-border-subtle);
-  border-radius: var(--shape-item);
+  border-radius: var(--shape-container);
   background: var(--color-surface-raised);
 }
 
-.list > * {
-  margin: 0;
+@media (min-width: 48em) {
+  .formCard {
+    padding: var(--space-7);
+  }
 }

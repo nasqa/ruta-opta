@@ -6,7 +6,7 @@ import './support/next-resolution.mjs';
 
 // env.ts imports server-only, which throws outside a server bundle
 registerHooks({ resolve: (specifier, context, nextResolve) => (specifier === 'server-only' ? { url: 'data:text/javascript,', shortCircuit: true } : nextResolve(specifier, context)) });
-process.env.URL = 'https://www.example.org';
+process.env.SITE_URL = 'https://www.example.org';
 
 const landing = join(import.meta.dirname, '../apps/landing/src');
 const { routing } = await import(join(landing, 'i18n/routing.ts'));
@@ -32,7 +32,7 @@ test('each entry carries the absolute form of the pages own hreflang set', () =>
     assert.deepEqual(languages, Object.fromEntries(Object.entries(alternates(href).languages).map(([language, path]) => [language, absolute(path)])));
     assert.deepEqual(Object.keys(languages), ['es', 'en', 'x-default']);
   }
-  assert.equal(sitemap()[0].alternates.languages['x-default'], absolute('/'));
+  assert.equal(sitemap()[0].alternates.languages['x-default'], absolute('/es'));
 });
 
 test('entries have no lastModified, changeFrequency or priority', () => {

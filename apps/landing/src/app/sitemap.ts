@@ -7,7 +7,7 @@ import { siteUrl } from '@/shared/env';
 
 const absolute = (path: string) => new URL(path, siteUrl).href;
 
-// One entry per localized URL, each listing the page's own hreflang set. The unprefixed / redirects, so it appears only as x-default
+// One entry per localized URL, each listing the page's own hreflang set. x-default is the Spanish page itself, so the unprefixed / never appears
 const sitemap = (): MetadataRoute.Sitemap =>
   indexable.flatMap((href) => {
     const languages = Object.fromEntries(Object.entries(alternates(href).languages).map(([language, path]) => [language, absolute(path)]));

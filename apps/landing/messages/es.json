@@ -8,21 +8,45 @@
   },
   "Prelaunch": {
     "metaTitle": "Ruta Opta · Talento y turismo comunitario en Colombia",
-    "metaDescription": "Ruta Opta conecta el talento de las personas con oportunidades en Quindío, Risaralda, Caldas, Valle del Cauca y Chocó. Crecer, crear y conectar.",
-    "ogAlt": "Un valle en relieve de papel, con el sol de Ruta Opta sobre las montañas.",
+    "metaDescription": "Una ruta para reconocer el talento de familias rurales de seis territorios de Colombia y conectarlo con oportunidades. En construcción.",
+    "ogAlt": "Ruta Opta: «El talento de las comunidades puede transformar sus territorios», sobre un valle cafetero en relieve de papel con el sol de Ruta Opta.",
+    "ogTitle": "El talento de las comunidades puede transformar sus territorios",
+    "ogDescription": "Una ruta en construcción para reconocer el talento de familias rurales y conectarlo con oportunidades.",
     "title": "El talento de las comunidades puede transformar sus territorios.",
-    "lead": "Ruta Opta conecta el talento de las personas con oportunidades en Quindío, Risaralda, Caldas, Valle del Cauca y Chocó. Escuchamos, reconocemos, conectamos y construimos con ellas.",
-    "cta": "Quiero que me avisen",
+    "lead": "Estamos diseñando una ruta para que familias rurales de seis territorios de Colombia reconozcan sus talentos y los conviertan en oportunidades. Vamos a empezar por los 12 municipios del Quindío. Aún no abrimos.",
+    "cta": "Quiero seguir el proceso",
     "thesis": {
-      "title": "Hay talento en cada territorio",
-      "text": "Las comunidades ya saben cocinar, cultivar, guiar, crear y organizarse. Lo que muchas veces falta es que las oportunidades lleguen hasta ellas. Ruta Opta existe para acercarlas, y para que las decisiones sigan en manos de quienes viven en el territorio.",
-      "territoriesLabel": "Los cinco territorios",
+      "title": "Por qué existe Ruta Opta",
+      "text": "Ruta Opta nació después del terremoto del 10 de agosto de 2026. Stephania Forero, representante legal de la Fundación Embajadores de la Paz, llevaba años recorriendo comunidades rurales y había visto mucho talento sin herramientas. Decidió dejar atrás las «intervenciones aisladas» y construir una ruta que conecte ese talento con oportunidades.",
+      "territoriesLabel": "Los seis territorios",
       "territories": {
         "quindio": "Quindío",
         "risaralda": "Risaralda",
         "caldas": "Caldas",
         "valle": "Valle del Cauca",
-        "choco": "Chocó"
+        "choco": "Chocó",
+        "narino": "Nariño"
+      },
+      "stance": "Cada territorio decide su propio camino; ninguna ruta debe acostumbrar a las comunidades a que otros decidan por ellas.",
+      "stanceAuthor": "Stephania Forero · Representante legal",
+      "commitmentsLabel": "Cuatro compromisos de cómo vamos a trabajar",
+      "commitments": {
+        "listen": {
+          "title": "Escuchar primero",
+          "text": "Cada ciclo empieza con reuniones con la alcaldía, líderes y familias, y con acuerdos por escrito."
+        },
+        "recognize": {
+          "title": "Reconocer",
+          "text": "Cada persona construye su propio mapa de fortalezas."
+        },
+        "connect": {
+          "title": "Conectar con cuidado",
+          "text": "Una experiencia solo se ofrece después de validarla con la familia anfitriona y con aliados."
+        },
+        "decide": {
+          "title": "Decidir juntos",
+          "text": "La comunidad puede aceptar, modificar o rechazar cualquier actividad."
+        }
       }
     },
     "methodTitle": "Crecer, crear y conectar: una ruta en tres pasos",
@@ -30,34 +54,36 @@
       "grow": {
         "name": "Crecer",
         "tagline": "Reconocer quién soy, qué siento y qué puedo aportar.",
-        "text": "Fortalecemos a las personas: bienestar, confianza y reconocimiento de lo que ya saben hacer."
+        "text": "Ocho semanas de encuentros para reconocer lo que cada persona siente, sabe y puede aportar. Al final, cada participante construye su mapa de fortalezas."
       },
       "create": {
         "name": "Crear",
         "tagline": "Convertir saberes y talentos en propuestas.",
-        "text": "Acompañamos para que eso que sabes hacer tenga costos, precio y una buena presentación."
+        "text": "Diez semanas para recuperar la memoria del territorio (recetas, oficios, lugares) y convertir saberes en propuestas, con costos, precio y presentación."
       },
       "connect": {
         "name": "Conectar",
         "tagline": "Presentar las propuestas a quienes pueden comprarlas y apoyarlas.",
-        "text": "Abrimos contacto con visitantes, aliados y mercados."
+        "text": "Seis semanas para validar cada propuesta y presentarla a aliados y visitantes."
       }
     },
     "tourism": {
       "title": "Turismo Vivo: experiencias rurales diseñadas por quienes las habitan",
-      "text": "Experiencias de turismo diseñadas por quienes habitan el territorio: una comida, un recorrido, un oficio. Cada familia decide qué comparte y cómo, y el precio y el reparto se conocen antes de vender. Lo estamos construyendo junto a las comunidades.",
+      "text": "Una posibilidad, no una promesa para todas las familias: solo diseñamos una experiencia donde hay interés de la comunidad, condiciones de seguridad y los requisitos en regla. Una comida, un recorrido, un oficio, contados por quienes los viven.",
       "status": "En construcción"
     },
     "who": {
       "title": "Quién está detrás",
-      "text": "Ruta Opta es una iniciativa de la {legalName}, con sede en {locality}, {region}.",
+      "text": "Ruta Opta es una iniciativa de la {legalName}, NIT {nit}, con sede en {locality}, {region}. Su representante legal es {representative}.",
       "legalName": "Fundación Embajadores de la Paz",
       "locality": "Armenia",
-      "region": "Quindío"
+      "region": "Quindío",
+      "nit": "901679710-4",
+      "representative": "Stephania Forero"
     },
     "allies": {
-      "title": "Construyamos juntos: alianzas para abrir oportunidades",
-      "text": "Ruta Opta se construye con empresas, agencias, alojamientos, instituciones y personas que quieran compartir su experiencia. Cuéntanos cómo te gustaría participar.",
+      "title": "Súmate como aliado",
+      "text": "Buscamos aliados que acompañen el proceso desde el principio. Elige la forma que más se parece a lo que puedes aportar y escríbenos: el mensaje ya viene listo.",
       "whatsapp": {
         "title": "WhatsApp",
         "label": "Escríbenos por WhatsApp",
@@ -70,11 +96,122 @@
         "label": "Escríbenos por correo",
         "address": "info@rutaopta.org",
         "subject": "Quiero ser aliado de Ruta Opta"
+      },
+      "ask": "En tu primer mensaje cuéntanos quién eres, qué puedes aportar y en qué territorio.",
+      "forLabel": "Para",
+      "byEmail": "O por correo",
+      "byEmailFor": "{label}: {verb}",
+      "routes": {
+        "train": {
+          "verb": "Formar",
+          "who": "Universidades, institutos y centros de formación",
+          "offer": "Aportas contenidos y docentes. Una certificación solo es posible con un acuerdo formal.",
+          "cta": "Quiero formar",
+          "message": "Hola, represento a una institución de formación y quiero conocer cómo formar parte de Ruta Opta.",
+          "subject": "Alianza para formar · Ruta Opta"
+        },
+        "link": {
+          "verb": "Articular",
+          "who": "Alcaldías, gobernaciones y otras entidades públicas",
+          "offer": "Aportas espacios, información y articulación con el territorio.",
+          "cta": "Quiero articular",
+          "message": "Hola, represento a una entidad pública y quiero conocer cómo articular con Ruta Opta.",
+          "subject": "Alianza para articular · Ruta Opta"
+        },
+        "validate": {
+          "verb": "Validar",
+          "who": "Agencias, alojamientos y guías de turismo",
+          "offer": "Revisas con nosotros cada experiencia antes de ofrecerla, y puedes sumarla a tu oferta.",
+          "cta": "Quiero validar experiencias",
+          "message": "Hola, represento a un negocio de turismo y quiero conocer cómo validar experiencias con Ruta Opta.",
+          "subject": "Alianza para validar experiencias · Ruta Opta"
+        },
+        "drive": {
+          "verb": "Impulsar",
+          "who": "Empresas y fundaciones",
+          "offer": "Financias o aportas en especie un componente concreto, con objetivo, costo y reporte.",
+          "cta": "Quiero impulsar",
+          "message": "Hola, represento a una empresa o fundación y quiero conocer cómo impulsar un componente de Ruta Opta.",
+          "subject": "Alianza para impulsar un componente · Ruta Opta"
+        },
+        "accompany": {
+          "verb": "Acompañar",
+          "who": "Organizaciones sociales, culturales y ambientales",
+          "offer": "Aportas acompañamiento especializado y redes de confianza en el territorio.",
+          "cta": "Quiero acompañar",
+          "message": "Hola, represento a una organización y quiero conocer cómo acompañar el proceso de Ruta Opta.",
+          "subject": "Alianza para acompañar · Ruta Opta"
+        },
+        "share": {
+          "verb": "Compartir",
+          "who": "Personas con un oficio, un saber o una conexión",
+          "offer": "Aportas tu experiencia: enseñar un oficio, orientar una propuesta o abrir una puerta.",
+          "cta": "Quiero compartir",
+          "message": "Hola, soy una persona con experiencia y quiero conocer cómo compartirla con Ruta Opta.",
+          "subject": "Compartir mi experiencia · Ruta Opta"
+        }
       }
     },
-    "listTitle": "Déjanos tu correo",
-    "listLead": "Déjanos tu nombre y tu correo y te avisamos cuando abramos.",
-    "privacyLink": "Política de tratamiento de datos"
+    "listTitle": "Sigue el proceso desde el principio",
+    "listLead": "Déjanos tu nombre y tu correo y te escribimos cuando haya algo real que contar.",
+    "privacyLink": "Política de tratamiento de datos",
+    "overline": "Talento y turismo comunitario · en construcción",
+    "ctaAllies": "Quiero ser aliado",
+    "ctaNote": "Un correo cuando haya algo real que contar. Te das de baja cuando quieras.",
+    "places": {
+      "title": "Seis territorios, una misma ruta",
+      "lead": "En cada territorio empezamos escuchando a quienes lo gobiernan y lo habitan, con sus propias formas de decidir: alcaldías, juntas de acción comunal y familias.",
+      "nextLabel": "Después",
+      "quindio": "Plan detallado de 36 meses en sus 12 municipios: Armenia, Buenavista, Calarcá, Circasia, Córdoba, Filandia, Génova, La Tebaida, Montenegro, Pijao, Quimbaya y Salento.",
+      "status": {
+        "design": "En diseño",
+        "upcoming": "Por iniciar"
+      }
+    },
+    "methodLead": "Tres pasos que parten de lo que cada persona ya sabe hacer.",
+    "tourismOverline": "Lo que estamos construyendo",
+    "tourismPrinciples": {
+      "label": "Así lo estamos diseñando",
+      "designed": "Cada experiencia se diseña con la familia anfitriona.",
+      "decides": "Cada familia decide qué comparte y cómo.",
+      "price": "El precio y el reparto se conocen antes de vender."
+    },
+    "tourismLink": "Avísame cuando abra",
+    "copyEmail": "Copiar correo",
+    "copiedEmail": "Correo copiado",
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "what": {
+        "q": "¿Qué es Ruta Opta y qué no es?",
+        "a": "Una ruta de formación y acompañamiento que parte del talento de las personas, impulsada por la Fundación Embajadores de la Paz. Complementa el trabajo del Estado; no lo reemplaza en salud, vivienda ni protección."
+      },
+      "book": {
+        "q": "¿Ya puedo reservar una experiencia?",
+        "a": "Todavía no. Turismo Vivo está en construcción. Si nos dejas tu correo, te avisamos cuando abra."
+      },
+      "allies": {
+        "q": "¿Cómo puedo ser aliado?",
+        "a": "Elige la forma que más se parece a ti (formar, articular, validar, impulsar, acompañar o compartir) y escríbenos por WhatsApp o a info@rutaopta.org. Cuéntanos quién eres, qué puedes aportar y en qué territorio."
+      },
+      "data": {
+        "q": "¿Qué hacen con mis datos?",
+        "a": "Usamos tu nombre y tu correo solo para enviarte novedades de Ruta Opta y avisarte cuando abramos. Puedes darte de baja cuando quieras desde cualquier correo. Los detalles están en nuestra política de tratamiento de datos."
+      },
+      "when": {
+        "q": "¿Cuándo abren?",
+        "a": "Todavía no hay fecha pública. Quienes se inscriben en la lista se enteran primero."
+      },
+      "donate": {
+        "q": "¿Puedo donar o ser voluntario?",
+        "a": "Todavía no. Antes necesitamos tener listos el proceso, los reportes y los protocolos de protección. Si quieres aliarte con un aporte concreto, escríbenos."
+      }
+    },
+    "listPromise": "Te contamos cómo avanza la ruta y cuándo abre Turismo Vivo.",
+    "alliesOther": {
+      "title": "¿Tu caso es otro?",
+      "whatsappText": "Escríbenos, cuéntanos quién eres y cómo te gustaría participar.",
+      "emailText": "Si prefieres el correo, escríbenos a esta dirección."
+    }
   },
   "Waitlist": {
     "name": {
@@ -90,7 +227,7 @@
       "label": "Autorizo a la Fundación Embajadores de la Paz, responsable de OPTA, a tratar mis datos para enviarme novedades y avisarme cuando abramos. Puedo retirar mi autorización cuando quiera. Conoce la <privacy>política de tratamiento de datos</privacy>.",
       "error": "Para inscribirte necesitamos tu autorización."
     },
-    "submit": "Quiero que me avisen",
+    "submit": "Quiero seguir el proceso",
     "note": "Pocos correos, solo los importantes.",
     "sent": {
       "title": "Casi listo, {name}.",
@@ -118,6 +255,10 @@
         "title": "Para qué los usamos",
         "text": "Para enviarte novedades de OPTA y avisarte cuando abramos. No los usamos para otra cosa."
       },
+      "contact": {
+        "title": "Si nos escribes por WhatsApp o correo",
+        "text": "Si nos escribes por WhatsApp o a info@rutaopta.org, por ejemplo para ser aliado, usamos lo que nos cuentes (tu nombre, tu organización y tu mensaje) solo para responderte y hablar contigo de esa colaboración. WhatsApp, de Meta, y tu proveedor de correo procesan esos mensajes con sus propios términos. Puedes pedir que borremos la conversación escribiendo a privacidad@rutaopta.org."
+      },
       "processor": {
         "title": "Quién nos ayuda a enviar los correos",
         "text": "Enviamos los boletines con Zoho Campaigns y los correos de confirmación con Zoho CPaaS, ambos de Zoho Corporation. El sitio está alojado en Netlify. Estos proveedores pueden guardar datos en servidores fuera de Colombia."
@@ -138,7 +279,7 @@
     "metaTitle": "Inscripción confirmada",
     "title": "Listo, quedaste en la lista",
     "lead": "Te escribiremos cuando haya novedades.",
-    "frequency": "Serán pocos correos: cuándo abrimos y cómo ser parte.",
+    "frequency": "Serán pocos correos: cómo avanza la ruta y cuándo abre Turismo Vivo.",
     "home": "Volver al inicio"
   },
   "Unsubscribed": {
@@ -201,7 +342,29 @@
     "footer": {
       "initiative": "Ruta Opta es una iniciativa de la Fundación Embajadores de la Paz.",
       "privacy": "Política de tratamiento de datos",
-      "email": "privacidad@rutaopta.org"
+      "email": "privacidad@rutaopta.org",
+      "mission": "Conectamos el talento de las comunidades con oportunidades en el Eje Cafetero, Valle del Cauca, Chocó y Nariño.",
+      "explore": "Explora",
+      "contact": "Contacto",
+      "legal": "Legal",
+      "whatsapp": "WhatsApp +57 310 587 4657",
+      "whatsappNumber": "573105874657",
+      "infoEmail": "info@rutaopta.org",
+      "instagram": "Instagram @rutaopta",
+      "instagramUrl": "https://www.instagram.com/rutaopta/",
+      "place": "Armenia, Quindío, Colombia",
+      "rights": "© {year} Fundación Embajadores de la Paz"
+    },
+    "whatsappFloat": {
+      "label": "Contacto por WhatsApp (se abre en una pestaña nueva)"
+    },
+    "sections": {
+      "label": "En esta página",
+      "places": "Territorios",
+      "method": "Cómo trabajamos",
+      "tourism": "Turismo Vivo",
+      "allies": "Aliados",
+      "faq": "Preguntas"
     }
   }
 }

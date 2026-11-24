@@ -10,3 +10,10 @@
   to = "https://www.rutaopta.org/:splat"
   status = 301
   force = true
+
+# The home's first social card shipped at a content-hashed path (PR #10); links shared since then keep that URL in their cached
+# preview, so it points at the stable per-locale card once the hashed file is gone. Not forced: it applies only when the file is missing
+[[redirects]]
+  from = "/_next/static/media/home-og.29lym9iu9n3f1.jpg"
+  to = "/og/home-es-v2.jpg"
+  status = 301

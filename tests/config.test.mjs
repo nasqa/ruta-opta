@@ -38,3 +38,23 @@ test('next.config.ts throws for a deploy preview or branch deploy with WAITLIST_
   await withEnv({ CONTEXT: 'dev', WAITLIST_ADAPTER: 'live' }, () => assert.doesNotReject(load()));
   await withEnv({ CONTEXT: 'deploy-preview', WAITLIST_ADAPTER: 'fake' }, () => assert.doesNotReject(load()));
 });
+
+test('next.config.ts inlines the address of the deploy context as SITE_URL', async () => {
+  const urls = { URL: 'https://www.rutaopta.org', DEPLOY_PRIME_URL: 'https://deploy-preview-12--rutaopta.netlify.app' };
+  const siteUrl = async (env) => {
+    let value;
+    await withEnv({ ...urls, ...env }, async () => {
+      value = (await load()).default.env.SITE_URL;
+    });
+    return value;
+  };
+  assert.equal(await siteUrl({ CONTEXT: 'production', WAITLIST_ADAPTER: 'live' }), urls.URL);
+  // A preview's canonical, Open Graph and JSON-LD point at the preview, where its new files exist; Netlify marks previews noindex
+  assert.equal(await siteUrl({ CONTEXT: 'deploy-preview', WAITLIST_ADAPTER: 'fake' }), urls.DEPLOY_PRIME_URL);
+  assert.equal(await siteUrl({ CONTEXT: 'branch-deploy', WAITLIST_ADAPTER: 'fake' }), urls.DEPLOY_PRIME_URL);
+  assert.equal(await siteUrl({ CONTEXT: 'deploy-preview', WAITLIST_ADAPTER: 'fake', DEPLOY_PRIME_URL: undefined }), urls.URL);
+  // netlify dev and a local build with URL in the shell keep URL; a plain local build has none, and env.ts falls back to localhost
+  assert.equal(await siteUrl({ CONTEXT: 'dev', WAITLIST_ADAPTER: undefined }), urls.URL);
+  assert.equal(await siteUrl({ CONTEXT: undefined, WAITLIST_ADAPTER: undefined }), urls.URL);
+  assert.equal(await siteUrl({ CONTEXT: undefined, WAITLIST_ADAPTER: undefined, URL: undefined, DEPLOY_PRIME_URL: undefined }), undefined);
+});

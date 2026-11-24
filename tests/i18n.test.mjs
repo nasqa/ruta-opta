@@ -14,18 +14,12 @@ const { alternates } = await import(join(landing, 'src/i18n/alternates.ts'));
 const { getPathname } = await import(join(landing, 'src/i18n/navigation.ts'));
 const { createNavigation } = await import('next-intl/navigation');
 const { default: createMiddleware } = await import('next-intl/middleware');
+const { default: proxy } = await import(join(landing, 'src/proxy.ts'));
 const { NextRequest } = await import('next/server');
 
 // A translated slug: the internal pathname /about-opta is /conoce-opta in Spanish
 const translatedPathnames = { ...routing.pathnames, '/about-opta': { es: '/conoce-opta', en: '/about-opta' } };
 const translated = createNavigation({ ...routing, pathnames: translatedPathnames });
-
-// The hreflang links next-intl's proxy emits itself when alternateLinks is on (the app turns them off in favor of metadata)
-const proxyLinks = (pathnames, path) => {
-  const proxy = createMiddleware({ ...routing, pathnames, alternateLinks: true });
-  const link = proxy(new NextRequest(new URL(path, 'http://localhost'))).headers.get('link');
-  return Object.fromEntries([...link.matchAll(/<([^>]+)>; rel="alternate"; hreflang="([^"]+)"/g)].map(([, url, hreflang]) => [hreflang, new URL(url).pathname]));
-};
 
 test('a namespace exists in the locales whose messages have it', () => {
   assert.deepEqual(localesWith('Prelaunch', { es, en: { Prelaunch: es.Prelaunch } }), ['es', 'en']);
@@ -40,24 +34,57 @@ test('every route has its namespace in Spanish, the source of the types', () => 
   for (const href of Object.keys(routing.pathnames)) assert.ok(localesFor(href).includes('es'), `${href} has no Spanish namespace`);
 });
 
-test('alternates list the covered locales and x-default, the unprefixed path where the proxy negotiates the locale', () => {
-  // The home exists in both locales
-  const home = alternates('/', ['es', 'en']).languages;
-  assert.deepEqual(home, { es: '/es', en: '/en', 'x-default': '/' });
-  assert.deepEqual(home, proxyLinks(routing.pathnames, '/es'));
-  // Off home, x-default is the default locale's translated pathname without its prefix, as in the proxy's own links
-  const aboutOpta = alternates('/about-opta', ['es', 'en'], translated.getPathname).languages;
-  assert.deepEqual(aboutOpta, { es: '/es/conoce-opta', en: '/en/about-opta', 'x-default': '/conoce-opta' });
-  assert.deepEqual(aboutOpta, proxyLinks(translatedPathnames, '/es/conoce-opta'));
+test('alternates list the covered locales and x-default, the page in the default locale', () => {
+  // Not the unprefixed path of next-intl's own links: / serves the Spanish home with /es as its canonical, so it cannot be the x-default
+  assert.deepEqual(alternates('/', ['es', 'en']).languages, { es: '/es', en: '/en', 'x-default': '/es' });
+  // Off home, x-default is the default locale's translated pathname with its prefix
+  assert.deepEqual(alternates('/about-opta', ['es', 'en'], translated.getPathname).languages, { es: '/es/conoce-opta', en: '/en/about-opta', 'x-default': '/es/conoce-opta' });
 });
 
 test('the home lists both locales and x-default', () => {
-  assert.deepEqual(alternates('/').languages, { es: '/es', en: '/en', 'x-default': '/' });
+  assert.deepEqual(alternates('/').languages, { es: '/es', en: '/en', 'x-default': '/es' });
 });
 
 test('a single-locale page lists only its locale, with no x-default', () => {
-  // The proxy would send an English browser from the unprefixed path to /en/..., which is a 404 for this page
   assert.deepEqual(alternates('/about-opta', ['es'], translated.getPathname), { languages: { es: '/es/conoce-opta' } });
+});
+
+const visit = (path, headers = {}) => proxy(new NextRequest(new URL(path, 'http://localhost'), { headers }));
+const rewriteOf = (response) => {
+  const target = response.headers.get('x-middleware-rewrite');
+  return target && `${new URL(target).pathname}${new URL(target).search}`;
+};
+const english = { 'accept-language': 'en-US,en;q=0.9' };
+
+test('the bare domain answers 200 with the Spanish home, for any browser that does not negotiate English', () => {
+  for (const headers of [{}, { 'accept-language': 'es-CO,es;q=0.9' }, { 'accept-language': 'fr-FR' }, { 'user-agent': 'WhatsApp/2.23.20.0' }]) {
+    const response = visit('/', headers);
+    assert.equal(response.status, 200, JSON.stringify(headers));
+    assert.equal(response.headers.get('location'), null);
+    assert.equal(rewriteOf(response), '/es');
+  }
+  assert.equal(rewriteOf(visit('/?utm_source=whatsapp')), '/es?utm_source=whatsapp');
+});
+
+test('an English browser at the bare domain still gets the 307 to /en, so / never serves English', () => {
+  for (const response of [visit('/', english), visit('/', { 'accept-language': 'es-CO', cookie: 'NEXT_LOCALE=en' })]) {
+    assert.equal(response.status, 307);
+    assert.equal(new URL(response.headers.get('location')).pathname, '/en');
+    assert.equal(rewriteOf(response), null);
+  }
+});
+
+test('every other path gets exactly what next-intl answers', () => {
+  const handleI18nRouting = createMiddleware(routing);
+  const request = (path, headers) => new NextRequest(new URL(path, 'http://localhost'), { headers });
+  for (const path of ['/es', '/en', '/privacidad', '/privacy', '/es/privacidad', '/en/privacy', '/fr/anything', '/es/confirmar?t=x']) {
+    for (const headers of [{}, english]) {
+      const ours = proxy(request(path, headers));
+      const theirs = handleI18nRouting(request(path, headers));
+      assert.equal(ours.status, theirs.status, path);
+      assert.deepEqual([...ours.headers], [...theirs.headers], path);
+    }
+  }
 });
 
 const unmirroredMarkers = (source, target, path = '') =>

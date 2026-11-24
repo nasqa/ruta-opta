@@ -38,10 +38,11 @@
   margin: var(--space-7) auto 0;
 }
 
-/* Trama's card drawn with its own tokens; it stays in view while the text scrolls past */
+/* Trama's card drawn with its own tokens; it stays in view while the text scrolls past, below the sticky header (its 48 px row,
+   padding and hairline) */
 .toc {
   position: sticky;
-  top: var(--space-5);
+  top: calc(var(--control-height-lg) + 2 * var(--space-4) + var(--border-width-hairline) + var(--space-5));
   display: grid;
   gap: var(--space-3);
   padding: var(--space-inset-container);

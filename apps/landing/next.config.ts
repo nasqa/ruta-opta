@@ -12,9 +12,16 @@ if (context && context !== 'production' && context !== 'dev' && live) {
   throw new Error('Deploy previews and branch deploys must not run WAITLIST_ADAPTER=live: set it for the Production context only.');
 }
 
+// The site's own address: production answers on URL, the primary domain; a deploy preview or branch deploy on DEPLOY_PRIME_URL, where its new
+// files exist. Netlify Functions see only URL at runtime, so the choice is inlined at build for every server bundle; a local build has neither
+const preview = context === 'deploy-preview' || context === 'branch-deploy';
+const siteUrl = (preview && process.env.DEPLOY_PRIME_URL) || process.env.URL;
+
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
+  // Next skips an undefined value, so src/shared/env.ts then reads the runtime environment and falls back to localhost
+  env: { SITE_URL: siteUrl },
   experimental: { agentFeedback: false },
 };
 

@@ -6,12 +6,17 @@ import { contrastRatio, type Rgb } from './contrast';
 const messages = { es, en };
 const locales = ['es', 'en'] as const;
 const ogLocales = { es: 'es_CO', en: 'en_US' };
-// The site URL the server was built with (src/shared/env.ts reads the same variable); the run itself serves on its own port
+// The site URL the server was built with (next.config.ts bakes it from URL when the build is not a Netlify preview); the run itself serves on its own port
 const site = new URL(process.env.URL ?? 'http://localhost:3000');
 const meta = (page: Page, selector: string) => page.locator(selector).getAttribute('content');
+// The sections the header and the footer link to, in page order, and the FAQ's questions
+const sections = ['places', 'method', 'tourism', 'allies', 'faq'] as const;
+const questions = ['what', 'when', 'book', 'donate', 'allies', 'data'] as const;
+const routes = ['train', 'link', 'validate', 'drive', 'accompany', 'share'] as const;
+const privacyPaths = { es: '/es/privacidad', en: '/en/privacy' };
 
 for (const locale of locales) {
-  const { Prelaunch } = messages[locale];
+  const { Prelaunch, SiteShell } = messages[locale];
 
   test.describe(`/${locale} home`, () => {
     test('the hero art band is 16:9 and carries exactly one sun', async ({ page }) => {
@@ -30,36 +35,108 @@ for (const locale of locales) {
 
       await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(Prelaunch.title);
-      await expect(page.getByRole('heading', { level: 2 })).toHaveText([
+      // The footer's column titles are h2 too, outside main
+      await expect(page.getByRole('main').getByRole('heading', { level: 2 })).toHaveText([
         Prelaunch.thesis.title,
+        Prelaunch.places.title,
         Prelaunch.methodTitle,
         Prelaunch.tourism.title,
-        Prelaunch.who.title,
         Prelaunch.allies.title,
+        Prelaunch.who.title,
+        Prelaunch.faq.title,
         Prelaunch.listTitle,
       ]);
     });
 
-    test('the method is three steps in an ordered list', async ({ page }) => {
+    test('every section the header and the footer link to is on the page, in order', async ({ page }) => {
+      await page.goto(`/${locale}`);
+
+      expect(await page.locator('main > section[id]').evaluateAll((elements) => elements.map(({ id }) => id))).toEqual([...sections, 'lista']);
+    });
+
+    test('the sticky header links to the sections from 62em, lands them below itself, and drops the links on phones', async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.goto(`/${locale}`);
+      const header = page.getByRole('banner');
+      const nav = header.getByRole('navigation', { name: SiteShell.sections.label, exact: true });
+
+      await expect(nav.getByRole('link')).toHaveText(sections.map((section) => SiteShell.sections[section]));
+      for (const section of sections) await expect(nav.getByRole('link', { name: SiteShell.sections[section], exact: true })).toHaveAttribute('href', `#${section}`);
+      // Targets of at least 44 px (WCAG 2.5.5, well over 2.5.8's 24)
+      for (const height of await nav.getByRole('link').evaluateAll((links) => links.map((link) => link.getBoundingClientRect().height))) expect(height).toBeGreaterThanOrEqual(44);
+
+      await nav.getByRole('link', { name: SiteShell.sections.faq, exact: true }).click();
+      await expect(page).toHaveURL(/#faq$/);
+      const bar = await header.boundingBox();
+      const title = await page.locator('#faq-title').boundingBox();
+      if (!bar || !title) throw new Error('no header or FAQ title box');
+      expect(bar.y, 'the header stays at the top').toBe(0);
+      expect(title.y, 'the title lands below the header').toBeGreaterThanOrEqual(bar.y + bar.height);
+
+      await page.setViewportSize({ width: 375, height: 667 });
+      await expect(header.locator(`nav[aria-label="${SiteShell.sections.label}"]`)).toBeHidden();
+    });
+
+    test('the method is three steps in an ordered list, each with its piece', async ({ page }) => {
       await page.goto(`/${locale}`);
       const steps = page.locator('section[aria-labelledby="method-title"] ol > li');
 
       await expect(steps).toHaveCount(3);
       await expect(steps.getByRole('heading', { level: 3 })).toHaveText([Prelaunch.stages.grow.name, Prelaunch.stages.create.name, Prelaunch.stages.connect.name]);
+      await expect(steps.locator('img')).toHaveCount(3);
     });
 
-    test('names the five territories in order', async ({ page }) => {
+    test('names the six territories in order: Quindío first with its plan, then the five that come after it', async ({ page }) => {
       await page.goto(`/${locale}`);
-      const territories = page.getByRole('list', { name: Prelaunch.thesis.territoriesLabel, exact: true }).getByRole('listitem');
+      const territories = page.getByRole('group', { name: Prelaunch.thesis.territoriesLabel, exact: true });
 
-      await expect(territories).toHaveText(['Quindío', 'Risaralda', 'Caldas', 'Valle del Cauca', 'Chocó']);
+      await expect(territories.getByRole('heading', { level: 3 })).toHaveText(['Quindío', 'Risaralda', 'Caldas', 'Valle del Cauca', 'Chocó', 'Nariño']);
+      await expect(territories.locator('img')).toHaveCount(6);
+      // Quindío has a plan, so it has its own text and its status; the five others share one status and no repeated paragraph
+      await expect(territories.getByText(Prelaunch.places.quindio, { exact: true })).toBeVisible();
+      await expect(territories.getByText(Prelaunch.places.status.design, { exact: true })).toHaveCount(1);
+      const rest = page.getByRole('list', { name: Prelaunch.places.nextLabel, exact: true });
+      await expect(rest.getByRole('listitem')).toHaveCount(5);
+      await expect(rest.getByText(Prelaunch.places.status.upcoming, { exact: true })).toHaveCount(5);
     });
 
-    test('the hero button jumps to the sign-up form', async ({ page }) => {
+    test('the origin comes with its author, and the four commitments are a list of their own', async ({ page }) => {
+      await page.goto(`/${locale}`);
+      const thesis = page.locator('section[aria-labelledby="thesis-title"]');
+
+      await expect(thesis.locator('figure p')).toHaveText(Prelaunch.thesis.stance);
+      await expect(thesis.locator('figure figcaption')).toHaveText(Prelaunch.thesis.stanceAuthor);
+      const commitments = thesis.getByRole('list', { name: Prelaunch.thesis.commitmentsLabel, exact: true });
+      await expect(commitments.getByRole('listitem')).toHaveCount(4);
+      await expect(commitments.getByRole('heading', { level: 3 })).toHaveText(
+        (['listen', 'recognize', 'connect', 'decide'] as const).map((key) => Prelaunch.thesis.commitments[key].title),
+      );
+    });
+
+    test('only the hero art is fetched first; every other piece is lazy, decorative and sized before it loads', async ({ page }) => {
+      await page.goto(`/${locale}`);
+      const hero = page.locator('section[aria-labelledby="hero-title"] img:not([src*="sun"])');
+
+      await expect(hero).toHaveAttribute('fetchpriority', 'high');
+      await expect(hero).not.toHaveAttribute('loading', 'lazy');
+      const art = await page.locator('main img, footer img').evaluateAll((images) =>
+        images
+          .filter((image) => !image.closest('section[aria-labelledby="hero-title"]'))
+          .map((image) => ({ loading: image.getAttribute('loading'), alt: image.getAttribute('alt'), width: image.getAttribute('width'), height: image.getAttribute('height') })),
+      );
+      // Six territories, three steps and Turismo Vivo; the footer's horizon and mark
+      expect(art).toHaveLength(12);
+      for (const image of art) expect(image).toMatchObject({ loading: 'lazy', alt: '', width: expect.stringMatching(/^\d+$/), height: expect.stringMatching(/^\d+$/) });
+    });
+
+    test('the hero buttons jump to the sign-up form and to the allies', async ({ page }) => {
       await page.goto(`/${locale}`);
 
       await expect(page.getByRole('link', { name: Prelaunch.cta, exact: true })).toHaveAttribute('href', '#lista');
+      await expect(page.getByRole('link', { name: Prelaunch.ctaAllies, exact: true })).toHaveAttribute('href', '#allies');
+      await expect(page.getByRole('link', { name: Prelaunch.tourismLink, exact: true })).toHaveAttribute('href', '#lista');
       await expect(page.locator('#lista')).toHaveCount(1);
+      await expect(page.locator('#allies')).toHaveCount(1);
     });
 
     test('the allies reach Ruta Opta by WhatsApp and by email', async ({ page }) => {
@@ -74,14 +151,69 @@ for (const locale of locales) {
       await expect(whatsapp).toHaveAttribute('aria-label', new RegExp(`^${Prelaunch.allies.whatsapp.label} \\(.+\\)$`));
       await expect(page.locator('section[aria-labelledby="allies-title"]').getByText(Prelaunch.allies.email.address, { exact: true })).toBeVisible();
       await expect(email).toHaveAttribute('href', /^mailto:info@rutaopta\.org\?subject=/);
+      await expect(page.getByRole('button', { name: Prelaunch.copyEmail, exact: true })).toBeVisible();
     });
 
-    test('names the foundation and links the data policy', async ({ page }) => {
+    // Every kind of ally has its own verb, and the message it opens is already written for that kind: the lead arrives qualified
+    test('each ally route opens a WhatsApp message and an email subject written for that kind of ally', async ({ page }) => {
       await page.goto(`/${locale}`);
-      const who = page.locator('section[aria-labelledby="who-title"]');
+      const allies = page.locator('section[aria-labelledby="allies-title"]');
+      const list = allies.getByRole('list', { name: Prelaunch.allies.title, exact: true });
 
+      await expect(list.getByRole('listitem')).toHaveCount(routes.length);
+      await expect(list.getByRole('heading', { level: 3 })).toHaveText(routes.map((route) => Prelaunch.allies.routes[route].verb));
+      for (const route of routes) {
+        const copy = Prelaunch.allies.routes[route];
+        const whatsapp = list.getByRole('link', { name: new RegExp(`^${copy.cta}`) });
+        const email = list.getByRole('link', { name: `${Prelaunch.allies.byEmail}: ${copy.verb}`, exact: true });
+
+        await expect(whatsapp).toHaveAttribute('href', `https://wa.me/${Prelaunch.allies.whatsapp.number}?text=${encodeURIComponent(copy.message)}`);
+        await expect(whatsapp).toHaveAttribute('target', '_blank');
+        await expect(whatsapp).toHaveAttribute('rel', /noopener/);
+        await expect(whatsapp).toHaveAttribute('aria-label', Prelaunch.allies.whatsapp.opensNewTab.replace('{label}', copy.cta));
+        await expect(email).toHaveAttribute('href', `mailto:${Prelaunch.allies.email.address}?subject=${encodeURIComponent(copy.subject)}`);
+      }
+    });
+
+    test('the copy button puts the address on the clipboard and says so, politely', async ({ page, context }) => {
+      await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+      await page.goto(`/${locale}`, { waitUntil: 'networkidle' });
+      const allies = page.locator('section[aria-labelledby="allies-title"]');
+
+      await allies.getByRole('button', { name: Prelaunch.copyEmail, exact: true }).click();
+      await expect(allies.getByRole('button', { name: Prelaunch.copiedEmail, exact: true })).toBeVisible();
+      await expect(allies.locator('[aria-live="polite"]')).toHaveText(Prelaunch.copiedEmail);
+      expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(Prelaunch.allies.email.address);
+    });
+
+    test('the FAQ answers its six questions as an accordion, and the data answer links the policy', async ({ page }) => {
+      await page.goto(`/${locale}`, { waitUntil: 'networkidle' });
+      const faq = page.locator('#faq');
+
+      await expect(faq.getByRole('heading', { level: 3 })).toHaveText(questions.map((question) => Prelaunch.faq[question].q));
+      const data = faq.getByRole('button', { name: Prelaunch.faq.data.q, exact: true });
+      await expect(data).toHaveAttribute('aria-expanded', 'false');
+      await data.click();
+      await expect(data).toHaveAttribute('aria-expanded', 'true');
+      const answer = faq.getByRole('region', { name: Prelaunch.faq.data.q });
+      await expect(answer).toContainText(Prelaunch.faq.data.a);
+      await expect(answer.getByRole('link', { name: Prelaunch.privacyLink, exact: true })).toHaveAttribute('href', privacyPaths[locale]);
+    });
+
+    // Who answers: its own section after the allies (Santiago, 2026-11-24), and again in the FAQ's first answer and the footer
+    test('names the foundation in its own section, in the FAQ and in the footer', async ({ page }) => {
+      await page.goto(`/${locale}`, { waitUntil: 'networkidle' });
+      const who = page.locator('section[aria-labelledby="who-title"]');
+      await expect(who.getByRole('heading', { level: 2, name: Prelaunch.who.title, exact: true })).toBeVisible();
       await expect(who).toContainText(Prelaunch.who.legalName);
-      await expect(who.getByRole('link', { name: Prelaunch.privacyLink, exact: true })).toHaveAttribute('href', /\/privacy|\/privacidad/);
+      await expect(who.getByRole('link', { name: Prelaunch.privacyLink, exact: true })).toHaveAttribute('href', privacyPaths[locale]);
+      const order = await page.locator('main > section').evaluateAll((sections) => sections.map((section) => section.id || section.getAttribute('aria-labelledby')));
+      expect(order.indexOf('who-title')).toBe(order.indexOf('allies') + 1);
+      const faq = page.locator('#faq');
+
+      await faq.getByRole('button', { name: Prelaunch.faq.what.q, exact: true }).click();
+      await expect(faq.getByRole('region', { name: Prelaunch.faq.what.q })).toContainText(Prelaunch.who.legalName);
+      await expect(page.getByRole('contentinfo')).toContainText(Prelaunch.who.legalName);
     });
 
     test('has its own title, canonical and social card', async ({ page, request }) => {
@@ -90,14 +222,22 @@ for (const locale of locales) {
       await expect(page).toHaveTitle(Prelaunch.metaTitle);
       await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', Prelaunch.metaDescription);
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${site.origin}/${locale}`);
-      expect(await meta(page, 'meta[property="og:title"]')).toBe(Prelaunch.metaTitle);
-      expect(await meta(page, 'meta[property="og:description"]')).toBe(Prelaunch.metaDescription);
+      expect(await meta(page, 'meta[property="og:site_name"]')).toBe(messages[locale].Site.name);
+      expect(await meta(page, 'meta[property="og:title"]')).toBe(Prelaunch.ogTitle);
+      expect(await meta(page, 'meta[property="og:description"]')).toBe(Prelaunch.ogDescription);
+      expect(await meta(page, 'meta[name="twitter:title"]')).toBe(Prelaunch.ogTitle);
+      expect(await meta(page, 'meta[name="twitter:description"]')).toBe(Prelaunch.ogDescription);
       expect(await meta(page, 'meta[property="og:locale"]')).toBe(ogLocales[locale]);
       expect(await meta(page, 'meta[property="og:locale:alternate"]')).toBe(ogLocales[locale === 'es' ? 'en' : 'es']);
       expect(await meta(page, 'meta[property="og:image:alt"]')).toBe(Prelaunch.ogAlt);
       expect(await meta(page, 'meta[name="twitter:card"]')).toBe('summary_large_image');
       const image = await meta(page, 'meta[property="og:image"]');
-      expect(image).toMatch(new RegExp(`^${site.origin}/`));
+      // A stable, versioned file per locale, never a hashed asset, with the size and type a first share needs
+      expect(image).toMatch(new RegExp(`^${site.origin}/og/home-${locale}-v\\d+\\.jpg$`));
+      expect(await meta(page, 'meta[name="twitter:image"]')).toBe(image);
+      expect(await meta(page, 'meta[property="og:image:width"]')).toBe('1200');
+      expect(await meta(page, 'meta[property="og:image:height"]')).toBe('630');
+      expect(await meta(page, 'meta[property="og:image:type"]')).toBe('image/jpeg');
       // The absolute URL points at the baked-in site URL, not this run's port: ask this run's server for the same path
       const response = await request.get(new URL(image ?? '').pathname);
       expect(response.status()).toBe(200);
@@ -111,12 +251,8 @@ for (const locale of locales) {
       expect(hrefs).toHaveLength(3);
       for (const href of hrefs) {
         const { pathname } = new URL(href);
-        const response = await request.get(pathname, { maxRedirects: 0 });
-        // x-default is the unprefixed root: the proxy answers a 307 to the browser's language (a post-launch item with the shell's owner)
-        if (pathname === '/') {
-          expect(response.status(), href).toBe(307);
-          expect(['/es', '/en']).toContain(new URL(response.headers().location ?? '', site).pathname);
-        } else expect(response.status(), href).toBe(200);
+        // x-default is the Spanish page itself, so every alternate is a page, never a redirect
+        expect((await request.get(pathname, { maxRedirects: 0 })).status(), href).toBe(200);
       }
     });
 
@@ -127,11 +263,20 @@ for (const locale of locales) {
       await expect(scripts).toHaveCount(1);
       const data = JSON.parse((await scripts.textContent()) ?? '');
       const organization = data['@graph'].find((node: { '@type': string }) => node['@type'] === 'Organization');
+      const website = data['@graph'].find((node: { '@type': string }) => node['@type'] === 'WebSite');
       expect(data['@context']).toBe('https://schema.org');
       expect(organization.name).toBe('Ruta Opta');
-      expect(organization.legalName).toBe(Prelaunch.who.legalName);
-      expect(organization.url).toBe(`${site.origin}/${locale}`);
-      expect(data['@graph'].find((node: { '@type': string }) => node['@type'] === 'WebSite').inLanguage).toBe(locale);
+      // Ruta Opta is the foundation's initiative: the legal name is the parent's
+      expect(organization.legalName).toBeUndefined();
+      expect(organization.parentOrganization).toMatchObject({ '@type': 'Organization', name: Prelaunch.who.legalName });
+      // Both point at the site root in every language; the @id stays per language
+      expect(organization.url).toBe(`${site.origin}/`);
+      expect(website.url).toBe(`${site.origin}/`);
+      expect(organization['@id']).toBe(`${site.origin}/${locale}#organization`);
+      expect(website['@id']).toBe(`${site.origin}/${locale}#website`);
+      expect(website.alternateName).toEqual(['rutaopta.org']);
+      expect(website.inLanguage).toBe(locale);
+      expect(organization.contactPoint).toMatchObject({ email: Prelaunch.allies.email.address, telephone: `+${Prelaunch.allies.whatsapp.number}` });
       expect((await request.get(new URL(organization.logo).pathname)).status()).toBe(200);
     });
   });
@@ -176,7 +321,7 @@ const backdrop = async (page: Page, selector: string): Promise<Rgb[]> => {
 const widths = [375, 768, 1440];
 
 for (const locale of locales) {
-  test.describe(`/${locale} hero text contrast on the real pixels`, () => {
+  test.describe(`/${locale} text contrast on the real pixels`, () => {
     for (const width of widths) {
       test(`the headline and the lead keep 7:1 at ${width} px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
@@ -191,6 +336,29 @@ for (const locale of locales) {
           if (!text) throw new Error(`no colour for ${selector}`);
           const worst = Math.min(...(await backdrop(page, selector)).map((pixel) => contrastRatio(text, pixel)));
           expect(worst, `${selector} worst pixel contrast`).toBeGreaterThanOrEqual(7);
+        }
+      });
+
+      // Text beside the art (Turismo Vivo), under it (a territory) and on the footer's dark band, whose tokens re-resolve there
+      test(`the text beside and under the art, and on the dark footer, keeps 7:1 at ${width} px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(`/${locale}`, { waitUntil: 'networkidle' });
+        await page.evaluate(() => document.fonts.ready);
+
+        const groups = [
+          ['#tourism-title ~ p.t-body-lg', '#places li:first-child p', '#places li:last-child h3', '#places p.t-body-md'],
+          ['footer p.t-body-lg', 'footer nav li:first-child a'],
+        ];
+        for (const [index, targets] of groups.entries()) {
+          // The footer waits under the curtain until the end of the scroll
+          if (index === 1) await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+          for (const selector of targets) {
+            await page.locator(selector).scrollIntoViewIfNeeded();
+            const text = await textColor(page, selector);
+            await page.addStyleTag({ content: `${selector} { color: transparent !important; }` });
+            const worst = Math.min(...(await backdrop(page, selector)).map((pixel) => contrastRatio(text, pixel)));
+            expect(worst, `${selector} worst pixel contrast`).toBeGreaterThanOrEqual(7);
+          }
         }
       });
     }
@@ -212,6 +380,24 @@ test.describe('without JavaScript', () => {
       await expect(page).toHaveURL(/#lista$/);
       await expect(page.locator('#lista')).toBeInViewport();
     });
+
+    test(`/${locale} shows every FAQ answer as a plain list, to people and to assistive technology`, async ({ page }) => {
+      const { Prelaunch } = messages[locale];
+      await page.goto(`/${locale}`, { waitUntil: 'networkidle' });
+      const faq = page.locator('#faq');
+      const list = faq.locator('dl');
+
+      // The accordion cannot open without scripts, so it gives way to the list
+      await expect(faq.locator('.mantine-Accordion-root')).toBeHidden();
+      await expect(list.locator('dt')).toHaveText(questions.map((question) => Prelaunch.faq[question].q));
+      for (const question of questions) {
+        const answer = list.getByText(Prelaunch.faq[question].a, { exact: true });
+        await expect(answer).toBeVisible();
+        // Visible is not enough: a closed panel's text is also aria-hidden, inert and transparent
+        expect(await answer.evaluate((element) => ({ hidden: !!element.closest('[aria-hidden="true"], [inert]'), opacity: getComputedStyle(element).opacity }))).toEqual({ hidden: false, opacity: '1' });
+      }
+      await expect(list.getByRole('link', { name: Prelaunch.privacyLink, exact: true })).toHaveAttribute('href', privacyPaths[locale]);
+    });
   }
 });
 
@@ -226,6 +412,16 @@ const watchLayoutShift = (page: Page) =>
   });
 
 const layoutShift = (page: Page) => page.evaluate(() => Number(Reflect.get(window, 'shift')));
+
+// Down the page half a window at a time, so every lazy piece is requested, then back to the top
+const scrollThrough = (page: Page) =>
+  page.evaluate(async () => {
+    for (let y = 0; y < document.documentElement.scrollHeight; y += window.innerHeight / 2) {
+      window.scrollTo(0, y);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    window.scrollTo(0, 0);
+  });
 
 for (const locale of locales) {
   test.describe(`/${locale} with the hero image blocked`, () => {
@@ -253,6 +449,39 @@ for (const locale of locales) {
 
       expect(await layoutShift(page)).toBeLessThanOrEqual(0.1);
     });
+
+    test('every lazy piece keeps its box when its image never arrives', async ({ page }) => {
+      await watchLayoutShift(page);
+      await page.route(/\/_next\/image/, (route) => route.abort());
+      await page.goto(`/${locale}`, { waitUntil: 'networkidle' });
+      await page.evaluate(() => document.fonts.ready);
+      const before = await page.evaluate(() => document.documentElement.scrollHeight);
+      await scrollThrough(page);
+      await page.waitForLoadState('networkidle');
+
+      const pieces = await page.locator('main img[loading="lazy"], footer img[src*="/_next/image"]').evaluateAll((images) =>
+        (images as HTMLImageElement[]).map((image) => ({ failed: image.complete && image.naturalWidth === 0, height: image.getBoundingClientRect().height })),
+      );
+      // Ten pieces in main (six territories, three steps, Turismo Vivo) and the footer's horizon (its mark is a static SVG, not an optimised image)
+      expect(pieces).toHaveLength(11);
+      for (const { failed, height } of pieces) {
+        expect(failed, 'the piece really failed').toBe(true);
+        expect(height, 'a failed piece keeps the height its file gives it').toBeGreaterThan(0);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(before);
+      expect(await layoutShift(page)).toBeLessThanOrEqual(0.1);
+    });
+
+    test('the layout shift stays within 0.1 while the lazy art arrives', async ({ page }) => {
+      await watchLayoutShift(page);
+      await page.goto(`/${locale}`, { waitUntil: 'networkidle' });
+      await page.evaluate(() => document.fonts.ready);
+      await scrollThrough(page);
+      await page.waitForLoadState('networkidle');
+
+      expect(await page.locator('main img, footer img').evaluateAll((images) => (images as HTMLImageElement[]).filter((image) => !image.complete).length)).toBe(0);
+      expect(await layoutShift(page)).toBeLessThanOrEqual(0.1);
+    });
   });
 }
 
@@ -262,9 +491,12 @@ for (const locale of locales) {
     await page.goto(`/${locale}`);
     await page.evaluate(() => document.fonts.ready);
 
-    // The page inset is 24 px a side: a long word must not stretch a section past it
-    const rights = await page.locator('main > *').evaluateAll((sections) => sections.map((section) => section.getBoundingClientRect().right));
-    for (const right of rights) expect(right).toBeLessThanOrEqual(296.01);
+    // The page inset is 24 px a side: no text and no control may run past it, whatever a long word does. The bands' surfaces and
+    // the hero art are full-bleed on purpose, so the check reads what sits in them
+    const rights = await page
+      .locator('main :is(h1, h2, h3, p, li, dt, dd, label, a, button, input)')
+      .evaluateAll((elements) => elements.filter((element) => element.getClientRects().length > 0).map((element) => [element.textContent?.slice(0, 40), element.getBoundingClientRect().right] as const));
+    for (const [text, right] of rights) expect(right, text ?? '').toBeLessThanOrEqual(296.01);
     const clipped = await page.locator('h1, .mantine-Button-label').evaluateAll((elements) => elements.filter((element) => element.scrollWidth > element.clientWidth).map((element) => element.textContent));
     expect(clipped, 'text wider than its box').toEqual([]);
   });
@@ -274,20 +506,24 @@ for (const locale of locales) {
   const { Prelaunch } = messages[locale];
 
   test.describe(`/${locale} reading and keyboard`, () => {
-    test('the territory list keeps its list role and the paragraphs keep a readable measure', async ({ page }) => {
+    test('the territories and the commitments keep their list roles and the paragraphs keep a readable measure', async ({ page }) => {
       await page.setViewportSize({ width: 1440, height: 900 });
       await page.goto(`/${locale}`);
 
-      await expect(page.locator('ul[role="list"][aria-label]')).toHaveCount(1);
-      for (const selector of ['thesis-title', 'tourism-title', 'who-title', 'allies-title']) {
-        const paragraph = await page.locator(`section[aria-labelledby="${selector}"] > p`).first().boundingBox();
+      // The territories are one named group; the lists are named by a heading or a visible label
+      await expect(page.getByRole('main').locator('[role="group"][aria-label]')).toHaveCount(1);
+      await expect(page.getByRole('main').locator('ul[role="list"][aria-label]')).toHaveCount(0);
+      await expect(page.getByRole('list', { name: Prelaunch.thesis.commitmentsLabel, exact: true }).getByRole('listitem')).toHaveCount(4);
+      const leads = ['#hero-title + p', '#thesis-title + p', '#places-title + p', '#method-title + p', '#tourism-title ~ p.t-body-lg', '#allies-title + p', '#list-title + p'];
+      for (const selector of leads) {
+        const paragraph = await page.locator(selector).first().boundingBox();
         if (!paragraph) throw new Error(`${selector} has no paragraph`);
         // 36em of the paragraph's own 18 px type is 648 px: about 70 characters a line (it was 48em, 864 px)
         expect(paragraph.width, selector).toBeLessThanOrEqual(649);
       }
     });
 
-    test('tab goes from the hero button to the policy, WhatsApp and email in order, with a visible focus ring', async ({ page }) => {
+    test('tab goes from the hero button through the allies, the copy control, the policy link and the FAQ to the form, with a visible focus ring', async ({ page }) => {
       await page.goto(`/${locale}`);
       const cta = page.getByRole('link', { name: Prelaunch.cta, exact: true });
       await cta.focus();
@@ -311,12 +547,29 @@ for (const locale of locales) {
       expect(ring.width).toBeGreaterThanOrEqual(2);
       expect(contrastRatio(ring.color, ring.page)).toBeGreaterThanOrEqual(3);
 
+      // Closed FAQ panels are inert: their policy link is skipped until its question opens
       const order: string[] = [];
-      for (let step = 0; step < 4; step++) {
+      for (let step = 0; step < 25; step++) {
         await page.keyboard.press('Tab');
-        order.push(await page.evaluate(() => document.activeElement?.getAttribute('href') ?? document.activeElement?.tagName ?? ''));
+        order.push(
+          await page.evaluate(() => {
+            const element = document.activeElement;
+            return element?.getAttribute('href') ?? (element?.tagName === 'BUTTON' ? `button:${element.textContent?.trim()}` : (element?.tagName ?? ''));
+          }),
+        );
       }
-      expect(order.map((href) => (href.startsWith('https://wa.me') ? 'whatsapp' : href.startsWith('mailto:') ? 'email' : /privacy|privacidad/.test(href) ? 'policy' : href))).toEqual(['policy', 'whatsapp', 'email', 'INPUT']);
+      expect(order.map((href) => (href.startsWith('https://wa.me') ? 'whatsapp' : href.startsWith('mailto:') ? 'email' : href))).toEqual([
+        '#allies',
+        '#lista',
+        // Each route: its WhatsApp button, then its email link
+        ...routes.flatMap(() => ['whatsapp', 'email']),
+        'whatsapp',
+        'email',
+        `button:${Prelaunch.copyEmail}`,
+        privacyPaths[locale],
+        ...questions.map((question) => `button:${Prelaunch.faq[question].q}`),
+        'INPUT',
+      ]);
     });
   });
 }

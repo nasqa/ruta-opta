@@ -12,3 +12,6 @@ test-results
 
 # Playwright MCP output
 .playwright-mcp/
+
+# Agent worktrees (separate checkouts)
+.claude/worktrees/

@@ -1,0 +1,55 @@
+/* The home is a stack of full-bleed bands whose surfaces alternate (canvas, subtle), each with one inner container as wide as
+   Mantine's lg breakpoint and the page inset at its sides */
+.band {
+  padding-block: var(--space-section);
+}
+
+.canvas {
+  background: var(--color-surface-canvas);
+}
+
+.subtle {
+  background: var(--color-surface-subtle);
+}
+
+.inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-7);
+  max-width: var(--mantine-breakpoint-lg);
+  margin-inline: auto;
+  padding-inline: var(--space-inset-page);
+}
+
+/* A section's heading and its one-line lead; the lead keeps a readable measure */
+.head {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.head > * {
+  margin: 0;
+  text-wrap: balance;
+}
+
+.head > p {
+  max-width: var(--mantine-breakpoint-xs);
+  color: var(--color-text-secondary);
+}
+
+/* A cut-paper piece on a transparent ground, its one soft shadow baked into the file, so it sits on any band as placed paper */
+.piece {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media (min-width: 62em) {
+  .band {
+    padding-block: var(--space-9);
+  }
+
+  .inner {
+    gap: var(--space-8);
+  }
+}
