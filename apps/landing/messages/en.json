@@ -23,7 +23,15 @@
         "caldas": "Caldas",
         "valle": "Valle del Cauca",
         "choco": "Chocó"
-      }
+      },
+      "verbsLabel": "How we do it",
+      "verbs": {
+        "listen": "We listen",
+        "recognize": "We recognize",
+        "connect": "We connect",
+        "build": "We build"
+      },
+      "stance": "Communities should not have to get used to others deciding for them."
     },
     "methodTitle": "Grow, create, connect: a path in three steps",
     "stages": {
@@ -74,7 +82,68 @@
     },
     "listTitle": "Leave us your email",
     "listLead": "Leave us your name and email and we'll let you know when we open.",
-    "privacyLink": "Data protection policy"
+    "privacyLink": "Data protection policy",
+    "overline": "Talent and community tourism",
+    "ctaAllies": "I want to be an ally",
+    "ctaNote": "We write rarely, and you can unsubscribe at any time.",
+    "places": {
+      "title": "Five territories, one route",
+      "lead": "From the coffee mountains to the Pacific rainforest, every territory has its own knowledge.",
+      "quindio": "Wax palms, coffee and bahareque towns.",
+      "risaralda": "Cloud forests, guadua bamboo and hot springs.",
+      "caldas": "Coffee mountains at the foot of the Nevado del Ruiz.",
+      "valle": "The Cauca river valley, between the Andes and the Pacific.",
+      "choco": "Rainforest, rivers and the Pacific coast."
+    },
+    "methodLead": "Three steps that start from what each person already knows how to do.",
+    "tourismOverline": "What we are building",
+    "tourismPrinciples": {
+      "label": "How it will work",
+      "designed": "Experiences are designed with the community.",
+      "decides": "Each family decides what to share and how.",
+      "price": "The price and how it is shared are known before anything is sold."
+    },
+    "tourismLink": "Tell me when it opens",
+    "alliesFor": {
+      "title": "Who can be an ally",
+      "companies": "Businesses",
+      "agencies": "Agencies",
+      "lodgings": "Lodgings",
+      "institutions": "Institutions",
+      "people": "People with experience to share"
+    },
+    "alliesWhatsappText": "Write to us, tell us who you are and how you would like to take part.",
+    "alliesEmailText": "If you prefer email, write to us at this address.",
+    "copyEmail": "Copy email",
+    "copiedEmail": "Email copied",
+    "faq": {
+      "title": "Frequently asked questions",
+      "what": {
+        "q": "What is Ruta Opta?",
+        "a": "An initiative of Fundación Embajadores de la Paz that connects people's talent with opportunities in Quindío, Risaralda, Caldas, Valle del Cauca and Chocó."
+      },
+      "how": {
+        "q": "How does Ruta Opta work?",
+        "a": "In three steps: grow, to strengthen people; create, to turn their knowledge into proposals with costs, a price and a good presentation; and connect, to present those proposals to visitors, allies and markets."
+      },
+      "tourism": {
+        "q": "What is Turismo Vivo?",
+        "a": "Rural experiences designed by the people who live in the territory: a meal, a walk, a craft. Each family decides what to share and how, and the price and how it is shared are known before anything is sold."
+      },
+      "book": {
+        "q": "Can I book an experience yet?",
+        "a": "Not yet. Turismo Vivo is being built together with the communities. Leave us your email and we will let you know when it opens."
+      },
+      "allies": {
+        "q": "How can I become an ally?",
+        "a": "Write to us on WhatsApp or at info@rutaopta.org and tell us who you are and how you would like to take part."
+      },
+      "data": {
+        "q": "What do you do with my data?",
+        "a": "We use your name and email only to send you Ruta Opta news and to let you know when we open. You can unsubscribe at any time from any email. The details are in our data processing policy."
+      }
+    },
+    "listPromise": "We will tell you when Turismo Vivo opens and what we are building with the communities."
   },
   "Waitlist": {
     "name": {
@@ -201,7 +270,24 @@
     "footer": {
       "initiative": "Ruta Opta is an initiative of Fundación Embajadores de la Paz.",
       "privacy": "Data protection policy",
-      "email": "privacy@rutaopta.org"
+      "email": "privacy@rutaopta.org",
+      "mission": "We connect the talent of communities with opportunities in the Coffee Region, Valle del Cauca and Chocó.",
+      "explore": "Explore",
+      "contact": "Contact",
+      "legal": "Legal",
+      "whatsapp": "WhatsApp +57 310 587 4657",
+      "whatsappNumber": "573105874657",
+      "infoEmail": "info@rutaopta.org",
+      "place": "Armenia, Quindío, Colombia",
+      "rights": "© {year} Fundación Embajadores de la Paz"
+    },
+    "sections": {
+      "label": "On this page",
+      "places": "Territories",
+      "method": "How we work",
+      "tourism": "Turismo Vivo",
+      "allies": "Allies",
+      "faq": "Questions"
     }
   }
 }

@@ -23,7 +23,15 @@
         "caldas": "Caldas",
         "valle": "Valle del Cauca",
         "choco": "Chocó"
-      }
+      },
+      "verbsLabel": "Cómo lo hacemos",
+      "verbs": {
+        "listen": "Escuchamos",
+        "recognize": "Reconocemos",
+        "connect": "Conectamos",
+        "build": "Construimos"
+      },
+      "stance": "Las comunidades no tienen por qué acostumbrarse a que otros decidan por ellas."
     },
     "methodTitle": "Crecer, crear y conectar: una ruta en tres pasos",
     "stages": {
@@ -74,7 +82,68 @@
     },
     "listTitle": "Déjanos tu correo",
     "listLead": "Déjanos tu nombre y tu correo y te avisamos cuando abramos.",
-    "privacyLink": "Política de tratamiento de datos"
+    "privacyLink": "Política de tratamiento de datos",
+    "overline": "Talento y turismo comunitario",
+    "ctaAllies": "Quiero ser aliado",
+    "ctaNote": "Te escribimos pocas veces y puedes darte de baja cuando quieras.",
+    "places": {
+      "title": "Cinco territorios, una misma ruta",
+      "lead": "De las montañas del café a la selva del Pacífico, cada territorio tiene sus propios saberes.",
+      "quindio": "Palmas de cera, café y pueblos de bahareque.",
+      "risaralda": "Bosques de niebla, guadua y aguas termales.",
+      "caldas": "Montañas cafeteras al pie del Nevado del Ruiz.",
+      "valle": "El valle del río Cauca, entre la cordillera y el Pacífico.",
+      "choco": "Selva, ríos y la costa del Pacífico."
+    },
+    "methodLead": "Tres pasos que parten de lo que cada persona ya sabe hacer.",
+    "tourismOverline": "Lo que estamos construyendo",
+    "tourismPrinciples": {
+      "label": "Así funcionará",
+      "designed": "Las experiencias se diseñan con la comunidad.",
+      "decides": "Cada familia decide qué comparte y cómo.",
+      "price": "El precio y el reparto se conocen antes de vender."
+    },
+    "tourismLink": "Avísame cuando abra",
+    "alliesFor": {
+      "title": "Pueden ser aliados",
+      "companies": "Empresas",
+      "agencies": "Agencias",
+      "lodgings": "Alojamientos",
+      "institutions": "Instituciones",
+      "people": "Personas con experiencia para compartir"
+    },
+    "alliesWhatsappText": "Escríbenos, cuéntanos quién eres y cómo te gustaría participar.",
+    "alliesEmailText": "Si prefieres el correo, escríbenos a esta dirección.",
+    "copyEmail": "Copiar correo",
+    "copiedEmail": "Correo copiado",
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "what": {
+        "q": "¿Qué es Ruta Opta?",
+        "a": "Una iniciativa de la Fundación Embajadores de la Paz que conecta el talento de las personas con oportunidades en Quindío, Risaralda, Caldas, Valle del Cauca y Chocó."
+      },
+      "how": {
+        "q": "¿Cómo trabaja Ruta Opta?",
+        "a": "En tres pasos: crecer, para fortalecer a las personas; crear, para convertir sus saberes en propuestas con costos, precio y buena presentación; y conectar, para presentar esas propuestas a visitantes, aliados y mercados."
+      },
+      "tourism": {
+        "q": "¿Qué es Turismo Vivo?",
+        "a": "Son experiencias rurales diseñadas por quienes habitan el territorio: una comida, un recorrido, un oficio. Cada familia decide qué comparte y cómo, y el precio y el reparto se conocen antes de vender."
+      },
+      "book": {
+        "q": "¿Ya puedo reservar una experiencia?",
+        "a": "Todavía no. Turismo Vivo está en construcción junto a las comunidades. Si nos dejas tu correo, te avisamos cuando abra."
+      },
+      "allies": {
+        "q": "¿Cómo puedo ser aliado?",
+        "a": "Escríbenos por WhatsApp o a info@rutaopta.org y cuéntanos quién eres y cómo te gustaría participar."
+      },
+      "data": {
+        "q": "¿Qué hacen con mis datos?",
+        "a": "Usamos tu nombre y tu correo solo para enviarte novedades de Ruta Opta y avisarte cuando abramos. Puedes darte de baja cuando quieras desde cualquier correo. Los detalles están en nuestra política de tratamiento de datos."
+      }
+    },
+    "listPromise": "Te contamos cuándo abre Turismo Vivo y lo que vamos construyendo con las comunidades."
   },
   "Waitlist": {
     "name": {
@@ -201,7 +270,24 @@
     "footer": {
       "initiative": "Ruta Opta es una iniciativa de la Fundación Embajadores de la Paz.",
       "privacy": "Política de tratamiento de datos",
-      "email": "privacidad@rutaopta.org"
+      "email": "privacidad@rutaopta.org",
+      "mission": "Conectamos el talento de las comunidades con oportunidades en el Eje Cafetero, Valle del Cauca y Chocó.",
+      "explore": "Explora",
+      "contact": "Contacto",
+      "legal": "Legal",
+      "whatsapp": "WhatsApp +57 310 587 4657",
+      "whatsappNumber": "573105874657",
+      "infoEmail": "info@rutaopta.org",
+      "place": "Armenia, Quindío, Colombia",
+      "rights": "© {year} Fundación Embajadores de la Paz"
+    },
+    "sections": {
+      "label": "En esta página",
+      "places": "Territorios",
+      "method": "Cómo trabajamos",
+      "tourism": "Turismo Vivo",
+      "allies": "Aliados",
+      "faq": "Preguntas"
     }
   }
 }
