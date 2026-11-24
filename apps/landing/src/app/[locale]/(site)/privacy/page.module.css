@@ -105,8 +105,10 @@
   margin: 0;
 }
 
-/* The two-digit number is decoration (the contents already number the sections), so its alternative text is empty */
+/* The two-digit number is decoration (the contents already number the sections), so its alternative text is empty. The plain
+   declaration first: browsers without alt text for generated content (Safari < 17.4, Firefox < 128) drop the second one */
 .section h2::before {
+  content: counter(section, decimal-leading-zero);
   content: counter(section, decimal-leading-zero) / '';
   margin-inline-end: var(--space-3);
   color: var(--color-action-solid);

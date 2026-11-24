@@ -53,9 +53,9 @@ for (const locale of routing.locales) {
     await expect(main.locator('section#controller')).toContainText('Fundación Embajadores de la Paz');
     await expect(main.locator('section#controller')).toContainText('Armenia');
 
-    // The accent card, found through its heading, lists the page's own language first
+    // The accent card, found through its heading: the privacy address, then the English one, in both locales
     const card = main.getByRole('heading', { level: 2, name: Privacy.questions, exact: true }).locator('..');
-    const emails = locale === 'en' ? [Privacy.emailEn, Privacy.emailEs] : [Privacy.emailEs, Privacy.emailEn];
+    const emails = [Privacy.emailEs, Privacy.emailEn];
     const contacts = card.getByRole('link');
     await expect(contacts).toHaveCount(emails.length);
     for (const [index, email] of emails.entries()) await expect(contacts.nth(index)).toHaveAttribute('href', `mailto:${email}`);

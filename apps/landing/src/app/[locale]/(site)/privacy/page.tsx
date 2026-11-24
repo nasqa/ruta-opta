@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { type Locale, useLocale, useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { alternates } from '@/i18n/alternates';
@@ -21,8 +21,8 @@ export const generateMetadata = async (): Promise<Metadata> => {
 // The keys of Privacy.sections, which are also the section ids the contents link to
 const sections = ['controller', 'data', 'purpose', 'processor', 'rights'] as const;
 
-// The page's own language first
-const contactOrder: Record<Locale, readonly ('Es' | 'En')[]> = { es: ['Es', 'En'], en: ['En', 'Es'] };
+// The privacy address first, then the English one, in every locale
+const contacts = ['Es', 'En'] as const;
 
 // Headings are plain h1/h2 with Trama's classes, and the cards are plain blocks with Trama's card tokens: Mantine's Title, Card and Stack
 // add client JS to every route. The contents is static (no scroll-spy, which needs client JS). Every link is a plain anchor: a next-intl
@@ -66,7 +66,7 @@ const PrivacyPage = () => {
               ))}
               <div className={styles.contact}>
                 <h2 className="t-title">{t('questions')}</h2>
-                {contactOrder[locale].map((language) => (
+                {contacts.map((language) => (
                   <p key={language} className="t-body-md">
                     {t(`contact${language}`)} <a href={`mailto:${t(`email${language}`)}`}>{t(`email${language}`)}</a>
                   </p>
