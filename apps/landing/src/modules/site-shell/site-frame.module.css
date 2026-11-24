@@ -1,0 +1,55 @@
+/* The curtain: an opaque layer at least one viewport tall (svh, so iOS Safari's toolbar does not uncover the footer early) */
+.content {
+  position: relative;
+  z-index: var(--mantine-z-index-app);
+  min-height: 100svh;
+  background: var(--color-surface-canvas);
+}
+
+/* Sticky, not fixed: it waits at the bottom of the viewport under the content and is uncovered in the last footer-height of
+   scroll, whatever its height */
+.footer {
+  position: sticky;
+  bottom: 0;
+  border-top: var(--border-width-hairline) solid var(--color-border-subtle);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+}
+
+/* Focus is never hidden (WCAG 2.4.11): tabbing into the footer lifts it above the content */
+.footer:focus-within {
+  z-index: var(--mantine-z-index-modal);
+}
+
+/* One row on wide screens (organisation left, links right); it wraps into lines on narrow ones */
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-5);
+  padding: var(--space-5) var(--space-inset-page);
+}
+
+.bar p {
+  margin: 0;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-5);
+}
+
+.footer a {
+  color: var(--color-action-text-low);
+  text-decoration-thickness: var(--border-width-hairline);
+  text-underline-offset: var(--space-1);
+}
+
+@media (max-width: 30em) {
+  .bar {
+    padding-inline: var(--space-4);
+  }
+}

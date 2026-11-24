@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { alternates } from '@/i18n/alternates';
 import { localesFor } from '@/i18n/coverage';
 import { Link } from '@/i18n/navigation';
+import { SiteHeader } from '@/modules/site-shell';
 import styles from './page.module.css';
 
 export const generateMetadata = async (): Promise<Metadata> => {
@@ -24,14 +25,17 @@ const ConfirmedPage = () => {
   const t = useTranslations('Confirmed');
 
   return (
-    <main className={styles.page}>
-      <h1 className="t-display-md">{t('title')}</h1>
-      <p className="t-body-lg">{t('lead')}</p>
-      <p className="t-body-lg">{t('frequency')}</p>
-      <Link className="t-body-lg" href="/">
-        {t('home')}
-      </Link>
-    </main>
+    <>
+      <SiteHeader href="/confirmed" />
+      <main className={styles.page}>
+        <h1 className="t-display-md">{t('title')}</h1>
+        <p className="t-body-lg">{t('lead')}</p>
+        <p className="t-body-lg">{t('frequency')}</p>
+        <Link className="t-body-lg" href="/">
+          {t('home')}
+        </Link>
+      </main>
+    </>
   );
 };
 

@@ -6,7 +6,7 @@ updated: 2026-11-23
 Installed: next 16.4.6, react 19.3.0, @mantine/core 9.8.2, @nasqa/trama-react 0.1.1, @nasqa/trama-theme-opta (dist in node_modules), next-intl 4.15.3, typescript 6.0.3 (pinned 6.0.x), eslint 9.39.5, stylelint 18.1.0. Also node:test, Playwright, Lighthouse CI. Node 24. CI: actions/checkout, setup-node, upload-artifact v7.
 
 ## Next.js 16.4.6: images
-- **Use:** `getImageProps()` from `next/image` and render a plain `<img {...props}>` in the Server Component. No client `Image`.
+- **Use:** `getImageProps()` from `next/image` and render a plain `<img {...props} alt="" />` in the Server Component. No client `Image`. `@next/next/no-img-element` is off only for `apps/*/src/modules/site-shell/**/*.tsx`, so these images live in site-shell.
 - **Patterns:** above the fold use `loading="eager"` or `fetchPriority="high"`. With art direction (several `<source>`/`<picture>`), `fetchPriority="high"` on the `<img>`; `preload` and `loading="eager"` would load both images.
 - **Avoid:** `priority` (deprecated in 16 in favour of `preload`). The docs advise `loading="eager"` / `fetchPriority="high"` over `preload` in most cases, and never `preload` alongside `loading` or `fetchPriority`.
 - **Hosting:** Netlify serves `next/image` through its Image CDN via the OpenNext adapter with no config (given by Santiago; not re-verified here).
@@ -16,6 +16,7 @@ Installed: next 16.4.6, react 19.3.0, @mantine/core 9.8.2, @nasqa/trama-react 0.
 - **Fact:** every `@mantine/core` component file starts with `"use client"` (checked in `esm/components/Button/Button.mjs`, `Title/Title.mjs`). A Server Component page may render them, but only with serialisable props: no `renderRoot`, no function props, no callback children.
 - **Compound parts:** `Popover.Target` etc. fail in server files; use the flat export (`PopoverTarget`) or put the file behind `'use client'`.
 - **Polymorphic:** `component="a" href="..."` retypes the props to the element's. A string `component` is safe from a server page; a component reference is not (see the next-intl fact).
+- **Container sizes are not global:** `--container-size-{xs..xl}` are declared only on the Container root class (`.m_7485cace` in `styles.css`), so `var(--container-size-xs)` outside a `Container` is invalid at computed time (Stylelint still passes it). `--mantine-breakpoint-*` and `--mantine-z-index-*` are on `:root`. `Container` is not imported by Trama's theme, so rendering it adds client JS.
 - **Title:** `order` picks the element (h1-h6, default 1) and its theme size; `size` changes only font size (and line height only between h1-h6 sizes). Choose `order` for semantics, `size` for visual override. Trama keys letter-spacing off `order`.
 - **Sources:** Context7 `/mantinedev/mantine/9.0.0` (guides/next, help q/server-components, core/title, guides/polymorphic), 2026-11-23; installed `@mantine/core/esm`.
 
@@ -49,7 +50,7 @@ Use `<Button component="a" href={getPathname({ locale, href })}>` instead (strin
 
 ## next-intl 4.15.3
 - **Routing here:** locales es/en, `localePrefix: 'always'`, `localeDetection: false`, `alternateLinks: false`, localised `pathnames`. Navigation APIs come from `createNavigation(routing)` in `@/i18n/navigation`.
-- **Link:** `<Link href={{ pathname: '/x', query: { a: 'b' } }} locale="en">` works in Server Components; `locale` switches language and sets `hreflang` on the anchor. The href always carries the locale prefix when `locale` is given. (Types: `BaseLink.d.ts` has `locale?: Locale`.)
+- **Link:** `<Link href={{ pathname: '/x', query: { a: 'b' } }} locale="en">` works in Server Components; `locale` switches language and sets `hreflang` on the anchor, but only when it differs from the current locale (`LocaleChangingLink` in `navigation/shared/BaseLink.js`); pass `hrefLang` yourself on the current-locale link. The href always carries the locale prefix when `locale` is given. (Types: `BaseLink.d.ts` has `locale?: Locale`.)
 - **Cookie:** the `NEXT_LOCALE` cookie is synced when a locale-prefixed path is visited (the docs' reason a `locale` Link keeps the prefix). `localeDetection: false` ignores both `accept-language` and the cookie for resolving the locale; `localeCookie: false` disables the cookie. Not exercised in this repo.
 - **getPathname:** `getPathname({ locale, href })` returns the localised, prefixed path string; `href` may be `{ pathname, query, params }`. Never prepend the locale by hand.
 - **hasLocale:** `hasLocale(routing.locales, value)` from `next-intl` narrows to a `Locale`; use it in request config and `notFound()` when false.

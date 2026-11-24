@@ -133,5 +133,19 @@
   "NotFound": {
     "title": "We couldn't find this page",
     "home": "Go to the home page"
+  },
+  "SiteShell": {
+    "home": "Ruta Opta, home",
+    "product": "Ruta Opta",
+    "languageNav": "Language",
+    "languages": {
+      "es": "Español",
+      "en": "English"
+    },
+    "footer": {
+      "initiative": "Ruta Opta is an initiative of Fundación Embajadores de la Paz.",
+      "privacy": "Data protection policy",
+      "email": "privacy@rutaopta.org"
+    }
   }
 }

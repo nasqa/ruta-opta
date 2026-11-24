@@ -60,10 +60,6 @@
   margin: 0;
 }
 
-.footer {
-  padding: var(--space-inset-page);
-}
-
 @media (min-width: 48em) {
   .hero {
     grid-template-columns: 1fr 1fr;

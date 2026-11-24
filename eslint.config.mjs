@@ -182,6 +182,8 @@ const eslintConfig = defineConfig([
     },
   },
   { files: ['apps/*/src/i18n/navigation.ts'], rules: { 'no-restricted-imports': 'off' } },
+  // site-shell's images come from next/image's getImageProps() (Next's documented pattern renders a bare <img {...props} />); the client <Image> would add JS to every route under a budget that only goes down
+  { files: ['apps/*/src/modules/site-shell/**/*.tsx'], rules: { '@next/next/no-img-element': 'off' } },
   // D6: visible text comes from messages; D1/D2: styles come from CSS that reads theme variables, or from theme keys
   {
     files: ['apps/*/src/**/*.tsx'],
