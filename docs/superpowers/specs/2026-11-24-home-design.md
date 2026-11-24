@@ -121,3 +121,10 @@ EN: "Who is behind it" / "Ruta Opta is an initiative of Fundación Embajadores d
 EN: "Let's build together" / "Ruta Opta is built with businesses, agencies, lodgings, institutions and people who want to share their experience. Tell us how you would like to take part." / "I want to be an ally".
 
 **Suscripción** keeps the current keys ("Déjanos tu correo", "Déjanos tu nombre y tu correo y te avisamos cuando abramos.").
+
+## Addendum (2026-11-24, approved by Santiago after Refero round 2)
+- Turismo Vivo shows a status tag: "En construcción" (EN "In progress"), using Trama's tag treatment.
+- Allies are two equal cards, each titled "WhatsApp" and "Correo" (EN "Email"), each with one button; stacked on phones; no icons in v1.
+- "Cómo trabajamos" is a vertical timeline (numbered circle markers, hairline connector, optional art column that collapses).
+- The hero button is full width and 48 px high at 30em and below.
+- Not approved, do not add: a status tag in the hero.
