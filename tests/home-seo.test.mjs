@@ -76,7 +76,7 @@ const metaInput = (locale) => ({
   ogTitle: 'El talento de las comunidades puede transformar sus territorios',
   ogDescription: 'Conectamos el talento de las comunidades con oportunidades.',
   ogAlt: 'Un valle en relieve de papel.',
-  og: { src: '/_next/static/media/home-og.jpg', width: 1200, height: 630 },
+  ogImage: 'https://www.rutaopta.org/og/home-es-v2.jpg',
   languages,
 });
 
@@ -101,7 +101,7 @@ test('Open Graph is a website with this locale first and the other as alternate,
   assert.deepEqual(es.alternateLocale, ['en_US']);
   assert.equal(en.locale, 'en_US');
   assert.deepEqual(en.alternateLocale, ['es_CO']);
-  assert.deepEqual(es.images, [{ url: '/_next/static/media/home-og.jpg', width: 1200, height: 630, alt: 'Un valle en relieve de papel.' }]);
+  assert.deepEqual(es.images, [{ url: 'https://www.rutaopta.org/og/home-es-v2.jpg', width: 1200, height: 630, type: 'image/jpeg', alt: 'Un valle en relieve de papel.' }]);
 });
 
 test('the card names the site and carries the headline and the short description, not the meta title and description', () => {
@@ -116,7 +116,7 @@ test('the Twitter card is the large image, with its own title, description and i
   assert.equal(twitter.card, 'summary_large_image');
   assert.equal(twitter.title, 'El talento de las comunidades puede transformar sus territorios');
   assert.equal(twitter.description, 'Conectamos el talento de las comunidades con oportunidades.');
-  assert.deepEqual(twitter.images, [{ url: '/_next/static/media/home-og.jpg', alt: 'Un valle en relieve de papel.' }]);
+  assert.deepEqual(twitter.images, [{ url: 'https://www.rutaopta.org/og/home-es-v2.jpg', alt: 'Un valle en relieve de papel.' }]);
 });
 
 test('the description is passed through for the plain meta tag', () => {

@@ -7,10 +7,9 @@ import { localesFor } from '@/i18n/coverage';
 import { getPathname } from '@/i18n/navigation';
 import { siteUrl } from '@/shared/env';
 import { SiteHeader } from '@/modules/site-shell';
-import ogImage from './_art/home-og.jpg';
 import { Allies } from './_components/home/allies';
 import { Hero } from './_components/home/hero';
-import { homeMetadata } from './_components/home/metadata';
+import { homeMetadata, ogCard } from './_components/home/metadata';
 import { Method } from './_components/home/method';
 import { homeJsonLd, jsonLdScript } from './_components/home/structured-data';
 import { Thesis } from './_components/home/thesis';
@@ -39,7 +38,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
     ogTitle: t('ogTitle'),
     ogDescription: t('ogDescription'),
     ogAlt: t('ogAlt'),
-    og: ogImage,
+    ogImage: new URL(ogCard.path(locale), siteUrl).href,
     languages: alternates('/').languages,
   });
 };

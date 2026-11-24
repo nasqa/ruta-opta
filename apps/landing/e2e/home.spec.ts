@@ -100,7 +100,12 @@ for (const locale of locales) {
       expect(await meta(page, 'meta[property="og:image:alt"]')).toBe(Prelaunch.ogAlt);
       expect(await meta(page, 'meta[name="twitter:card"]')).toBe('summary_large_image');
       const image = await meta(page, 'meta[property="og:image"]');
-      expect(image).toMatch(new RegExp(`^${site.origin}/`));
+      // A stable, versioned file per locale, never a hashed asset, with the size and type a first share needs
+      expect(image).toMatch(new RegExp(`^${site.origin}/og/home-${locale}-v\\d+\\.jpg$`));
+      expect(await meta(page, 'meta[name="twitter:image"]')).toBe(image);
+      expect(await meta(page, 'meta[property="og:image:width"]')).toBe('1200');
+      expect(await meta(page, 'meta[property="og:image:height"]')).toBe('630');
+      expect(await meta(page, 'meta[property="og:image:type"]')).toBe('image/jpeg');
       // The absolute URL points at the baked-in site URL, not this run's port: ask this run's server for the same path
       const response = await request.get(new URL(image ?? '').pathname);
       expect(response.status()).toBe(200);
