@@ -37,21 +37,11 @@
   color: var(--color-text-secondary);
 }
 
-/* A cut-paper piece photographed on its own sheet. Multiplied into the band, with the sheet's off-white lifted to white by a
-   brightness and contrast step, the sheet drops out and only the paper pieces stay. The feathered edges and the softened corners
-   hide the sheet's border and its vignette without touching the pieces, which all sit between 6 % and 94 % of their file and
-   within 112 % of the half-width from the centre (measured), so nothing of the art is cut */
+/* A cut-paper piece on a transparent ground, its one soft shadow baked into the file, so it sits on any band as placed paper */
 .piece {
   display: block;
   width: 100%;
   height: auto;
-  mix-blend-mode: multiply;
-  filter: brightness(1.12) contrast(1.2) saturate(0.95);
-  mask-image:
-    linear-gradient(to right, transparent, var(--color-text-primary) 5%, var(--color-text-primary) 95%, transparent),
-    linear-gradient(to bottom, transparent, var(--color-text-primary) 5%, var(--color-text-primary) 95%, transparent),
-    radial-gradient(circle closest-side, var(--color-text-primary) 112%, transparent 140%);
-  mask-composite: intersect;
 }
 
 @media (min-width: 62em) {

@@ -33,20 +33,24 @@ const paper = light['color.surface.canvas'].hex;
 
 // The band is the hero's own 16:9 at the card's width, top-aligned, so the crop takes 45 px of foreground and keeps the sky; the sun sits where
 // SceneBand puts it (scene-band.module.css: top 20 %, left 80 %, 16.1 % wide, centred)
-const page = async ({ title, size }) => `<!doctype html>
+const page = async ({ title, size, name }) => `<!doctype html>
 <html><head><style>
   @font-face { font-family: Comfortaa; src: url(${await dataUri(fileURLToPath(import.meta.resolve('@nasqa/trama-theme-opta/fonts/comfortaa-latin-wght-normal.woff2')))}) format('woff2'); font-weight: 300 700; }
+  @font-face { font-family: Inter; src: url(${await dataUri(fileURLToPath(import.meta.resolve('@nasqa/trama-theme-opta/fonts/inter-latin-opsz-normal.woff2')))}) format('woff2'); font-weight: 100 900; }
   html, body { margin: 0; }
   body { position: relative; width: ${card.width}px; height: ${card.height}px; overflow: hidden; background: ${paper}; }
   .band { position: absolute; top: 0; left: 0; width: ${card.width}px; aspect-ratio: 16 / 9; }
   .scene { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .sun { position: absolute; top: 20%; left: 80%; width: 16.1%; height: auto; translate: -50% -50%; }
   .text { position: absolute; top: ${card.inset}px; left: ${card.inset}px; width: 640px; }
+  .brand { display: flex; align-items: center; gap: 18px; }
   .logo { display: block; height: 52px; width: auto; }
+  .divider { width: 2px; height: 34px; background: ${ink}; opacity: 0.2; }
+  .product { color: ${ink}; font: 600 26px/1 Inter; }
   h1 { margin: 24px 0 0; color: ${ink}; font: 700 ${size}px/1.125 Comfortaa; letter-spacing: -0.0147em; text-wrap: balance; }
 </style></head><body>
   <div class="band"><img class="scene" src="${await dataUri(art)}" alt=""><img class="sun" src="${await dataUri(join(assets, 'sun.svg'))}" alt=""></div>
-  <div class="text"><img class="logo" src="${await dataUri(join(assets, 'opta-horizontal.svg'))}" alt=""><h1>${title.replace(/[&<>]/g, (character) => `&#${character.charCodeAt(0)};`)}</h1></div>
+  <div class="text"><div class="brand"><img class="logo" src="${await dataUri(join(assets, 'opta-horizontal.svg'))}" alt=""><span class="divider"></span><span class="product">${name}</span></div><h1>${title.replace(/[&<>]/g, (character) => `&#${character.charCodeAt(0)};`)}</h1></div>
 </body></html>`;
 
 // WCAG 2 contrast of two sRGB colours
@@ -93,9 +97,9 @@ const backdrop = async (tab, boxes) => {
 };
 
 // The largest headline that takes at most three lines, ends above the sky's floor and keeps 7:1 on every pixel behind and around it
-const render = async (tab, title) => {
+const render = async (tab, title, name) => {
   for (let size = 60; size >= 36; size -= 2) {
-    await tab.setContent(await page({ title, size }), { waitUntil: 'load' });
+    await tab.setContent(await page({ title, size, name }), { waitUntil: 'load' });
     const faces = await tab.evaluate(async (font) => (await document.fonts.load(font)).map((face) => face.status), `700 ${size}px Comfortaa`);
     if (faces.length === 0 || faces.some((status) => status !== 'loaded')) throw new Error('Comfortaa did not load: the card would ship the fallback font');
     const boxes = await lineBoxes(tab);
@@ -113,7 +117,7 @@ await mkdir(join(app, 'public/og'), { recursive: true });
 
 for (const [locale, messages] of Object.entries({ es, en })) {
   if (!messages.Prelaunch) continue;
-  const { size, lines, worst } = await render(tab, messages.Prelaunch.ogTitle);
+  const { size, lines, worst } = await render(tab, messages.Prelaunch.ogTitle, messages.Site.name);
 
   // The JPEG quality steps down until the card fits WhatsApp's budget with room to spare
   let quality = 90;
