@@ -7,26 +7,71 @@
     "close": "Cerrar"
   },
   "Prelaunch": {
-    "metaDescription": "OPTA conecta el potencial de las personas con oportunidades para transformar sus territorios. Déjanos tu correo y te avisamos cuando abramos.",
+    "metaTitle": "Ruta Opta · Talento y turismo comunitario en Colombia",
+    "metaDescription": "Ruta Opta conecta el talento de las personas con oportunidades en Quindío, Risaralda, Caldas, Valle del Cauca y Chocó. Crecer, crear y conectar.",
+    "ogAlt": "Un valle en relieve de papel, con el sol de Ruta Opta sobre las montañas.",
     "title": "El talento de las comunidades puede transformar sus territorios.",
-    "lead": "OPTA conecta el potencial de las personas con oportunidades para transformar sus territorios. Estamos construyendo la ruta y queremos avisarte cuando abra.",
+    "lead": "Ruta Opta conecta el talento de las personas con oportunidades en Quindío, Risaralda, Caldas, Valle del Cauca y Chocó. Escuchamos, reconocemos, conectamos y construimos con ellas.",
     "cta": "Quiero que me avisen",
-    "buildingTitle": "Lo que estamos construyendo",
+    "thesis": {
+      "title": "Hay talento en cada territorio",
+      "text": "Las comunidades ya saben cocinar, cultivar, guiar, crear y organizarse. Lo que muchas veces falta es que las oportunidades lleguen hasta ellas. Ruta Opta existe para acercarlas, y para que las decisiones sigan en manos de quienes viven en el territorio.",
+      "territoriesLabel": "Los cinco territorios",
+      "territories": {
+        "quindio": "Quindío",
+        "risaralda": "Risaralda",
+        "caldas": "Caldas",
+        "valle": "Valle del Cauca",
+        "choco": "Chocó"
+      }
+    },
+    "methodTitle": "Crecer, crear y conectar: una ruta en tres pasos",
     "stages": {
       "grow": {
         "name": "Crecer",
-        "text": "Bienestar emocional y reconocimiento de las capacidades que cada persona ya tiene."
+        "tagline": "Reconocer quién soy, qué siento y qué puedo aportar.",
+        "text": "Fortalecemos a las personas: bienestar, confianza y reconocimiento de lo que ya saben hacer."
       },
       "create": {
         "name": "Crear",
-        "text": "Formación en emprendimiento, finanzas, tecnología y comercialización."
+        "tagline": "Convertir saberes y talentos en propuestas.",
+        "text": "Acompañamos para que eso que sabes hacer tenga costos, precio y una buena presentación."
       },
       "connect": {
         "name": "Conectar",
-        "text": "Vínculos con empleo, mercados, financiación y aliados."
+        "tagline": "Presentar las propuestas a quienes pueden comprarlas y apoyarlas.",
+        "text": "Abrimos contacto con visitantes, aliados y mercados."
       }
     },
-    "territory": "Vamos a empezar por el Quindío.",
+    "tourism": {
+      "title": "Turismo Vivo: experiencias rurales diseñadas por quienes las habitan",
+      "text": "Experiencias de turismo diseñadas por quienes habitan el territorio: una comida, un recorrido, un oficio. Cada familia decide qué comparte y cómo, y el precio y el reparto se conocen antes de vender. Lo estamos construyendo junto a las comunidades.",
+      "status": "En construcción"
+    },
+    "who": {
+      "title": "Quién está detrás",
+      "text": "Ruta Opta es una iniciativa de la {legalName}, con sede en {locality}, {region}.",
+      "legalName": "Fundación Embajadores de la Paz",
+      "locality": "Armenia",
+      "region": "Quindío"
+    },
+    "allies": {
+      "title": "Construyamos juntos: alianzas para abrir oportunidades",
+      "text": "Ruta Opta se construye con empresas, agencias, alojamientos, instituciones y personas que quieran compartir su experiencia. Cuéntanos cómo te gustaría participar.",
+      "whatsapp": {
+        "title": "WhatsApp",
+        "label": "Escríbenos por WhatsApp",
+        "opensNewTab": "{label} (se abre en una pestaña nueva)",
+        "number": "573105874657",
+        "message": "Hola, quiero conocer Ruta Opta como aliado."
+      },
+      "email": {
+        "title": "Correo",
+        "label": "Escríbenos por correo",
+        "address": "info@rutaopta.org",
+        "subject": "Quiero ser aliado de Ruta Opta"
+      }
+    },
     "listTitle": "Déjanos tu correo",
     "listLead": "Déjanos tu nombre y tu correo y te avisamos cuando abramos.",
     "privacyLink": "Política de tratamiento de datos"

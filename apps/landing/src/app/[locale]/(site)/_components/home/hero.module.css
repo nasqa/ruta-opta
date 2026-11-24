@@ -1,0 +1,49 @@
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-group);
+}
+
+/* The text sits on the paper above the art, never over it, so it needs no scrim */
+.text {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  justify-items: start;
+}
+
+.text > * {
+  margin: 0;
+  text-wrap: balance;
+}
+
+/* The headline takes two lines on wide screens; the lead keeps a readable measure */
+@media (min-width: 62em) {
+  .text > h1 {
+    max-width: 68%;
+  }
+
+  .text > p {
+    max-width: 54%;
+  }
+}
+
+/* The same fade as the art's top edge, so the panel and the picture blend into the page together */
+.art {
+  background: linear-gradient(to bottom, transparent, var(--color-surface-subtle) var(--space-9));
+}
+
+/* A thumb-sized, full-width button right after the lead on phones */
+@media (max-width: 30em) {
+  .cta {
+    width: 100%;
+    height: var(--control-height-lg);
+  }
+}
+
+/* "comunidades" at the display size is wider than the 272 px column of a 320 px phone: one step down there only */
+@media (max-width: 22em) {
+  .text > h1 {
+    font-size: var(--font-size-3xl);
+  }
+}

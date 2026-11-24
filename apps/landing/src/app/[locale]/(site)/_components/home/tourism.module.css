@@ -1,0 +1,21 @@
+.section {
+  display: grid;
+  gap: var(--space-related);
+  justify-items: start;
+  padding: var(--space-inset-container);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--shape-item);
+  background: var(--color-surface-raised);
+}
+
+.section > * {
+  margin: 0;
+}
+
+.section > p {
+  max-width: var(--mantine-breakpoint-xs);
+}
+
+.status {
+  margin-block: var(--space-related);
+}

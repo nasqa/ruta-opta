@@ -17,6 +17,11 @@
   aspect-ratio: 60 / 11;
 }
 
+/* The home's hero shows its art whole: the same 16:9 as the file, at every width, so nothing is cropped and the sun never is */
+.hero {
+  aspect-ratio: 16 / 9;
+}
+
 /* The top edge fades into the canvas; routes pass the focal point (object-position) as imageClassName */
 .scene {
   position: absolute;
