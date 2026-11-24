@@ -200,3 +200,31 @@ test.describe('the waitlist round trip on /en', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(en.Confirmed.title);
   });
 });
+
+test.describe('the confirmed page', () => {
+  const pages = [
+    { locale: 'es', path: '/es/confirmado', messages: es.Confirmed },
+    { locale: 'en', path: '/en/confirmed', messages: en.Confirmed },
+  ] as const;
+
+  for (const { locale, path, messages } of pages) {
+    test(`/${locale} ends in the dawn band with the sun as a decorative layer`, async ({ page }) => {
+      await page.goto(path);
+
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText(messages.title);
+      await expect(page.getByRole('link', { name: messages.home })).toHaveAttribute('href', `/${locale}`);
+      // The scene and the sun are both decorative: two images with an empty alt inside the band
+      const band = page.locator('main img[alt=""]').first().locator('..');
+      await expect(band.locator('img[alt=""]')).toHaveCount(2);
+      await axe(page);
+    });
+  }
+
+  test('with reduced motion the sun only fades', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/es/confirmado');
+
+    const sun = page.locator('main img[alt=""]').last();
+    expect(await sun.evaluate((element) => getComputedStyle(element).animationDuration)).toBe('0.1s');
+  });
+});
