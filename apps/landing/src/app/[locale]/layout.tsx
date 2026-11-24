@@ -8,9 +8,10 @@ import '@nasqa/trama-react/system.css';
 import { ColorSchemeScript, mantineHtmlProps } from '@mantine/core';
 import { TramaProvider } from '@nasqa/trama-react';
 import { theme } from '@nasqa/trama-theme-opta';
+import resolved from '@nasqa/trama-theme-opta/tokens.resolved.json' with { type: 'json' };
 import comfortaa from '@nasqa/trama-theme-opta/fonts/comfortaa-latin-wght-normal.woff2';
 import inter from '@nasqa/trama-theme-opta/fonts/inter-latin-opsz-normal.woff2';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { preload } from 'react-dom';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages, getTranslations } from 'next-intl/server';
@@ -18,6 +19,9 @@ import { routing } from '@/i18n/routing';
 import { siteUrl } from '@/shared/env';
 
 export const generateStaticParams = () => routing.locales.map((locale) => ({ locale }));
+
+// The browser's chrome takes the paper canvas the site renders on (light only, like the manifest)
+export const viewport: Viewport = { themeColor: resolved.light['color.surface.canvas'].hex };
 
 // Netlify's free plan injects a comment wrapped in line breaks into <head>. React fails to hydrate a document whose <head> has text nodes and re-renders it all on the client
 const dropHeadWhitespace = 'for (const node of [...document.head.childNodes]) if (node.nodeType === 3 && !node.data.trim()) node.remove()';

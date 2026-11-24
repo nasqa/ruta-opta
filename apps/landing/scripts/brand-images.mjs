@@ -1,5 +1,5 @@
 // Renders the raster images the site serves from its brand sources, with the Chromium the e2e already installs: the home's Open Graph card
-// for each locale that has the home, public/og/home-<locale>-v<version>.jpg.
+// for each locale that has the home, public/og/home-<locale>-v<version>.jpg, and the apple-touch-icon, src/app/apple-icon.png.
 //
 //   node apps/landing/scripts/brand-images.mjs [hero master]
 //
@@ -126,5 +126,15 @@ for (const [locale, messages] of Object.entries({ es, en })) {
   await writeFile(path, jpeg);
   console.log(`${path}: ${jpeg.length} bytes, quality ${quality}, headline ${size}px in ${lines} lines, worst contrast ${worst.toFixed(2)}`);
 }
+
+// iOS paints a transparent touch icon's background black, so the ring sits on the paper canvas, opaque, at the 180 px Apple asks for, with the
+// same margin as public/brand/opta-icon-512.png (src/app/icon.png): the SVG's own, the ring being 300 of its 420 units
+await tab.setViewportSize({ width: 180, height: 180 });
+await tab.setContent(
+  `<!doctype html><html><body style="margin: 0; width: 180px; height: 180px; display: grid; place-items: center; background: ${paper}"><img src="${await dataUri(join(assets, 'opta-icon.svg'))}" alt="" style="width: 180px; height: 180px"></body></html>`,
+  { waitUntil: 'load' },
+);
+await writeFile(join(app, 'src/app/apple-icon.png'), await tab.screenshot());
+console.log(join(app, 'src/app/apple-icon.png'));
 
 await browser.close();
