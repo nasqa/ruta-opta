@@ -67,11 +67,14 @@ test('the script payload cannot break out of its script element and still parses
   assert.deepEqual(JSON.parse(script), { a: '</script><script>alert(1)</script>', b: 'Quindío <!--' });
 });
 
-const languages = { es: '/es', en: '/en', 'x-default': '/' };
+const languages = { es: '/es', en: '/en', 'x-default': '/es' };
 const metaInput = (locale) => ({
   locale,
   title: 'Ruta Opta · Talento y turismo comunitario en Colombia',
   description: 'Ruta Opta conecta el talento de las personas con oportunidades.',
+  siteName: 'Ruta Opta',
+  ogTitle: 'El talento de las comunidades puede transformar sus territorios',
+  ogDescription: 'Conectamos el talento de las comunidades con oportunidades.',
   ogAlt: 'Un valle en relieve de papel.',
   og: { src: '/_next/static/media/home-og.jpg', width: 1200, height: 630 },
   languages,
@@ -99,15 +102,20 @@ test('Open Graph is a website with this locale first and the other as alternate,
   assert.equal(en.locale, 'en_US');
   assert.deepEqual(en.alternateLocale, ['es_CO']);
   assert.deepEqual(es.images, [{ url: '/_next/static/media/home-og.jpg', width: 1200, height: 630, alt: 'Un valle en relieve de papel.' }]);
-  assert.equal(es.title, 'Ruta Opta · Talento y turismo comunitario en Colombia');
-  assert.equal(es.description, 'Ruta Opta conecta el talento de las personas con oportunidades.');
+});
+
+test('the card names the site and carries the headline and the short description, not the meta title and description', () => {
+  const es = homeMetadata(metaInput('es')).openGraph;
+  assert.equal(es.siteName, 'Ruta Opta');
+  assert.equal(es.title, 'El talento de las comunidades puede transformar sus territorios');
+  assert.equal(es.description, 'Conectamos el talento de las comunidades con oportunidades.');
 });
 
 test('the Twitter card is the large image, with its own title, description and image', () => {
   const { twitter } = homeMetadata(metaInput('es'));
   assert.equal(twitter.card, 'summary_large_image');
-  assert.equal(twitter.title, 'Ruta Opta · Talento y turismo comunitario en Colombia');
-  assert.equal(twitter.description, 'Ruta Opta conecta el talento de las personas con oportunidades.');
+  assert.equal(twitter.title, 'El talento de las comunidades puede transformar sus territorios');
+  assert.equal(twitter.description, 'Conectamos el talento de las comunidades con oportunidades.');
   assert.deepEqual(twitter.images, [{ url: '/_next/static/media/home-og.jpg', alt: 'Un valle en relieve de papel.' }]);
 });
 

@@ -11,7 +11,7 @@ const at = (messages, path) => path.split('.').reduce((node, key) => node?.[key]
 
 const territoryKeys = ['quindio', 'risaralda', 'caldas', 'valle', 'choco'];
 const homeKeys = [
-  'metaTitle', 'metaDescription', 'ogAlt', 'title', 'lead', 'cta',
+  'metaTitle', 'metaDescription', 'ogAlt', 'ogTitle', 'ogDescription', 'title', 'lead', 'cta',
   'thesis.title', 'thesis.text', 'thesis.territoriesLabel',
   ...territoryKeys.map((key) => `thesis.territories.${key}`),
   'methodTitle',
@@ -60,6 +60,15 @@ test('meta lengths', () => {
   for (const [locale, messages] of Object.entries(locales)) {
     assert.ok(messages.Prelaunch.metaTitle.length <= 60, `${locale}: metaTitle is ${messages.Prelaunch.metaTitle.length} characters`);
     assert.ok(messages.Prelaunch.metaDescription.length <= 155, `${locale}: metaDescription is ${messages.Prelaunch.metaDescription.length} characters`);
+  }
+});
+
+test('the card title is the headline without its period, and the card description fits a preview', () => {
+  for (const [locale, messages] of Object.entries(locales)) {
+    const { title, ogTitle, ogDescription } = messages.Prelaunch;
+    assert.equal(ogTitle, title.replace(/\.$/, ''), `${locale}: ogTitle`);
+    // WhatsApp shows about 80 to 100 characters and other previews cut near 125
+    assert.ok(ogDescription.length >= 90 && ogDescription.length <= 110, `${locale}: ogDescription is ${ogDescription.length} characters`);
   }
 });
 

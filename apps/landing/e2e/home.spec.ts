@@ -90,8 +90,11 @@ for (const locale of locales) {
       await expect(page).toHaveTitle(Prelaunch.metaTitle);
       await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', Prelaunch.metaDescription);
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${site.origin}/${locale}`);
-      expect(await meta(page, 'meta[property="og:title"]')).toBe(Prelaunch.metaTitle);
-      expect(await meta(page, 'meta[property="og:description"]')).toBe(Prelaunch.metaDescription);
+      expect(await meta(page, 'meta[property="og:site_name"]')).toBe(messages[locale].Site.name);
+      expect(await meta(page, 'meta[property="og:title"]')).toBe(Prelaunch.ogTitle);
+      expect(await meta(page, 'meta[property="og:description"]')).toBe(Prelaunch.ogDescription);
+      expect(await meta(page, 'meta[name="twitter:title"]')).toBe(Prelaunch.ogTitle);
+      expect(await meta(page, 'meta[name="twitter:description"]')).toBe(Prelaunch.ogDescription);
       expect(await meta(page, 'meta[property="og:locale"]')).toBe(ogLocales[locale]);
       expect(await meta(page, 'meta[property="og:locale:alternate"]')).toBe(ogLocales[locale === 'es' ? 'en' : 'es']);
       expect(await meta(page, 'meta[property="og:image:alt"]')).toBe(Prelaunch.ogAlt);

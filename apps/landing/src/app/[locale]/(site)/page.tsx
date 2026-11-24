@@ -29,12 +29,15 @@ export const generateMetadata = async (): Promise<Metadata> => {
   // A locale without the page renders the 404, so it has no namespace to read here
   if (!localesFor('/').includes(locale)) return {};
 
-  const t = await getTranslations('Prelaunch');
+  const [t, site] = await Promise.all([getTranslations('Prelaunch'), getTranslations('Site')]);
 
   return homeMetadata({
     locale,
     title: t('metaTitle'),
     description: t('metaDescription'),
+    siteName: site('name'),
+    ogTitle: t('ogTitle'),
+    ogDescription: t('ogDescription'),
     ogAlt: t('ogAlt'),
     og: ogImage,
     languages: alternates('/').languages,
