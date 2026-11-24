@@ -356,7 +356,8 @@
       "rights": "© {year} Fundación Embajadores de la Paz"
     },
     "whatsappFloat": {
-      "label": "Contacto por WhatsApp (se abre en una pestaña nueva)"
+      "label": "Contacto por WhatsApp (se abre en una pestaña nueva)",
+      "message": "Hola, vi la página de Ruta Opta y quiero más información."
     },
     "sections": {
       "label": "En esta página",

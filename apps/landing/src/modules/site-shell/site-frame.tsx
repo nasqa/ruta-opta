@@ -98,12 +98,13 @@ const SiteFooter = () => {
   );
 };
 
-// The button that floats over every page and over the footer. A plain anchor, like the footer's links: no Mantine Affix, so no client JS
+// The button that floats over every page and over the footer. A plain anchor, like the footer's links: no Mantine Affix, so no client JS.
+// Its written message is its own, so a contact that arrives with it is known to have come from this button
 const WhatsappButton = () => {
   const t = useTranslations('SiteShell');
 
   return (
-    <a href={`https://wa.me/${t('footer.whatsappNumber')}`} target="_blank" rel="noopener noreferrer" aria-label={t('whatsappFloat.label')} className={styles.whatsapp}>
+    <a href={`https://wa.me/${t('footer.whatsappNumber')}?text=${encodeURIComponent(t('whatsappFloat.message'))}`} target="_blank" rel="noopener noreferrer" aria-label={t('whatsappFloat.label')} className={styles.whatsapp}>
       <img {...whatsappProps} alt="" className={styles.whatsappMark} />
     </a>
   );
