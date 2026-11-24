@@ -1,0 +1,31 @@
+.hero {
+  display: grid;
+  gap: var(--space-group);
+}
+
+/* The text sits on the paper above the art, never over it, so it needs no scrim */
+.text {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+}
+
+.text > * {
+  margin: 0;
+  text-wrap: balance;
+}
+
+@media (min-width: 48em) {
+  .text > h1,
+  .text > p {
+    max-width: 54%;
+  }
+}
+
+/* A thumb-sized, full-width button right after the lead on phones */
+@media (max-width: 30em) {
+  .cta {
+    width: 100%;
+    height: var(--control-height-lg);
+  }
+}
