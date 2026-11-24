@@ -7,26 +7,70 @@
     "close": "Close"
   },
   "Prelaunch": {
-    "metaDescription": "OPTA connects people's potential with opportunities to transform their territories. Leave us your email and we'll let you know when we open.",
+    "metaTitle": "Ruta Opta · Talent and community tourism in Colombia",
+    "metaDescription": "Ruta Opta connects people's talent with opportunities in Quindío, Risaralda, Caldas, Valle del Cauca and Chocó. Grow, create and connect.",
+    "ogAlt": "A paper-relief valley, with the Ruta Opta sun over the mountains.",
     "title": "The talent in communities can transform their territories.",
-    "lead": "OPTA connects people's potential with opportunities to transform their territories. We're building the route and want to tell you when it opens.",
+    "lead": "Ruta Opta connects people's talent with opportunities in Quindío, Risaralda, Caldas, Valle del Cauca and Chocó. We listen, recognize, connect and build with them.",
     "cta": "Keep me posted",
-    "buildingTitle": "What we're building",
+    "thesis": {
+      "title": "There is talent in every territory",
+      "text": "Communities already know how to cook, farm, guide, create and organize. What is often missing is opportunities reaching them. Ruta Opta exists to bring the two closer, and so that decisions stay with the people who live there.",
+      "territoriesLabel": "The five territories",
+      "territories": {
+        "quindio": "Quindío",
+        "risaralda": "Risaralda",
+        "caldas": "Caldas",
+        "valle": "Valle del Cauca",
+        "choco": "Chocó"
+      }
+    },
+    "methodTitle": "Grow, create, connect: a path in three steps",
     "stages": {
       "grow": {
         "name": "Grow",
-        "text": "Emotional well-being and recognition of the abilities each person already has."
+        "tagline": "Recognize who I am, what I feel and what I can contribute.",
+        "text": "We strengthen people: well-being, confidence and recognition of what they already know how to do."
       },
       "create": {
         "name": "Create",
-        "text": "Training in entrepreneurship, finance, technology and marketing."
+        "tagline": "Turn knowledge and talents into proposals.",
+        "text": "We help so that what you know how to do gets its costs, a price and a good presentation."
       },
       "connect": {
         "name": "Connect",
-        "text": "Links to jobs, markets, funding and allies."
+        "tagline": "Present proposals to the people who can buy and support them.",
+        "text": "We open contact with visitors, allies and markets."
       }
     },
-    "territory": "We're starting in Quindío.",
+    "tourism": {
+      "title": "Turismo Vivo: rural experiences designed by the people who live there",
+      "text": "Tourism experiences designed by the people who live in the territory: a meal, a walk, a craft. Each family decides what to share and how, and the price and how it is shared are known before anything is sold. We are building it together with the communities.",
+      "status": "In progress"
+    },
+    "who": {
+      "title": "Who is behind it",
+      "text": "Ruta Opta is an initiative of {legalName}, based in {locality}, {region}.",
+      "legalName": "Fundación Embajadores de la Paz",
+      "locality": "Armenia",
+      "region": "Quindío"
+    },
+    "allies": {
+      "title": "Let's build together: partnerships that open opportunities",
+      "text": "Ruta Opta is built with businesses, agencies, lodgings, institutions and people who want to share their experience. Tell us how you would like to take part.",
+      "whatsapp": {
+        "title": "WhatsApp",
+        "label": "Message us on WhatsApp",
+        "number": "573105874657",
+        "message": "Hello, I would like to learn about Ruta Opta as an ally."
+      },
+      "email": {
+        "title": "Email",
+        "label": "Email us",
+        "address": "info@rutaopta.org",
+        "subject": "I want to be an ally of Ruta Opta"
+      }
+    },
     "listTitle": "Leave us your email",
     "listLead": "Leave us your name and email and we'll let you know when we open.",
     "privacyLink": "Data protection policy"

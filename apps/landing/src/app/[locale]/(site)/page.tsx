@@ -50,7 +50,7 @@ const PrelaunchPage = () => {
         </Scope>
         <section className={styles.section} aria-labelledby="building-title">
           <h2 id="building-title" className="t-heading-lg">
-            {t('buildingTitle')}
+            {t('methodTitle')}
           </h2>
           <ol className={styles.stages}>
             {stages.map((stage) => (
@@ -60,7 +60,6 @@ const PrelaunchPage = () => {
               </li>
             ))}
           </ol>
-          <p className="t-body-md">{t('territory')}</p>
         </section>
         <section id="lista" className={styles.card} aria-labelledby="list-title">
           <h2 id="list-title" className="t-heading-lg">
