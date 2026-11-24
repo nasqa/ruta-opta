@@ -10,10 +10,12 @@ import styles from './site-header.module.css';
 // 120 px wide on desktop; the CSS module narrows it to 96 px on phones
 const { props: logoProps } = getImageProps({ src: logo, alt: '', width: 120, loading: 'eager' });
 
-type SiteHeaderProps = { href: Href; query?: Record<string, string> };
+type Section = { id: string; label: string };
+type SiteHeaderProps = { href: Href; query?: Record<string, string>; sections?: Section[] };
 
-// The switch opens this same page in each locale, query included (/confirm's token), so the page passes its own href
-export const SiteHeader = ({ href, query }: SiteHeaderProps) => {
+// The switch opens this same page in each locale, query included (/confirm's token), so the page passes its own href. A long page
+// passes its sections, which become in-page links on wide screens
+export const SiteHeader = ({ href, query, sections }: SiteHeaderProps) => {
   const locale = useLocale();
   const t = useTranslations('SiteShell');
 
@@ -26,6 +28,16 @@ export const SiteHeader = ({ href, query }: SiteHeaderProps) => {
         <span className={styles.divider} />
         <span className={`${styles.product} t-label`}>{t('product')}</span>
       </Link>
+      {sections && (
+        // Plain fragment links: no client navigation and no JS; hidden below 62em, where they would not fit on one line
+        <nav aria-label={t('sections.label')} className={styles.sections}>
+          {sections.map(({ id, label }) => (
+            <a key={id} href={`#${id}`} className={`${styles.section} t-label`}>
+              {label}
+            </a>
+          ))}
+        </nav>
+      )}
       <nav aria-label={t('languageNav')} className={styles.switcher}>
         {routing.locales.map((language, index) => (
           <Fragment key={language}>

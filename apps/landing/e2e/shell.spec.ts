@@ -6,6 +6,7 @@ import { pages, pathFor } from './pages';
 
 const messages = { es, en };
 type Language = (typeof routing.locales)[number];
+const footerSections = ['places', 'method', 'tourism', 'allies', 'faq'] as const;
 
 // A language link's accessible name: its visible code first (WCAG 2.5.3), then the language named in itself
 const languageName = (locale: Language, language: Language) => `${language.toUpperCase()} ${messages[locale].SiteShell.languages[language]}`;
@@ -54,6 +55,21 @@ for (const { locale, href, path } of pages) {
     await expect(footer.getByRole('link', { name: SiteShell.footer.privacy, exact: true })).toHaveAttribute('href', pathFor(locale, '/privacy'));
     await expect(footer.getByRole('link', { name: SiteShell.footer.email, exact: true })).toHaveAttribute('href', `mailto:${SiteShell.footer.email}`);
   });
+
+  test(`${path} footer links the home's sections and the contacts, and dates the rights line`, async ({ page }) => {
+    await page.goto(path);
+    const footer = page.getByRole('contentinfo');
+    const explore = footer.getByRole('navigation', { name: SiteShell.footer.explore, exact: true });
+
+    // Plain anchors to the home's sections, from every page
+    for (const section of footerSections) {
+      await expect(explore.getByRole('link', { name: SiteShell.sections[section], exact: true })).toHaveAttribute('href', `${pathFor(locale, '/')}#${section}`);
+    }
+    await expect(footer.getByRole('link', { name: SiteShell.footer.whatsapp, exact: true })).toHaveAttribute('href', `https://wa.me/${SiteShell.footer.whatsappNumber}`);
+    await expect(footer.getByRole('link', { name: SiteShell.footer.infoEmail, exact: true })).toHaveAttribute('href', `mailto:${SiteShell.footer.infoEmail}`);
+    await expect(footer.getByText(SiteShell.footer.place, { exact: true })).toBeVisible();
+    await expect(footer.getByText(SiteShell.footer.rights.replace('{year}', String(new Date().getFullYear())), { exact: true })).toBeVisible();
+  });
 }
 
 test('the language switch on /confirm keeps the token', async ({ page }) => {
@@ -93,15 +109,43 @@ test.describe('no page scrolls sideways at 320 px', () => {
   }
 });
 
-test('the footer is covered until the end of the scroll and uncovered at the bottom', async ({ page }) => {
-  await page.goto('/es/privacidad');
-  const footer = page.getByRole('contentinfo');
+// The curtain is kept only where the whole footer fits the window: a taller one would keep its top under the content for good
+for (const [width, height] of [
+  [1440, 900],
+  [1280, 800],
+  [768, 1024],
+]) {
+  test(`at ${width}x${height} the whole footer fits, is covered until the end of the scroll and uncovered at the bottom`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.goto('/es/privacidad');
+    const footer = page.getByRole('contentinfo');
 
-  // The footer waits at the bottom of the viewport, under the content
-  expect(await hitAtCentre(footer)).toBe(false);
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-  await expect.poll(() => hitAtCentre(footer)).toBe(true);
-});
+    expect(await footer.evaluate((element) => getComputedStyle(element).position)).toBe('sticky');
+    expect((await footer.boundingBox())?.height).toBeLessThanOrEqual(height);
+    // The footer waits at the bottom of the viewport, under the content
+    expect(await hitAtCentre(footer)).toBe(false);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await expect.poll(() => hitAtCentre(footer)).toBe(true);
+  });
+}
+
+for (const [width, height] of [
+  [320, 568],
+  [375, 667],
+]) {
+  test(`at ${width}x${height} the footer is taller than the window, so it follows the page and every link can be reached`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.goto('/es/privacidad');
+    const footer = page.getByRole('contentinfo');
+
+    expect(await footer.evaluate((element) => getComputedStyle(element).position)).toBe('static');
+    expect((await footer.boundingBox())?.height).toBeGreaterThan(height);
+    for (const link of await footer.getByRole('link').all()) {
+      await link.scrollIntoViewIfNeeded();
+      expect(await hitAtCentre(link)).toBe(true);
+    }
+  });
+}
 
 test('a focused footer link is on top', async ({ page }) => {
   await page.goto('/es/privacidad');

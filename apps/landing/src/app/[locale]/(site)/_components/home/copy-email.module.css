@@ -1,0 +1,9 @@
+/* Read by screen readers, never seen: the button's own label already shows the state */
+.announce {
+  position: absolute;
+  width: var(--border-width-hairline);
+  height: var(--border-width-hairline);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
