@@ -83,7 +83,10 @@ test.describe('the confirm page on /es/confirmar', () => {
 
     await page.getByRole('button', { name: es.Confirm.submit }).click();
     // Next's route announcer is an alert too, so the form's is picked by its text
-    await expect(page.getByRole('alert').filter({ hasText: es.Confirm.expired.text })).toBeVisible();
+    const alert = page.getByRole('alert').filter({ hasText: es.Confirm.expired.text });
+    await expect(alert).toBeVisible();
+    // The button that had focus is gone: the alert takes it
+    await expect(alert).toBeFocused();
     // A final answer: retrying cannot change it, so the only way on is signing up again, at the home's form
     await expect(page.getByRole('button', { name: es.Confirm.submit })).toHaveCount(0);
     await expect(page.getByRole('link', { name: es.Confirm.again })).toHaveAttribute('href', '/es#lista');

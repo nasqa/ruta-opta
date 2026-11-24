@@ -2,7 +2,7 @@
 
 import { Button } from '@mantine/core';
 import { useLocale, useTranslations } from 'next-intl';
-import { useActionState } from 'react';
+import { useActionState, useEffect, useRef } from 'react';
 import { getPathname } from '@/i18n/navigation';
 import { initialConfirmState } from '@/modules/waitlist';
 import { confirmWaitlist } from '@/modules/waitlist/actions';
@@ -18,6 +18,12 @@ export const ConfirmForm = ({ token }: { token: string }) => {
   const t = useTranslations('Confirm');
   const locale = useLocale();
   const [state, action, pending] = useActionState(confirmWaitlist, initialConfirmState);
+  const alert = useRef<HTMLParagraphElement>(null);
+
+  // The submit button that had focus is gone for a final answer: the alert takes it, so keyboard users land on the reason
+  useEffect(() => {
+    if (final.has(state.status)) alert.current?.focus();
+  }, [state.status]);
 
   return (
     <form action={action} className={styles.form}>
@@ -25,7 +31,7 @@ export const ConfirmForm = ({ token }: { token: string }) => {
       {/* The action cannot read the page's locale, and /confirmed opens in it */}
       <input type="hidden" name="locale" value={locale} />
       {state.status !== 'idle' && (
-        <p role="alert" className={`${styles.alert} t-body-md`}>
+        <p ref={alert} tabIndex={-1} role="alert" className={`${styles.alert} t-body-md`}>
           {t(`${state.status}.text`)}
         </p>
       )}
