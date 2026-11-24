@@ -6,7 +6,7 @@ import { contrastRatio, type Rgb } from './contrast';
 const messages = { es, en };
 const locales = ['es', 'en'] as const;
 const ogLocales = { es: 'es_CO', en: 'en_US' };
-// The site URL the server was built with (src/shared/env.ts reads the same variable); the run itself serves on its own port
+// The site URL the server was built with (next.config.ts bakes it from URL when the build is not a Netlify preview); the run itself serves on its own port
 const site = new URL(process.env.URL ?? 'http://localhost:3000');
 const meta = (page: Page, selector: string) => page.locator(selector).getAttribute('content');
 

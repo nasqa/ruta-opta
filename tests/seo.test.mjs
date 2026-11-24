@@ -6,7 +6,7 @@ import './support/next-resolution.mjs';
 
 // env.ts imports server-only, which throws outside a server bundle
 registerHooks({ resolve: (specifier, context, nextResolve) => (specifier === 'server-only' ? { url: 'data:text/javascript,', shortCircuit: true } : nextResolve(specifier, context)) });
-process.env.URL = 'https://www.example.org';
+process.env.SITE_URL = 'https://www.example.org';
 
 const landing = join(import.meta.dirname, '../apps/landing/src');
 const { routing } = await import(join(landing, 'i18n/routing.ts'));
