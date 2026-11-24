@@ -1,6 +1,6 @@
 # Home page of rutaopta.org: design
 
-Status: draft for Santiago's approval. Written 2026-11-24. Target: preview ready 2026-11-25; publishing needs Santiago's explicit OK.
+Status: draft for Santiago's approval; Appendix A (copy) is a draft until he approves it. Written 2026-11-24. Target: preview ready 2026-11-25; publishing needs Santiago's explicit OK.
 
 ## Intent and why
 The home is the first thing the people at the rural-tourism course (about 250 tourism entrepreneurs, rural women, youth, Indigenous and Afro-descendant participants, on mid and low-end phones, WhatsApp-first) and, later, allies and funders will see. It must say plainly what Ruta Opta is and how it works, give them one easy way to stay in touch, and be built to be found by search. The name is "oportunidad + talento": people already have talent; opportunities do not reach everyone. The founder's stance: listen, recognize, connect and build with people; communities must not get used to others deciding for them.
@@ -50,7 +50,7 @@ Savior or disaster framing; invented numbers, testimonials, partners or counters
 Components live in `(site)/_components/home/` (hero, thesis, steps, tourism, who, allies); `page.tsx` only composes. The hero no longer uses `Scope territory="quindio"`. Territory colour is not used in v1 (plain list), to respect "Scope on sections only".
 
 ### Copy
-Source of truth: this document's Appendix A, approved by Santiago, then moved into `messages/es.json` and `en.json` under `Prelaunch`. Spanish is written first, English alongside. Every string passes a plain-Spanish and anti-AI-tells read. No claim without a source: method wording comes from OPTA's project document; the founder's verbs from the interview; "Turismo Vivo" is stated as under construction.
+Source of truth: this document's Appendix A, once Santiago approves it, then moved into `messages/es.json` and `en.json` under `Prelaunch`. Spanish is written first, English alongside. Every string passes a plain-Spanish and anti-AI-tells read. No claim without a source: method wording comes from OPTA's project document; the founder's verbs from the interview; "Turismo Vivo" is stated as under construction.
 
 ### Hero art
 `A2-base-2-mirrored.png` (empty sky, 1K) as the background, exported to AVIF and WebP in 640, 960 and 1280 widths through `next/image`, `priority`. The sun is the real `opta-icon.svg` as a separate layer (centre x 80 %, y 20 %, width 11.5 % of the frame), its soft shadow inside the SVG (Stylelint forbids `drop-shadow`). The sun asset is the one `ruta-opta-46` already builds for `SceneBand`; reuse it, do not redraw. Layout follows the measured prototype: the art keeps 16:9 at the bottom with extra paper-coloured sky above, the headline in two lines (max 54 % width), below 760 px the text stacks above the art, text at least 17/16/14 px, contrast at least 7:1 on step-12 text measured on real pixels. The art is decorative (`alt=""`). The 2K upscale of the empty base is a later swap with no code change.
@@ -86,14 +86,21 @@ A neutral tracked link (`?o=<tag>`) for the first cohort; an analytics tool with
 3. "Quién está detrás" names only the entity and the city. NIT, address and legal representative stay in the data policy. It does not say "sin ánimo de lucro".
 4. The allies button is a `mailto:` to `info@` for tomorrow.
 5. No territory colour in v1.
-6. English is written together with Spanish and marked for review.
+6. English is written together with Spanish and marked for review; where `feat/brand-flow-and-english` already has an English string (the H1 and lead), that one wins.
+7. Legal name and address for the visible text and JSON-LD get their own keys in `Prelaunch`, because the privacy policy holds them as one prose string. A unit test asserts that the legal name in `Prelaunch` appears in `Privacy.sections.controller.text` in both languages, so the two cannot drift. JSON-LD carries locality, region and country only, not the street.
+8. The hero image is rendered with `getImageProps()` and a plain `<img>` in a Server Component, as the other session's stack brief prescribes (no client `Image`, no JS added to the budget). Lint allows `<img>` only under `modules/site-shell/**`, so a `HeroScene` component is added there (it reuses the sun layer) in this PR, after rebase, with that session's agreement. No ESLint exception is added.
+9. `siteUrl` stays Netlify's `URL`. Previews therefore point canonical, `og:image` and JSON-LD at the production host; social cards and structured data are checked on a local build with `URL` set, and again after publishing.
+10. The PR is stacked: base is `feat/brand-flow-and-english`, current shell commit `a0587fe`. `robots.ts` and `sitemap.ts` arrive in that branch later. Go-live needs that whole PR merged first, then this one; if it is not ready on 2026-11-25 Santiago decides between waiting and publishing something smaller.
+
+## Dependencies
+`ruta-opta-46`'s branch has no upstream and no PR yet; they push at their last task. A Netlify deploy preview exists for a PR only once it is open and only if previews are enabled for a non-`main` base (not confirmed). Fallback for Santiago's review: a local `next start` build with screenshots at 375, 768 and 1440 px.
 
 ## Left to the builder
 Exact component props and CSS, how the sun layer is shared with the other module, the `ImageResponse` for the social card, image export settings, copy length trimming, e2e selectors.
 
 ## Appendix A: draft copy (Spanish, then English)
 **Hero.** H1: "El talento de las comunidades puede transformar sus territorios." Lead: "Ruta Opta conecta el talento de las personas con oportunidades en Quindío, Risaralda, Caldas, Valle del Cauca y Chocó. Escuchamos, reconocemos, conectamos y construimos con ellas." Button: "Quiero que me avisen".
-EN: "Community talent can transform its territories." / "Ruta Opta connects people's talent with opportunities in Quindío, Risaralda, Caldas, Valle del Cauca and Chocó. We listen, recognize, connect and build with them." / "Let me know".
+EN: use the English already committed on `feat/brand-flow-and-english` for the H1 and lead ("The talent in communities can transform their territories."), so the site has one English; the lines below are mine only where that branch has no equivalent. (Draft: "Community talent can transform its territories." / "Ruta Opta connects people's talent with opportunities in Quindío, Risaralda, Caldas, Valle del Cauca and Chocó. We listen, recognize, connect and build with them." / "Let me know".)
 
 **Thesis.** H2: "Hay talento en cada territorio". "Las comunidades ya saben cocinar, cultivar, guiar, crear y organizarse. Lo que muchas veces falta es que las oportunidades lleguen hasta ellas. Ruta Opta existe para acercarlas, y para que las decisiones sigan en manos de quienes viven en el territorio." List: Quindío · Risaralda · Caldas · Valle del Cauca · Chocó.
 EN: "There is talent in every territory" / "Communities already know how to cook, farm, guide, create and organize. What is often missing is opportunities reaching them. Ruta Opta exists to bring the two closer, and so that decisions stay with the people who live there."
@@ -104,7 +111,7 @@ EN: "There is talent in every territory" / "Communities already know how to cook
 3. Conectar: "Presentar las propuestas a quienes pueden comprarlas y apoyarlas." "Abrimos contacto con visitantes, aliados y mercados."
 EN: Grow: "Recognize who I am, what I feel and what I can contribute." / Create: "Turn knowledge and talents into proposals." / Connect: "Present proposals to the people who can buy and support them." (supporting lines translated from the Spanish.)
 
-**Turismo Vivo.** H2: "Turismo Vivo: experiencias rurales diseñadas por quienes las habitan". (EN: "Turismo Vivo: rural experiences designed by the people who live there".) "Experiencias de turismo diseñadas por quienes habitan el territorio: una comida, un recorrido, un oficio. Cada familia decide qué comparte y cómo, y el precio y el reparto se conocen antes de vender. Lo estamos construyendo junto a las comunidades."
+**Turismo Vivo** (sources in OPTA's project document: "las experiencias se diseñarán con la comunidad… La comunidad podrá aceptar, modificar o rechazar cualquier actividad", §13 area; "La comunidad conocerá el precio final y la distribución de ingresos antes de vender", §14.3). H2: "Turismo Vivo: experiencias rurales diseñadas por quienes las habitan". (EN: "Turismo Vivo: rural experiences designed by the people who live there".) "Experiencias de turismo diseñadas por quienes habitan el territorio: una comida, un recorrido, un oficio. Cada familia decide qué comparte y cómo, y el precio y el reparto se conocen antes de vender. Lo estamos construyendo junto a las comunidades."
 EN: "Living Tourism" is not used; keep the name "Turismo Vivo". "Tourism experiences designed by the people who live in the territory: a meal, a walk, a craft. Each family decides what to share and how, and the price and how it is shared are known before anything is sold. We are building it together with the communities."
 
 **Quién está detrás.** H2: "Quién está detrás". "Ruta Opta es una iniciativa de la Fundación Embajadores de la Paz, con sede en Armenia, Quindío." Link: "Política de tratamiento de datos".
