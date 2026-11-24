@@ -134,6 +134,13 @@
     "p3": "If it wasn't you, ignore this message: we won't write to you.",
     "action": "Confirm my signup"
   },
+  "EmailLayout": {
+    "logoAlt": "Opta",
+    "reason": "You received this email because someone entered this address on rutaopta.org.",
+    "organization": "Fundación Embajadores de la Paz · Armenia, Quindío, Colombia",
+    "privacyLabel": "Data protection policy",
+    "fallback": "Button not working? Copy this link into your browser:"
+  },
   "NotFound": {
     "title": "We couldn't find this page",
     "home": "Go to the home page"
