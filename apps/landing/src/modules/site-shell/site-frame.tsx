@@ -5,10 +5,14 @@ import { getPathname } from '@/i18n/navigation';
 import { ArtImage } from './art-image';
 import horizon from './assets/footer-horizon.webp';
 import logo from './assets/opta-horizontal-light.svg';
+import whatsapp from './assets/whatsapp.svg';
 import styles from './site-frame.module.css';
 
 // The same mark as the header's, with the wordmark in the paper colour for the dark band. Below the fold on every page, so lazy
 const { props: logoProps } = getImageProps({ src: logo, alt: '', width: 176, loading: 'lazy' });
+
+// WhatsApp's own round mark, green included: its colour is the brand's, so it lives in the file and not in the theme
+const { props: whatsappProps } = getImageProps({ src: whatsapp, alt: '', width: 56, height: 56 });
 
 // The home's sections, in page order: the footer links to them from every page
 const sections = ['places', 'method', 'tourism', 'allies', 'faq'] as const;
@@ -59,6 +63,17 @@ const SiteFooter = () => {
               <li>
                 <a href={`mailto:${t('footer.infoEmail')}`}>{t('footer.infoEmail')}</a>
               </li>
+              <li>
+                {/* The glyph is decorative: the link's text already says the network and the handle */}
+                <a href={t('footer.instagramUrl')} className={styles.social}>
+                  <svg viewBox="0 0 24 24" width="1.25em" height="1.25em" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M4 8a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z" />
+                    <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0-6 0" />
+                    <path d="M16.5 7.5v.01" />
+                  </svg>
+                  {t('footer.instagram')}
+                </a>
+              </li>
               <li>{t('footer.place')}</li>
             </ul>
           </div>
@@ -83,10 +98,22 @@ const SiteFooter = () => {
   );
 };
 
+// The button that floats over every page and over the footer. A plain anchor, like the footer's links: no Mantine Affix, so no client JS
+const WhatsappButton = () => {
+  const t = useTranslations('SiteShell');
+
+  return (
+    <a href={`https://wa.me/${t('footer.whatsappNumber')}`} target="_blank" rel="noopener noreferrer" aria-label={t('whatsappFloat.label')} className={styles.whatsapp}>
+      <img {...whatsappProps} alt="" className={styles.whatsappMark} />
+    </a>
+  );
+};
+
 // The reveal footer: the page sits on an opaque layer above the footer, which the end of the scroll uncovers where the whole footer fits
 export const SiteFrame = ({ children }: { children: ReactNode }) => (
   <>
     <div className={styles.content}>{children}</div>
     <SiteFooter />
+    <WhatsappButton />
   </>
 );

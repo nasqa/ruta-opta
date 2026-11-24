@@ -16,7 +16,7 @@ export const Who = () => {
             {t('who.title')}
           </h2>
           <div className={styles.body}>
-            <p className="t-body-lg">{t('who.text', { legalName: t('who.legalName'), locality: t('who.locality'), region: t('who.region') })}</p>
+            <p className="t-body-lg">{t('who.text', { legalName: t('who.legalName'), nit: t('who.nit'), locality: t('who.locality'), region: t('who.region'), representative: t('who.representative') })}</p>
             {/* A plain anchor, as in the footer: no client Link, so the home never prefetches /privacy */}
             <a className={`${styles.link} t-body-md`} href={getPathname({ locale, href: '/privacy' })}>
               {t('privacyLink')}

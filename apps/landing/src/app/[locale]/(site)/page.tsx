@@ -24,7 +24,7 @@ import styles from './page.module.css';
 // The logo is a stable file under public/, not a hashed asset: search engines keep the URL for a long time
 const logoPath = '/brand/opta-icon-512.png';
 
-const territories = ['quindio', 'risaralda', 'caldas', 'valle', 'choco'] as const;
+const territories = ['quindio', 'risaralda', 'caldas', 'valle', 'choco', 'narino'] as const;
 
 // The sections the header links to, in page order (their ids are the section ids below)
 const sections = ['places', 'method', 'tourism', 'allies', 'faq'] as const;

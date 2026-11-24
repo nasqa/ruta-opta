@@ -8,66 +8,82 @@
   },
   "Prelaunch": {
     "metaTitle": "Ruta Opta · Talent and community tourism in Colombia",
-    "metaDescription": "Ruta Opta connects people's talent with opportunities in Quindío, Risaralda, Caldas, Valle del Cauca and Chocó. Grow, create and connect.",
+    "metaDescription": "A route to recognize the talent of rural families in six territories of Colombia and connect it with opportunities. In progress.",
     "ogAlt": "Ruta Opta: “The talent in communities can transform their territories”, over a paper-relief coffee valley with the Ruta Opta sun.",
     "ogTitle": "The talent in communities can transform their territories",
-    "ogDescription": "We connect the talent in communities with opportunities in the Coffee Region, Valle del Cauca and Chocó.",
+    "ogDescription": "A route in progress to recognize the talent of rural families and connect it with opportunities.",
     "title": "The talent in communities can transform their territories.",
-    "lead": "Ruta Opta connects people's talent with opportunities in Quindío, Risaralda, Caldas, Valle del Cauca and Chocó. We listen, recognize, connect and build with them.",
-    "cta": "Keep me posted",
+    "lead": "We are designing a route for rural families in six territories of Colombia to recognize their talents and turn them into opportunities. We will start with the 12 municipalities of Quindío. We have not opened yet.",
+    "cta": "Follow the process",
     "thesis": {
-      "title": "There is talent in every territory",
-      "text": "Communities already know how to cook, farm, guide, create and organize. What is often missing is opportunities reaching them. Ruta Opta exists to bring the two closer, and so that decisions stay with the people who live there.",
-      "territoriesLabel": "The five territories",
+      "title": "Why Ruta Opta exists",
+      "text": "Ruta Opta was born after the earthquake of 10 August 2026. Stephania Forero, legal representative of Fundación Embajadores de la Paz, had spent years visiting rural communities and had seen a great deal of talent without tools. She decided to leave behind “isolated interventions” and build a route that connects that talent with opportunities.",
+      "territoriesLabel": "The six territories",
       "territories": {
         "quindio": "Quindío",
         "risaralda": "Risaralda",
         "caldas": "Caldas",
         "valle": "Valle del Cauca",
-        "choco": "Chocó"
+        "choco": "Chocó",
+        "narino": "Nariño"
       },
-      "verbsLabel": "How we do it",
-      "verbs": {
-        "listen": "We listen",
-        "recognize": "We recognize",
-        "connect": "We connect",
-        "build": "We build"
-      },
-      "stance": "Communities should not have to get used to others deciding for them."
+      "stance": "Each territory decides its own path; no route should get communities used to others deciding for them.",
+      "stanceAuthor": "Stephania Forero · Legal representative",
+      "commitmentsLabel": "Four commitments on how we will work",
+      "commitments": {
+        "listen": {
+          "title": "Listen first",
+          "text": "Every cycle starts with meetings with the mayor's office, leaders and families, and with written agreements."
+        },
+        "recognize": {
+          "title": "Recognize",
+          "text": "Each person builds their own map of strengths."
+        },
+        "connect": {
+          "title": "Connect with care",
+          "text": "An experience is offered only after it has been validated with the host family and with allies."
+        },
+        "decide": {
+          "title": "Decide together",
+          "text": "The community can accept, change or turn down any activity."
+        }
+      }
     },
     "methodTitle": "Grow, create, connect: a path in three steps",
     "stages": {
       "grow": {
         "name": "Grow",
         "tagline": "Recognize who I am, what I feel and what I can contribute.",
-        "text": "We strengthen people: well-being, confidence and recognition of what they already know how to do."
+        "text": "Eight weeks of meetings to recognize what each person feels, knows and can contribute. By the end, each participant builds their own map of strengths."
       },
       "create": {
         "name": "Create",
         "tagline": "Turn knowledge and talents into proposals.",
-        "text": "We help you put costs, a price and a good presentation on what you already know how to do."
+        "text": "Ten weeks to recover the memory of the territory (recipes, crafts, places) and turn knowledge into proposals, with costs, a price and a presentation."
       },
       "connect": {
         "name": "Connect",
         "tagline": "Present proposals to the people who can buy and support them.",
-        "text": "We open contact with visitors, allies and markets."
+        "text": "Six weeks to validate each proposal and present it to allies and visitors."
       }
     },
     "tourism": {
       "title": "Turismo Vivo: rural experiences designed by the people who live there",
-      "text": "Tourism experiences designed by the people who live in the territory: a meal, a walk, a craft. Each family decides what to share and how, and the price and how it is shared are known before anything is sold. We are building it together with the communities.",
+      "text": "A possibility, not a promise to every family: we only design an experience where the community is interested, safety conditions are met and the requirements are in order. A meal, a walk, a craft, told by the people who live it.",
       "status": "In progress"
     },
     "who": {
       "title": "Who is behind it",
-      "text": "Ruta Opta is an initiative of {legalName}, based in {locality}, {region}.",
+      "text": "Ruta Opta is an initiative of {legalName}, tax ID {nit}, based in {locality}, {region}. Its legal representative is {representative}.",
       "legalName": "Fundación Embajadores de la Paz",
       "locality": "Armenia",
-      "region": "Quindío"
+      "region": "Quindío",
+      "nit": "901679710-4",
+      "representative": "Stephania Forero"
     },
     "allies": {
-      "title": "Let's build together: partnerships that open opportunities",
-      "text": "Ruta Opta is built with businesses, agencies, lodgings, institutions and people who want to share their experience. Tell us how you would like to take part.",
+      "title": "Join as an ally",
+      "text": "We are looking for allies who will walk the process with us from the start. Pick the way that best matches what you can contribute and write to us: the message is already written.",
       "whatsapp": {
         "title": "WhatsApp",
         "label": "Message us on WhatsApp",
@@ -80,72 +96,122 @@
         "label": "Email us",
         "address": "info@rutaopta.org",
         "subject": "I want to be an ally of Ruta Opta"
+      },
+      "ask": "In your first message, tell us who you are, what you can contribute and in which territory.",
+      "forLabel": "For",
+      "byEmail": "Or by email",
+      "byEmailFor": "{label}: {verb}",
+      "routes": {
+        "train": {
+          "verb": "Train",
+          "who": "Universities, institutes and training centres",
+          "offer": "You contribute content and teachers. A certificate is only possible with a formal agreement.",
+          "cta": "I want to train",
+          "message": "Hello, I represent a training institution and would like to learn how to take part in Ruta Opta.",
+          "subject": "Partnership to train · Ruta Opta"
+        },
+        "link": {
+          "verb": "Coordinate",
+          "who": "Mayors' offices, governors' offices and other public bodies",
+          "offer": "You contribute spaces, information and coordination with the territory.",
+          "cta": "I want to coordinate",
+          "message": "Hello, I represent a public body and would like to learn how to coordinate with Ruta Opta.",
+          "subject": "Partnership to coordinate · Ruta Opta"
+        },
+        "validate": {
+          "verb": "Validate",
+          "who": "Agencies, lodgings and tourist guides",
+          "offer": "You review each experience with us before it is offered, and can add it to your own offer.",
+          "cta": "I want to validate experiences",
+          "message": "Hello, I represent a tourism business and would like to learn how to validate experiences with Ruta Opta.",
+          "subject": "Partnership to validate experiences · Ruta Opta"
+        },
+        "drive": {
+          "verb": "Drive",
+          "who": "Businesses and foundations",
+          "offer": "You fund or contribute in kind a specific component, with an objective, a cost and a report.",
+          "cta": "I want to drive a component",
+          "message": "Hello, I represent a business or foundation and would like to learn how to drive a component of Ruta Opta.",
+          "subject": "Partnership to drive a component · Ruta Opta"
+        },
+        "accompany": {
+          "verb": "Accompany",
+          "who": "Social, cultural and environmental organizations",
+          "offer": "You contribute specialized support and networks of trust in the territory.",
+          "cta": "I want to accompany",
+          "message": "Hello, I represent an organization and would like to learn how to accompany the Ruta Opta process.",
+          "subject": "Partnership to accompany · Ruta Opta"
+        },
+        "share": {
+          "verb": "Share",
+          "who": "People with a craft, a skill or a connection",
+          "offer": "You contribute your experience: teaching a craft, guiding a proposal or opening a door.",
+          "cta": "I want to share my experience",
+          "message": "Hello, I am a person with experience and would like to learn how to share it with Ruta Opta.",
+          "subject": "Share my experience · Ruta Opta"
+        }
       }
     },
-    "listTitle": "Leave us your email",
-    "listLead": "Leave us your name and email and we'll let you know when we open.",
+    "listTitle": "Follow the process from the start",
+    "listLead": "Leave us your name and email and we'll write when there is something real to tell.",
     "privacyLink": "Data protection policy",
-    "overline": "Talent and community tourism",
+    "overline": "Talent and community tourism · in progress",
     "ctaAllies": "I want to be an ally",
-    "ctaNote": "We write rarely, and you can unsubscribe at any time.",
+    "ctaNote": "One email when there is something real to tell. Unsubscribe whenever you like.",
     "places": {
-      "title": "Five territories, one route",
-      "lead": "From the coffee mountains to the Pacific rainforest, every territory has its own knowledge.",
-      "quindio": "Wax palms, coffee and bahareque towns.",
-      "risaralda": "Cloud forests, guadua bamboo and hot springs.",
-      "caldas": "Coffee mountains at the foot of the Nevado del Ruiz.",
-      "valle": "The Cauca river valley, between the Andes and the Pacific.",
-      "choco": "Rainforest, rivers and the Pacific coast."
+      "title": "Six territories, one route",
+      "lead": "In every territory we start by listening to those who govern and live in it, in their own ways of deciding: mayors' offices, community action boards and families.",
+      "nextLabel": "Next",
+      "quindio": "A detailed 36-month plan across its 12 municipalities: Armenia, Buenavista, Calarcá, Circasia, Córdoba, Filandia, Génova, La Tebaida, Montenegro, Pijao, Quimbaya and Salento.",
+      "status": {
+        "design": "In design",
+        "upcoming": "To start"
+      }
     },
     "methodLead": "Three steps that start from what each person already knows how to do.",
     "tourismOverline": "What we are building",
     "tourismPrinciples": {
-      "label": "How it will work",
-      "designed": "Experiences are designed with the community.",
+      "label": "How we are designing it",
+      "designed": "Each experience is designed with the host family.",
       "decides": "Each family decides what to share and how.",
       "price": "The price and how it is shared are known before anything is sold."
     },
     "tourismLink": "Tell me when it opens",
-    "alliesFor": {
-      "title": "Who can be an ally",
-      "companies": "Businesses",
-      "agencies": "Agencies",
-      "lodgings": "Lodgings",
-      "institutions": "Institutions",
-      "people": "People with experience to share"
-    },
-    "alliesWhatsappText": "Write to us, tell us who you are and how you would like to take part.",
-    "alliesEmailText": "If you prefer email, write to us at this address.",
     "copyEmail": "Copy email",
     "copiedEmail": "Email copied",
     "faq": {
       "title": "Frequently asked questions",
       "what": {
-        "q": "What is Ruta Opta?",
-        "a": "An initiative of Fundación Embajadores de la Paz that connects people's talent with opportunities in Quindío, Risaralda, Caldas, Valle del Cauca and Chocó."
-      },
-      "how": {
-        "q": "How does Ruta Opta work?",
-        "a": "In three steps: grow, to strengthen people; create, to turn their knowledge into proposals with costs, a price and a good presentation; and connect, to present those proposals to visitors, allies and markets."
-      },
-      "tourism": {
-        "q": "What is Turismo Vivo?",
-        "a": "Rural experiences designed by the people who live in the territory: a meal, a walk, a craft. Each family decides what to share and how, and the price and how it is shared are known before anything is sold."
+        "q": "What is Ruta Opta, and what is it not?",
+        "a": "A training and support route that starts from people's talent, driven by Fundación Embajadores de la Paz. It complements the work of the State; it does not replace it in health, housing or protection."
       },
       "book": {
         "q": "Can I book an experience yet?",
-        "a": "Not yet. Turismo Vivo is being built together with the communities. Leave us your email and we will let you know when it opens."
+        "a": "Not yet. Turismo Vivo is in progress. Leave us your email and we will let you know when it opens."
       },
       "allies": {
         "q": "How can I become an ally?",
-        "a": "Write to us on WhatsApp or at info@rutaopta.org and tell us who you are and how you would like to take part."
+        "a": "Pick the way that best matches you (train, coordinate, validate, drive, accompany or share) and write to us on WhatsApp or at info@rutaopta.org. Tell us who you are, what you can contribute and in which territory."
       },
       "data": {
         "q": "What do you do with my data?",
         "a": "We use your name and email only to send you Ruta Opta news and to let you know when we open. You can unsubscribe at any time from any email. The details are in our data processing policy."
+      },
+      "when": {
+        "q": "When do you open?",
+        "a": "There is no public date yet. People on the list hear first."
+      },
+      "donate": {
+        "q": "Can I donate or volunteer?",
+        "a": "Not yet. First we need the process, the reports and the protection protocols in place. If you would like to partner with a specific contribution, write to us."
       }
     },
-    "listPromise": "We will tell you when Turismo Vivo opens and what we are building with the communities."
+    "listPromise": "We will tell you how the route is advancing and when Turismo Vivo opens.",
+    "alliesOther": {
+      "title": "Is yours a different case?",
+      "whatsappText": "Write to us, tell us who you are and how you would like to take part.",
+      "emailText": "If you prefer email, write to us at this address."
+    }
   },
   "Waitlist": {
     "name": {
@@ -161,7 +227,7 @@
       "label": "I authorize Fundación Embajadores de la Paz, responsible for OPTA, to process my data to send me news and let me know when we open. I can withdraw my authorization at any time. Read the <privacy>data protection policy</privacy>.",
       "error": "We need your authorization to sign you up."
     },
-    "submit": "Keep me posted",
+    "submit": "Follow the process",
     "note": "Few emails, only the important ones.",
     "sent": {
       "title": "Almost there, {name}.",
@@ -189,6 +255,10 @@
         "title": "What we use it for",
         "text": "To send you news from OPTA and let you know when we open. We don't use it for anything else."
       },
+      "contact": {
+        "title": "If you write to us by WhatsApp or email",
+        "text": "If you write to us on WhatsApp or at info@rutaopta.org, for example to become an ally, we use what you tell us (your name, your organization and your message) only to reply and to talk with you about that collaboration. WhatsApp, from Meta, and your email provider process those messages under their own terms. You can ask us to delete the conversation by writing to privacy@rutaopta.org."
+      },
       "processor": {
         "title": "Who helps us send the emails",
         "text": "We send newsletters with Zoho Campaigns and confirmation emails with Zoho CPaaS, both from Zoho Corporation. The site is hosted on Netlify. These providers may store data on servers outside Colombia."
@@ -209,7 +279,7 @@
     "metaTitle": "Signup confirmed",
     "title": "Done, you're on the list",
     "lead": "We'll write to you when there's news.",
-    "frequency": "Few emails: when we open and how to take part.",
+    "frequency": "Few emails: how the route is advancing and when Turismo Vivo opens.",
     "home": "Back to the home page"
   },
   "Unsubscribed": {
@@ -273,15 +343,20 @@
       "initiative": "Ruta Opta is an initiative of Fundación Embajadores de la Paz.",
       "privacy": "Data protection policy",
       "email": "privacy@rutaopta.org",
-      "mission": "We connect the talent of communities with opportunities in the Coffee Region, Valle del Cauca and Chocó.",
+      "mission": "We connect the talent of communities with opportunities in the Coffee Region, Valle del Cauca, Chocó and Nariño.",
       "explore": "Explore",
       "contact": "Contact",
       "legal": "Legal",
       "whatsapp": "WhatsApp +57 310 587 4657",
       "whatsappNumber": "573105874657",
       "infoEmail": "info@rutaopta.org",
+      "instagram": "Instagram @rutaopta",
+      "instagramUrl": "https://www.instagram.com/rutaopta/",
       "place": "Armenia, Quindío, Colombia",
       "rights": "© {year} Fundación Embajadores de la Paz"
+    },
+    "whatsappFloat": {
+      "label": "Contact us on WhatsApp (opens in a new tab)"
     },
     "sections": {
       "label": "On this page",

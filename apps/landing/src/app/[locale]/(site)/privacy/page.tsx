@@ -19,7 +19,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
 };
 
 // The keys of Privacy.sections, which are also the section ids the contents link to
-const sections = ['controller', 'data', 'purpose', 'processor', 'rights'] as const;
+const sections = ['controller', 'data', 'purpose', 'contact', 'processor', 'rights'] as const;
 
 // The privacy address first, then the English one, in every locale
 const contacts = ['Es', 'En'] as const;

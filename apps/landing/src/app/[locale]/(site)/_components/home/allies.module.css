@@ -4,7 +4,7 @@
 
 .intro {
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-4);
   align-content: start;
 }
 
@@ -20,41 +20,68 @@
   max-width: var(--mantine-breakpoint-xs);
 }
 
-.kinds {
+/* Six routes, one per kind of ally: the verb first, who it is for in a label, what the ally contributes, then the two ways in. One
+   column on phones, two on tablets, three on wide screens */
+.routes {
   display: grid;
-  gap: var(--space-3);
-}
-
-.kinds > *,
-.kindsList {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
   margin: 0;
-}
-
-.kindsTitle {
-  color: var(--color-text-secondary);
-}
-
-/* Who can be an ally, as words in a line with hairlines between them, not pills. The list starts one hairline and one gap left of
-   its box, and the box clips it, so the line that wraps never opens with a hairline */
-.kindsClip {
-  overflow: hidden;
-}
-
-.kindsList {
-  display: flex;
-  flex-wrap: wrap;
-  row-gap: var(--space-2);
-  margin-inline-start: calc(-1 * (var(--space-4) + var(--border-width-hairline)));
   padding: 0;
   list-style: none;
 }
 
-.kindsList li {
-  padding-inline: var(--space-4);
-  border-inline-start: var(--border-width-hairline) solid var(--color-border-subtle);
+.route {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  padding: var(--space-6) var(--space-inset-container);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--shape-container);
+  background: var(--color-surface-raised);
 }
 
-/* Two equal cards: side by side on tablets, stacked beside the text on wide screens */
+.route > * {
+  margin: 0;
+}
+
+.who {
+  color: var(--color-text-secondary);
+}
+
+.route > .who + p {
+  margin-top: var(--space-1);
+}
+
+.routeActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.byEmail {
+  color: var(--color-action-text-low);
+}
+
+.ask {
+  max-width: var(--mantine-breakpoint-sm);
+  color: var(--color-text-secondary);
+}
+
+/* The general way in, for whoever does not fit a route: two quieter cards under the routes */
+.other {
+  display: grid;
+  gap: var(--space-4);
+  padding-block-start: var(--space-6);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.other > h3 {
+  margin: 0;
+}
+
 .cards {
   display: grid;
   gap: var(--space-5);
@@ -75,7 +102,7 @@
   margin: 0;
 }
 
-.card > h3 + p {
+.card > h4 + p {
   color: var(--color-text-secondary);
 }
 
@@ -94,24 +121,19 @@
 }
 
 @media (min-width: 48em) {
+  .routes,
   .cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 62em) {
-  .layout {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: var(--space-8);
-    align-items: start;
-  }
-
-  .cards {
-    grid-template-columns: minmax(0, 1fr);
+  .routes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
-/* The labels are one line that never wraps: full-width, tighter buttons keep "Escríbenos por WhatsApp" whole at 320 px */
+/* The labels are one line that never wraps: full-width, tighter buttons keep the long ones whole at 320 px */
 @media (max-width: 30em) {
   .card {
     justify-items: stretch;
@@ -121,7 +143,8 @@
     display: grid;
   }
 
-  .card :is(a, button) {
+  .card :is(a, button),
+  .routeActions > a:first-child {
     width: 100%;
     padding-inline: var(--space-3);
   }

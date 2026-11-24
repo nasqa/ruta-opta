@@ -15,7 +15,7 @@ const org = {
   description: 'Ruta Opta conecta el talento de las personas con oportunidades.',
   locality: 'Armenia',
   region: 'Quindío',
-  areas: ['Quindío', 'Risaralda', 'Caldas', 'Valle del Cauca', 'Chocó'],
+  areas: ['Quindío', 'Risaralda', 'Caldas', 'Valle del Cauca', 'Chocó', 'Nariño'],
   language: 'es',
   email: 'info@rutaopta.org',
   phone: '573105874657',

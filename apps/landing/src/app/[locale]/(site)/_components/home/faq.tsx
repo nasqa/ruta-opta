@@ -4,7 +4,7 @@ import { FaqAccordion, type FaqItem } from './faq-accordion';
 import layout from './layout.module.css';
 import styles from './faq.module.css';
 
-const questions = ['what', 'how', 'tourism', 'book', 'allies', 'data'] as const;
+const questions = ['what', 'when', 'book', 'donate', 'allies', 'data'] as const;
 
 export const Faq = () => {
   const locale = useLocale();

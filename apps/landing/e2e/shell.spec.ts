@@ -67,6 +67,13 @@ for (const { locale, href, path } of pages) {
     }
     await expect(footer.getByRole('link', { name: SiteShell.footer.whatsapp, exact: true })).toHaveAttribute('href', `https://wa.me/${SiteShell.footer.whatsappNumber}`);
     await expect(footer.getByRole('link', { name: SiteShell.footer.infoEmail, exact: true })).toHaveAttribute('href', `mailto:${SiteShell.footer.infoEmail}`);
+    // The round WhatsApp button floats over every page: a plain link to the same number, in a new tab
+    const floating = page.getByRole('link', { name: SiteShell.whatsappFloat.label, exact: true });
+    await expect(floating).toHaveAttribute('href', `https://wa.me/${SiteShell.footer.whatsappNumber}`);
+    await expect(floating).toHaveAttribute('target', '_blank');
+    await expect(floating).toHaveAttribute('rel', /noopener/);
+    await expect(floating).toBeInViewport();
+    await expect(footer.getByRole('link', { name: SiteShell.footer.instagram, exact: true })).toHaveAttribute('href', SiteShell.footer.instagramUrl);
     await expect(footer.getByText(SiteShell.footer.place, { exact: true })).toBeVisible();
     await expect(footer.getByText(SiteShell.footer.rights.replace('{year}', String(new Date().getFullYear())), { exact: true })).toBeVisible();
   });

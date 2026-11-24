@@ -10,48 +10,71 @@
   max-width: var(--mantine-breakpoint-xs);
 }
 
-/* The verbs as a strip between two hairlines; each one is marked by a small dot in the action colour */
-.verbs {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-3) var(--space-6);
-  padding: var(--space-5) 0;
-  list-style: none;
-  border-block: var(--border-width-hairline) solid var(--color-border-subtle);
-}
-
-.verb {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.verb::before {
-  content: '';
-  flex: none;
-  width: var(--space-2);
-  height: var(--space-2);
-  border-radius: var(--radius-full);
-  background: var(--color-action-solid);
-}
-
-/* The pull statement: a state-width rule in the action colour on its left */
+/* The founder's sentence: a state-width rule in the action colour on its left, and her name under it */
 .stance {
+  display: grid;
+  gap: var(--space-3);
   max-width: var(--mantine-breakpoint-xs);
   padding-inline-start: var(--space-5);
   border-inline-start: var(--border-width-state) solid var(--color-action-solid);
+}
+
+.quote {
+  margin: 0;
   text-wrap: balance;
 }
 
+.quote > p {
+  margin: 0;
+}
+
+.stance > figcaption {
+  color: var(--color-text-secondary);
+}
+
+/* The four commitments between hairlines: two columns from tablets, one row of four on wide screens */
+.commitments {
+  display: grid;
+  gap: var(--space-4);
+  padding-block-start: var(--space-5);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.commitmentsLabel {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5) var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.commitment {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+}
+
+.commitment > * {
+  margin: 0;
+}
+
+.commitment > p {
+  color: var(--color-text-secondary);
+}
+
 @media (min-width: 30em) {
-  .verbs {
+  .list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-/* The statement and its argument side by side; one row of four equal cells, the dots now between the verbs; the stance under
-   the argument */
+/* The origin and its argument side by side, the founder's sentence under the argument, the commitments across the foot */
 @media (min-width: 62em) {
   .layout {
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
@@ -59,33 +82,15 @@
     align-items: start;
   }
 
-  .verbs {
-    grid-column: 1 / -1;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    padding-block: var(--space-6);
-  }
-
-  .verb {
-    justify-content: center;
-  }
-
-  .verb::before {
-    content: none;
-  }
-
-  .verb + .verb::after {
-    content: '';
-    position: absolute;
-    inset-inline-start: calc(-1 * var(--space-6) / 2);
-    top: 50%;
-    width: var(--space-2);
-    height: var(--space-2);
-    border-radius: var(--radius-full);
-    background: var(--color-action-solid);
-    translate: -50% -50%;
-  }
-
   .stance {
     grid-column: 2;
+  }
+
+  .commitments {
+    grid-column: 1 / -1;
+  }
+
+  .list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

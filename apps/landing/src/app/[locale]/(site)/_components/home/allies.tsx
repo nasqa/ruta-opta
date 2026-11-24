@@ -5,11 +5,14 @@ import { CopyEmail } from './copy-email';
 import layout from './layout.module.css';
 import styles from './allies.module.css';
 
-const allyKinds = ['companies', 'agencies', 'lodgings', 'institutions', 'people'] as const;
+// One route per kind of ally, each named by the verb the ally performs. The WhatsApp message and the email subject arrive already
+// written for that kind, so a lead reaches the inbox qualified without the site collecting anything from it
+const routes = ['train', 'link', 'validate', 'drive', 'accompany', 'share'] as const;
 
 export const Allies = () => {
   const t = useTranslations('Prelaunch');
   const address = t('allies.email.address');
+  const number = t('allies.whatsapp.number');
 
   return (
     <section id="allies" className={`${layout.band} ${layout.subtle}`} aria-labelledby="allies-title">
@@ -19,44 +22,68 @@ export const Allies = () => {
             {t('allies.title')}
           </h2>
           <p className="t-body-lg">{t('allies.text')}</p>
-          <div className={styles.kinds}>
-            <p id="allies-kinds" className={`${styles.kindsTitle} t-label`}>
-              {t('alliesFor.title')}
-            </p>
-            {/* list-style: none drops the list role in Safari; the wrapper clips each line's leading hairline */}
-            <div className={styles.kindsClip}>
-              <ul role="list" aria-labelledby="allies-kinds" className={`${styles.kindsList} t-body-md`}>
-                {allyKinds.map((kind) => (
-                  <li key={kind}>{t(`alliesFor.${kind}`)}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
         </div>
-        <div className={styles.cards}>
-          <div className={styles.card}>
-            <h3 className="t-heading-md">{t('allies.whatsapp.title')}</h3>
-            <p className="t-body-md">{t('alliesWhatsappText')}</p>
-            <Button
-              component="a"
-              href={whatsappHref(t('allies.whatsapp.number'), t('allies.whatsapp.message'))}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={t('allies.whatsapp.opensNewTab', { label: t('allies.whatsapp.label') })}
-            >
-              {t('allies.whatsapp.label')}
-            </Button>
-          </div>
-          <div className={styles.card}>
-            <h3 className="t-heading-md">{t('allies.email.title')}</h3>
-            <p className="t-body-md">{t('alliesEmailText')}</p>
-            {/* Many phones have no mail app set up: the address stays readable, selectable and copyable next to the button */}
-            <p className={`${styles.address} t-title`}>{address}</p>
-            <div className={styles.actions}>
-              <Button component="a" href={mailtoHref(address, t('allies.email.subject'))}>
-                {t('allies.email.label')}
+        {/* list-style: none drops the list role in Safari */}
+        <ul role="list" aria-labelledby="allies-title" className={styles.routes}>
+          {routes.map((route) => {
+            const verb = t(`allies.routes.${route}.verb`);
+            const cta = t(`allies.routes.${route}.cta`);
+            return (
+              <li key={route} className={styles.route}>
+                <h3 className="t-heading-md">{verb}</h3>
+                <p className={`${styles.who} t-label`}>{t(`allies.routes.${route}.who`)}</p>
+                <p className="t-body-md">{t(`allies.routes.${route}.offer`)}</p>
+                <div className={styles.routeActions}>
+                  <Button
+                    component="a"
+                    href={whatsappHref(number, t(`allies.routes.${route}.message`))}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={t('allies.whatsapp.opensNewTab', { label: cta })}
+                  >
+                    {cta}
+                  </Button>
+                  <a
+                    className={`${styles.byEmail} t-body-md`}
+                    href={mailtoHref(address, t(`allies.routes.${route}.subject`))}
+                    aria-label={t('allies.byEmailFor', { label: t('allies.byEmail'), verb })}
+                  >
+                    {t('allies.byEmail')}
+                  </a>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+        <p className={`${styles.ask} t-body-md`}>{t('allies.ask')}</p>
+        <div className={styles.other}>
+          <h3 className="t-heading-md">{t('alliesOther.title')}</h3>
+          <div className={styles.cards}>
+            <div className={styles.card}>
+              <h4 className="t-heading-sm">{t('allies.whatsapp.title')}</h4>
+              <p className="t-body-md">{t('alliesOther.whatsappText')}</p>
+              <Button
+                component="a"
+                href={whatsappHref(number, t('allies.whatsapp.message'))}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="default"
+                aria-label={t('allies.whatsapp.opensNewTab', { label: t('allies.whatsapp.label') })}
+              >
+                {t('allies.whatsapp.label')}
               </Button>
-              <CopyEmail address={address} copyLabel={t('copyEmail')} copiedLabel={t('copiedEmail')} />
+            </div>
+            <div className={styles.card}>
+              <h4 className="t-heading-sm">{t('allies.email.title')}</h4>
+              <p className="t-body-md">{t('alliesOther.emailText')}</p>
+              {/* Many phones have no mail app set up: the address stays readable, selectable and copyable next to the button */}
+              <p className={`${styles.address} t-title`}>{address}</p>
+              <div className={styles.actions}>
+                <Button component="a" href={mailtoHref(address, t('allies.email.subject'))} variant="default">
+                  {t('allies.email.label')}
+                </Button>
+                <CopyEmail address={address} copyLabel={t('copyEmail')} copiedLabel={t('copiedEmail')} />
+              </div>
             </div>
           </div>
         </div>
