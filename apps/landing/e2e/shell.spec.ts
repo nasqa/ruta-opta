@@ -63,21 +63,7 @@ test('the language switch on /confirm keeps the token', async ({ page }) => {
   await expect(switcher.getByRole('link', { name: languageName('es', 'en'), exact: true })).toHaveAttribute('href', '/en/confirm?t=abc');
 });
 
-for (const { locale, href, path } of pages) {
-  test(`${path} does not scroll sideways at 320 px`, async ({ page }) => {
-    // Known before the shell: the home hero's display heading has a word wider than its padded column at 320 px. The home's
-    // rewrite owns that layout; this expectation fails loudly once it is fixed, so the marker can go
-    test.fail(href === '/', 'the home hero overflows at 320 px (pre-existing, owned by the home rewrite)');
-    await page.setViewportSize({ width: 320, height: 640 });
-    await page.goto(path);
-
-    const scrollWidth = await page.evaluate(async () => {
-      await document.fonts.ready;
-      return document.documentElement.scrollWidth;
-    });
-    expect(scrollWidth).toBeLessThanOrEqual(320);
-  });
-
+for (const { locale, path } of pages) {
   test(`${path} keeps header B on one line at 320 px`, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
     await page.goto(path);
@@ -91,6 +77,24 @@ for (const { locale, href, path } of pages) {
     expect(switcher && switcher.x + switcher.width).toBeLessThanOrEqual(320);
   });
 }
+
+test.describe('no page scrolls sideways at 320 px', () => {
+  for (const { href, path } of pages) {
+    test(path, async ({ page }) => {
+      // Known before the shell: the home hero's display heading has a word wider than its padded column at 320 px. The home's
+      // rewrite owns that layout; this expectation fails loudly once it is fixed, so the marker can go
+      test.fail(href === '/', 'the home hero overflows at 320 px (pre-existing, owned by the home rewrite)');
+      await page.setViewportSize({ width: 320, height: 640 });
+      await page.goto(path);
+
+      const scrollWidth = await page.evaluate(async () => {
+        await document.fonts.ready;
+        return document.documentElement.scrollWidth;
+      });
+      expect(scrollWidth).toBeLessThanOrEqual(320);
+    });
+  }
+});
 
 test('the footer is covered until the end of the scroll and uncovered at the bottom', async ({ page }) => {
   await page.goto('/es/privacidad');
