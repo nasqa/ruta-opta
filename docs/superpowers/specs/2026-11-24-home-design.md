@@ -1,6 +1,6 @@
 # Home page of rutaopta.org: design
 
-Status: draft for Santiago's approval; Appendix A (copy) is a draft until he approves it. Written 2026-11-24. Target: preview ready 2026-11-25; publishing needs Santiago's explicit OK.
+Status: APPROVED by Santiago on 2026-11-24, copy included (Appendix A). Written 2026-11-24. Target: preview ready 2026-11-25; publishing needs Santiago's explicit OK.
 
 ## Intent and why
 The home is the first thing the people at the rural-tourism course (about 250 tourism entrepreneurs, rural women, youth, Indigenous and Afro-descendant participants, on mid and low-end phones, WhatsApp-first) and, later, allies and funders will see. It must say plainly what Ruta Opta is and how it works, give them one easy way to stay in touch, and be built to be found by search. The name is "oportunidad + talento": people already have talent; opportunities do not reach everyone. The founder's stance: listen, recognize, connect and build with people; communities must not get used to others deciding for them.
@@ -50,7 +50,7 @@ Savior or disaster framing; invented numbers, testimonials, partners or counters
 Components live in `(site)/_components/home/` (hero, thesis, steps, tourism, who, allies); `page.tsx` only composes. The hero no longer uses `Scope territory="quindio"`. Territory colour is not used in v1 (plain list), to respect "Scope on sections only".
 
 ### Copy
-Source of truth: this document's Appendix A, once Santiago approves it, then moved into `messages/es.json` and `en.json` under `Prelaunch`. Spanish is written first, English alongside. Every string passes a plain-Spanish and anti-AI-tells read. No claim without a source: method wording comes from OPTA's project document; the founder's verbs from the interview; "Turismo Vivo" is stated as under construction.
+Source of truth: this document's Appendix A (approved 2026-11-24), then moved into `messages/es.json` and `en.json` under `Prelaunch`. Spanish is written first, English alongside. Every string passes a plain-Spanish and anti-AI-tells read. No claim without a source: method wording comes from OPTA's project document; the founder's verbs from the interview; "Turismo Vivo" is stated as under construction.
 
 ### Hero art
 `A2-base-2-mirrored.png` (empty sky, 1K) as the background, exported to AVIF and WebP in 640, 960 and 1280 widths through `next/image`, `priority`. The sun is the real `opta-icon.svg` as a separate layer (centre x 80 %, y 20 %, width 11.5 % of the frame), its soft shadow inside the SVG (Stylelint forbids `drop-shadow`). The sun asset is the one `ruta-opta-46` already builds for `SceneBand`; reuse it, do not redraw. Layout follows the measured prototype: the art keeps 16:9 at the bottom with extra paper-coloured sky above, the headline in two lines (max 54 % width), below 760 px the text stacks above the art, text at least 17/16/14 px, contrast at least 7:1 on step-12 text measured on real pixels. The art is decorative (`alt=""`). The 2K upscale of the empty base is a later swap with no code change.
@@ -72,7 +72,7 @@ Source of truth: this document's Appendix A, once Santiago approves it, then mov
 The existing waitlist form, unchanged: name, email, consent, double opt-in through the other session's module. The hero button and the allies section point to it or to `mailto:`; both targets come from messages. Nothing in this PR reads, echoes or stores what a person typed.
 
 ### Allies
-One `mailto:` button to the project's `info@` address with a prefilled subject, text from messages. Assumption to confirm: `info@rutaopta.org` is monitored by the founder.
+Two contact buttons, both configured from messages: a WhatsApp link (`https://wa.me/573105874657` with a prefilled Spanish or English message; the number is Stephania Forero's, given by Santiago for public use on 2026-11-24) and a `mailto:` to `info@rutaopta.org` with a prefilled subject (confirmed by Santiago: the address exists and Stephania reads it). The site collects no data from either. The prefilled text never names the course organizer.
 
 ### Accessibility, quality gates and tests
 WCAG 2.2 AA with zero serious axe violations in both locales; keyboard order and focus ring (>= 2 px, >= 3:1); `prefers-reduced-motion` respected; contrast measured on the real pixels under text. E2E in ES and EN (home renders, hero button lands on the form, hreflang and canonical present, JSON-LD parses, no console errors). Lighthouse budget unchanged. A Netlify deploy preview for Santiago.
@@ -84,7 +84,7 @@ A neutral tracked link (`?o=<tag>`) for the first cohort; an analytics tool with
 1. The H1 stays the existing one: "El talento de las comunidades puede transformar sus territorios."
 2. Turismo Vivo is in, as "under construction"; OPTA por la Infancia is out of v1.
 3. "Quién está detrás" names only the entity and the city. NIT, address and legal representative stay in the data policy. It does not say "sin ánimo de lucro".
-4. The allies button is a `mailto:` to `info@` for tomorrow.
+4. The allies section has a WhatsApp button and a `mailto:` button for tomorrow (both approved).
 5. No territory colour in v1.
 6. English is written together with Spanish and marked for review; where `feat/brand-flow-and-english` already has an English string (the H1 and lead), that one wins.
 7. Legal name and address for the visible text and JSON-LD get their own keys in `Prelaunch`, because the privacy policy holds them as one prose string. A unit test asserts that the legal name in `Prelaunch` appears in `Privacy.sections.controller.text` in both languages, so the two cannot drift. JSON-LD carries locality, region and country only, not the street.
