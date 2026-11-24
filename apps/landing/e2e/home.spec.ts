@@ -240,3 +240,17 @@ for (const locale of locales) {
     });
   });
 }
+
+for (const locale of locales) {
+  test(`/${locale} keeps every section in its column and every label in its button at 320 px`, async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto(`/${locale}`);
+    await page.evaluate(() => document.fonts.ready);
+
+    // The page inset is 24 px a side: a long word must not stretch a section past it
+    const rights = await page.locator('main > *').evaluateAll((sections) => sections.map((section) => section.getBoundingClientRect().right));
+    for (const right of rights) expect(right).toBeLessThanOrEqual(296.01);
+    const clipped = await page.locator('h1, .mantine-Button-label').evaluateAll((elements) => elements.filter((element) => element.scrollWidth > element.clientWidth).map((element) => element.textContent));
+    expect(clipped, 'text wider than its box').toEqual([]);
+  });
+}

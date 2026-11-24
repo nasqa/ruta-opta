@@ -1,11 +1,13 @@
 .hero {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-group);
 }
 
 /* The text sits on the paper above the art, never over it, so it needs no scrim */
 .text {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
   justify-items: start;
 }
@@ -31,5 +33,12 @@
   .cta {
     width: 100%;
     height: var(--control-height-lg);
+  }
+}
+
+/* "comunidades" at the display size is wider than the 272 px column of a 320 px phone: one step down there only */
+@media (max-width: 22em) {
+  .text > h1 {
+    font-size: var(--font-size-3xl);
   }
 }

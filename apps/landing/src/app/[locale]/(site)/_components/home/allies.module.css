@@ -38,8 +38,10 @@
   }
 }
 
+/* The label is one line that never wraps: a tighter button keeps "Escríbenos por WhatsApp" whole at 320 px */
 @media (max-width: 30em) {
   .card a {
     width: 100%;
+    padding-inline: var(--space-3);
   }
 }
