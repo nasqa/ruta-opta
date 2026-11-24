@@ -13,10 +13,9 @@ const stylelintConfig = {
   ignoreFiles: ['**/.next/**', '**/out/**', '**/playwright-report/**', '**/test-results/**', '**/.lighthouseci/**'],
   rules: {
     'no-unknown-custom-properties': true,
-    // 100svh: a viewport height is not a design-scale length, and the theme cannot provide it (site-shell's content wrapper only)
     'value-type-custom-property-required-list': [
       ['color', 'length'],
-      { ignoreValues: ['0', 'transparent', '/^currentcolor$/i', '100svh'] },
+      { ignoreValues: ['0', 'transparent', '/^currentcolor$/i'] },
     ],
     // Both rules above let a literal through: as a var() fallback, or as a custom property defined here
     'declaration-property-value-disallowed-list': [
@@ -28,6 +27,18 @@ const stylelintConfig = {
       { message: 'Custom properties come from the theme: read its tokens with var(--…) instead of defining one here.' },
     ],
   },
+  overrides: [
+    {
+      // 100svh: a viewport height is not a design-scale length, and the theme cannot provide it (site-shell's content wrapper only)
+      files: ['apps/*/src/modules/site-shell/site-frame.module.css'],
+      rules: {
+        'value-type-custom-property-required-list': [
+          ['color', 'length'],
+          { ignoreValues: ['0', 'transparent', '/^currentcolor$/i', '100svh'] },
+        ],
+      },
+    },
+  ],
 };
 
 export default stylelintConfig;

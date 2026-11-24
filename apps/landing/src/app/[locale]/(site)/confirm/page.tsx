@@ -69,7 +69,7 @@ const ConfirmPage = async ({ searchParams }: PageProps<'/[locale]/confirm'>) => 
         <SceneCard mark>
           <h1 className="t-display-md">{t('title')}</h1>
           <div className={styles.lead}>
-            <p className="t-body-lg">{t('greeting', { name: result.name })}</p>
+            <p className={`${styles.greeting} t-body-lg`}>{t('greeting', { name: result.name })}</p>
             <p className="t-body-lg">{t('lead')}</p>
           </div>
           {/* The island gets only the namespace it uses */}

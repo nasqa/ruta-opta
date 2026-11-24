@@ -24,6 +24,11 @@
   margin: 0;
 }
 
+/* A name can be 80 letters with no break */
+.greeting {
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 30em) {
   .page {
     padding-bottom: var(--space-6);
