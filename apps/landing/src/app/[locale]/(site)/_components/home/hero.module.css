@@ -1,15 +1,20 @@
+/* Named lines: the text sits in the page's content column, the art runs to the window's edge. Phones stack them, text first */
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-group);
+  grid-template-columns: [full-start] var(--space-inset-page) [content-start] minmax(0, 1fr) [content-end] var(--space-inset-page) [full-end];
+  row-gap: var(--space-7);
+  padding-top: var(--space-7);
+  background: var(--color-surface-canvas);
 }
 
-/* The text sits on the paper above the art, never over it, so it needs no scrim */
+/* The text sits on the paper beside or above the art, never over it, so it needs no scrim */
 .text {
+  grid-column: content;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-4);
+  gap: var(--space-5);
   justify-items: start;
+  align-content: center;
 }
 
 .text > * {
@@ -17,33 +22,88 @@
   text-wrap: balance;
 }
 
-/* The headline takes two lines on wide screens; the lead keeps a readable measure */
-@media (min-width: 62em) {
-  .text > h1 {
-    max-width: 68%;
-  }
+.text > p {
+  max-width: var(--mantine-breakpoint-xs);
+}
 
-  .text > p {
-    max-width: 54%;
-  }
+.overline,
+.note {
+  color: var(--color-text-secondary);
+}
+
+.overline {
+  margin-bottom: calc(-1 * var(--space-2));
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.note {
+  margin-top: calc(-1 * var(--space-2));
 }
 
 /* The same fade as the art's top edge, so the panel and the picture blend into the page together */
 .art {
+  grid-column: full;
   background: linear-gradient(to bottom, transparent, var(--color-surface-subtle) var(--space-9));
 }
 
-/* A thumb-sized, full-width button right after the lead on phones */
-@media (max-width: 30em) {
-  .cta {
-    width: 100%;
-    height: var(--control-height-lg);
+/* Two columns: the text keeps six thirteenths of the content column (wide enough for «comunidades puede» on one line), the art
+   takes the rest plus the margin to the window's edge and stands on the band's foot, where the next band begins */
+@media (min-width: 62em) {
+  .hero {
+    grid-template-columns:
+      [full-start] max(var(--space-inset-page), calc((100% - var(--mantine-breakpoint-lg)) / 2 + var(--space-inset-page)))
+      [content-start] minmax(0, 6fr)
+      [split] minmax(0, 7fr)
+      [content-end] max(var(--space-inset-page), calc((100% - var(--mantine-breakpoint-lg)) / 2 + var(--space-inset-page)))
+      [full-end];
+    padding-top: var(--space-8);
+  }
+
+  .text {
+    grid-column: content-start / split;
+    align-self: center;
+    padding-block-end: var(--space-8);
+    padding-inline-end: var(--space-7);
+  }
+
+  .art {
+    grid-column: split / full-end;
+    align-self: end;
   }
 }
 
-/* "comunidades" at the display size is wider than the 272 px column of a 320 px phone: one step down there only */
-@media (max-width: 22em) {
+/* Until the content column reaches its full width, the headline takes the next display size so it keeps four lines */
+@media (min-width: 62em) and (max-width: 75em) {
+  .text > h1 {
+    font-size: var(--text-display-md-font-size);
+    line-height: var(--text-display-md-line-height);
+    letter-spacing: var(--text-display-md-letter-spacing);
+  }
+}
+
+/* Thumb-sized, full-width buttons right after the lead on phones */
+@media (max-width: 30em) {
+  .actions {
+    display: grid;
+    width: 100%;
+  }
+
+  .actions a {
+    width: 100%;
+    height: var(--control-height-lg);
+  }
+
+  /* At the display sizes a phone's column breaks the headline into six lines with one-word orphans, and «comunidades» overflows
+     a 320 px phone's 272 px: 32 px keeps it to four or five lines */
   .text > h1 {
     font-size: var(--font-size-3xl);
+    line-height: var(--text-display-md-line-height);
+    letter-spacing: var(--text-display-md-letter-spacing);
   }
 }

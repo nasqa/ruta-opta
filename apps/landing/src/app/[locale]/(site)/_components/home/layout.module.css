@@ -1,0 +1,65 @@
+/* The home is a stack of full-bleed bands whose surfaces alternate (canvas, subtle), each with one inner container as wide as
+   Mantine's lg breakpoint and the page inset at its sides */
+.band {
+  padding-block: var(--space-section);
+}
+
+.canvas {
+  background: var(--color-surface-canvas);
+}
+
+.subtle {
+  background: var(--color-surface-subtle);
+}
+
+.inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-7);
+  max-width: var(--mantine-breakpoint-lg);
+  margin-inline: auto;
+  padding-inline: var(--space-inset-page);
+}
+
+/* A section's heading and its one-line lead; the lead keeps a readable measure */
+.head {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.head > * {
+  margin: 0;
+  text-wrap: balance;
+}
+
+.head > p {
+  max-width: var(--mantine-breakpoint-xs);
+  color: var(--color-text-secondary);
+}
+
+/* A cut-paper piece photographed on its own sheet. Multiplied into the band, with the sheet's off-white lifted to white by a
+   brightness and contrast step, the sheet drops out and only the paper pieces stay. The feathered edges and the softened corners
+   hide the sheet's border and its vignette without touching the pieces, which all sit between 6 % and 94 % of their file and
+   within 112 % of the half-width from the centre (measured), so nothing of the art is cut */
+.piece {
+  display: block;
+  width: 100%;
+  height: auto;
+  mix-blend-mode: multiply;
+  filter: brightness(1.12) contrast(1.2) saturate(0.95);
+  mask-image:
+    linear-gradient(to right, transparent, var(--color-text-primary) 5%, var(--color-text-primary) 95%, transparent),
+    linear-gradient(to bottom, transparent, var(--color-text-primary) 5%, var(--color-text-primary) 95%, transparent),
+    radial-gradient(circle closest-side, var(--color-text-primary) 112%, transparent 140%);
+  mask-composite: intersect;
+}
+
+@media (min-width: 62em) {
+  .band {
+    padding-block: var(--space-9);
+  }
+
+  .inner {
+    gap: var(--space-8);
+  }
+}

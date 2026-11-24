@@ -1,12 +1,29 @@
+/* The fields fill the form's width: name and email side by side from 48em, everything else on its own full row (React's hidden
+   action inputs come first in the form and take no cell) */
 .form {
   display: grid;
-  gap: var(--space-related);
-  justify-items: start;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
 }
 
 .form > *,
 .done > * {
   margin: 0;
+}
+
+/* The consent's link to the policy, in the theme's link colour instead of the browser's blue */
+.form a {
+  color: var(--color-action-text-low);
+  text-decoration-thickness: var(--border-width-hairline);
+  text-underline-offset: var(--space-1);
+}
+
+.form > button {
+  justify-self: start;
+}
+
+.form > p:last-child {
+  color: var(--color-text-secondary);
 }
 
 .done {
@@ -20,4 +37,22 @@
   border-radius: var(--shape-item);
   background: var(--alert-danger-bg);
   color: var(--alert-danger-fg);
+}
+
+@media (min-width: 48em) {
+  .form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form > :not(:global(.mantine-InputWrapper-root)) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* A thumb-sized button across the whole form on phones */
+@media (max-width: 30em) {
+  .form > button {
+    justify-self: stretch;
+    height: var(--control-height-lg);
+  }
 }

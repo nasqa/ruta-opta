@@ -9,13 +9,15 @@ import { siteUrl } from '@/shared/env';
 import { SiteHeader } from '@/modules/site-shell';
 import ogImage from './_art/home-og.jpg';
 import { Allies } from './_components/home/allies';
+import { Faq } from './_components/home/faq';
 import { Hero } from './_components/home/hero';
+import layout from './_components/home/layout.module.css';
 import { homeMetadata } from './_components/home/metadata';
 import { Method } from './_components/home/method';
+import { Places } from './_components/home/places';
 import { homeJsonLd, jsonLdScript } from './_components/home/structured-data';
 import { Thesis } from './_components/home/thesis';
 import { Tourism } from './_components/home/tourism';
-import { Who } from './_components/home/who';
 import { WaitlistForm } from './_components/waitlist-form';
 import styles from './page.module.css';
 
@@ -23,6 +25,9 @@ import styles from './page.module.css';
 const logoPath = '/brand/opta-icon-512.png';
 
 const territories = ['quindio', 'risaralda', 'caldas', 'valle', 'choco'] as const;
+
+// The sections the header links to, in page order (their ids are the section ids below)
+const sections = ['places', 'method', 'tourism', 'allies', 'faq'] as const;
 
 export const generateMetadata = async (): Promise<Metadata> => {
   const locale = await getLocale();
@@ -48,6 +53,7 @@ const PrelaunchPage = () => {
 
   const t = useTranslations('Prelaunch');
   const site = useTranslations('Site');
+  const shell = useTranslations('SiteShell');
   const { Waitlist } = useMessages();
 
   const jsonLd = homeJsonLd({
@@ -64,24 +70,33 @@ const PrelaunchPage = () => {
 
   return (
     <>
-      <SiteHeader href="/" />
+      <SiteHeader href="/" sections={sections.map((id) => ({ id, label: shell(`sections.${id}`) }))} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
-      <main className={styles.page}>
+      <main>
         <Hero />
         <Thesis />
+        <Places />
         <Method />
         <Tourism />
-        <Who />
         <Allies />
-        <section id="lista" className={styles.list} aria-labelledby="list-title">
-          <h2 id="list-title" className="t-heading-lg">
-            {t('listTitle')}
-          </h2>
-          <p className="t-body-md">{t('listLead')}</p>
-          {/* The island gets only the namespace it uses */}
-          <NextIntlClientProvider messages={{ Waitlist }}>
-            <WaitlistForm />
-          </NextIntlClientProvider>
+        <Faq />
+        {/* The closing band fades to the canvas at its foot, where the footer's horizon begins */}
+        <section id="lista" className={`${layout.band} ${styles.list}`} aria-labelledby="list-title">
+          <div className={`${layout.inner} ${styles.listInner}`}>
+            <div className={styles.listHead}>
+              <h2 id="list-title" className="t-display-md">
+                {t('listTitle')}
+              </h2>
+              <p className="t-body-lg">{t('listLead')}</p>
+              <p className={`${styles.promise} t-body-md`}>{t('listPromise')}</p>
+            </div>
+            <div className={styles.formCard}>
+              {/* The island gets only the namespace it uses */}
+              <NextIntlClientProvider messages={{ Waitlist }}>
+                <WaitlistForm />
+              </NextIntlClientProvider>
+            </div>
+          </div>
         </section>
       </main>
     </>
