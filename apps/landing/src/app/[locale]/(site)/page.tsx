@@ -17,6 +17,7 @@ import { Places } from './_components/home/places';
 import { homeJsonLd, jsonLdScript } from './_components/home/structured-data';
 import { Thesis } from './_components/home/thesis';
 import { Tourism } from './_components/home/tourism';
+import { Who } from './_components/home/who';
 import { WaitlistForm } from './_components/waitlist-form';
 import styles from './page.module.css';
 
@@ -84,6 +85,7 @@ const PrelaunchPage = () => {
         <Method />
         <Tourism />
         <Allies />
+        <Who />
         <Faq />
         {/* The closing band fades to the canvas at its foot, where the footer's horizon begins */}
         <section id="lista" className={`${layout.band} ${styles.list}`} aria-labelledby="list-title">

@@ -41,6 +41,7 @@ for (const locale of locales) {
         Prelaunch.methodTitle,
         Prelaunch.tourism.title,
         Prelaunch.allies.title,
+        Prelaunch.who.title,
         Prelaunch.faq.title,
         Prelaunch.listTitle,
       ]);
@@ -160,9 +161,15 @@ for (const locale of locales) {
       await expect(answer.getByRole('link', { name: Prelaunch.privacyLink, exact: true })).toHaveAttribute('href', privacyPaths[locale]);
     });
 
-    // The Who section folded into the FAQ's first answer and the footer
-    test('names the foundation in the FAQ and in the footer', async ({ page }) => {
+    // Who answers: its own section after the allies (Santiago, 2026-11-24), and again in the FAQ's first answer and the footer
+    test('names the foundation in its own section, in the FAQ and in the footer', async ({ page }) => {
       await page.goto(`/${locale}`, { waitUntil: 'networkidle' });
+      const who = page.locator('section[aria-labelledby="who-title"]');
+      await expect(who.getByRole('heading', { level: 2, name: Prelaunch.who.title, exact: true })).toBeVisible();
+      await expect(who).toContainText(Prelaunch.who.legalName);
+      await expect(who.getByRole('link', { name: Prelaunch.privacyLink, exact: true })).toHaveAttribute('href', privacyPaths[locale]);
+      const order = await page.locator('main > section').evaluateAll((sections) => sections.map((section) => section.id || section.getAttribute('aria-labelledby')));
+      expect(order.indexOf('who-title')).toBe(order.indexOf('allies') + 1);
       const faq = page.locator('#faq');
 
       await faq.getByRole('button', { name: Prelaunch.faq.what.q, exact: true }).click();
@@ -477,7 +484,7 @@ for (const locale of locales) {
       }
     });
 
-    test('tab goes from the hero button through the allies, the copy control and the FAQ to the form, with a visible focus ring', async ({ page }) => {
+    test('tab goes from the hero button through the allies, the copy control, the policy link and the FAQ to the form, with a visible focus ring', async ({ page }) => {
       await page.goto(`/${locale}`);
       const cta = page.getByRole('link', { name: Prelaunch.cta, exact: true });
       await cta.focus();
@@ -503,7 +510,7 @@ for (const locale of locales) {
 
       // Closed FAQ panels are inert: their policy link is skipped until its question opens
       const order: string[] = [];
-      for (let step = 0; step < 12; step++) {
+      for (let step = 0; step < 13; step++) {
         await page.keyboard.press('Tab');
         order.push(
           await page.evaluate(() => {
@@ -518,6 +525,7 @@ for (const locale of locales) {
         'whatsapp',
         'email',
         `button:${Prelaunch.copyEmail}`,
+        privacyPaths[locale],
         ...questions.map((question) => `button:${Prelaunch.faq[question].q}`),
         'INPUT',
       ]);
