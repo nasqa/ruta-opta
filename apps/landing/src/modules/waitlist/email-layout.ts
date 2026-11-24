@@ -76,11 +76,12 @@ export const renderEmail = async ({ locale, subject, preheader, heading, paragra
 <meta name="color-scheme" content="light only">
 <meta name="supported-color-schemes" content="light only">
 <title>${escapeHtml(subject)}</title>
+<!--[if mso]><style>body, table, td, h1, p, a { font-family: Arial, Helvetica, sans-serif !important; }</style><![endif]-->
 <!--[if !mso]><!--><style>@font-face{font-family:'${displayFace}';font-weight:300 700;font-display:swap;src:url('${fontUrl}') format('woff2')}</style><!--<![endif]-->
 <style>
 @media (max-width: 480px) {
 .shell { padding: 16px 8px 28px !important; }
-.card-body { padding: 28px 12px 24px !important; }
+.card-body { padding: 28px 20px 24px !important; }
 .heading { font-size: 24px !important; line-height: 30px !important; }
 .button-box { width: 100% !important; }
 .button { display: block !important; text-align: center !important; }

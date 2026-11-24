@@ -81,6 +81,15 @@ test('Outlook gets a 600 px ghost table and everyone else a fluid max-width colu
   assert.ok(html.includes('max-width:600px'));
 });
 
+test('Outlook on Windows is pinned to a sans font and never sees the webfont', async () => {
+  const { html } = await renderEmail(base);
+  const mso = html.match(/<!--\[if mso\]><style>([^<]*)<\/style><!\[endif\]-->/);
+  assert.ok(mso, 'no MSO-only style block');
+  assert.ok(mso[1].includes('body, table, td, h1, p, a { font-family: Arial, Helvetica, sans-serif !important; }'));
+  assert.ok(/<!--\[if !mso\]><!--><style>@font-face\{[^<]*<\/style><!--<!\[endif\]-->/.test(html));
+  assert.equal(html.match(/@font-face/g).length, 1);
+});
+
 test('the logo is the plate PNG with explicit size and alt', async () => {
   const { html } = await renderEmail(base);
   assert.ok(html.includes(`<img src="${chrome.logoUrl}" width="164" height="72" alt="Opta"`));

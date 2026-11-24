@@ -30,8 +30,13 @@ test.describe('the confirmation email', () => {
       const card = await page.locator('.card').boundingBox();
       expect(card?.width).toBeLessThanOrEqual(600);
       if (width < 480) {
+        // Full width means the card's content box: the card's inner width less its padding
         const button = await page.locator('.button').boundingBox();
-        expect(button?.width).toBeGreaterThanOrEqual((card?.width ?? Infinity) * 0.9);
+        const inner = await page.locator('.card-body').evaluate((cell) => {
+          const { paddingLeft, paddingRight } = getComputedStyle(cell);
+          return cell.getBoundingClientRect().width - parseFloat(paddingLeft) - parseFloat(paddingRight);
+        });
+        expect(Math.abs((button?.width ?? 0) - inner)).toBeLessThanOrEqual(1);
       }
       await test.info().attach(`email-${width}`, { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' });
     }
