@@ -103,6 +103,38 @@
   text-decoration-line: underline;
 }
 
+/* The WhatsApp button: fixed at the bottom end of the window, above the page and its footer. It is the brand's round mark, a little
+   larger than a large control, with the theme's overlay shadow to lift its pale edge off the paper */
+.whatsapp {
+  position: fixed;
+  inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom));
+  inset-inline-end: var(--space-4);
+  z-index: var(--mantine-z-index-modal);
+  display: block;
+  width: calc(var(--control-height-lg) + var(--space-2));
+  height: calc(var(--control-height-lg) + var(--space-2));
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-overlay);
+}
+
+.whatsapp:focus-visible {
+  outline: var(--focus-width-normal) solid var(--color-focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.whatsappMark {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The network's glyph sits before its handle, on the text's baseline */
+.social {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 /* A phone number never breaks across lines */
 .phone {
   white-space: nowrap;

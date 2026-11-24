@@ -1,5 +1,40 @@
-/* Phones: two columns, and the fifth territory takes the whole row, its piece beside its words. Tablets: three over two, the two
-   centred. Desktop: one row of five. No carousel: all five are always on the page */
+/* Quindío first, on its own: it is the one territory with a plan. Then the five that come after it. No carousel: all six are always on
+   the page */
+.group {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.first {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: center;
+  padding-block-end: var(--space-6);
+  border-bottom: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.firstText {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.firstText > *,
+.nextLabel {
+  margin: 0;
+}
+
+.firstText > p:last-child {
+  max-width: var(--mantine-breakpoint-xs);
+  color: var(--color-text-secondary);
+}
+
+.nextLabel,
+.caption > p {
+  color: var(--color-text-secondary);
+}
+
+/* Phones: two columns. Tablets: three. Wide screens: one row of five */
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -25,42 +60,20 @@
   margin: 0;
 }
 
-.caption > p {
-  color: var(--color-text-secondary);
-}
-
-.place:last-child {
-  grid-column: 1 / -1;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: var(--space-5);
-  align-items: center;
-}
-
 @media (min-width: 48em) {
+  .first {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: var(--space-7);
+  }
+
   .grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-
-  .place,
-  .place:last-child {
-    grid-column: span 2;
-    grid-template-columns: minmax(0, 1fr);
-    align-items: start;
-  }
-
-  .place:nth-child(4) {
-    grid-column: 2 / span 2;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
-@media (min-width: 62em) {
+@media (min-width: 75em) {
   .grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-
-  .place,
-  .place:last-child,
-  .place:nth-child(4) {
-    grid-column: auto;
+    column-gap: var(--space-4);
   }
 }

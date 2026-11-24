@@ -11,7 +11,8 @@ const site = new URL(process.env.URL ?? 'http://localhost:3000');
 const meta = (page: Page, selector: string) => page.locator(selector).getAttribute('content');
 // The sections the header and the footer link to, in page order, and the FAQ's questions
 const sections = ['places', 'method', 'tourism', 'allies', 'faq'] as const;
-const questions = ['what', 'how', 'tourism', 'book', 'allies', 'data'] as const;
+const questions = ['what', 'when', 'book', 'donate', 'allies', 'data'] as const;
+const routes = ['train', 'link', 'validate', 'drive', 'accompany', 'share'] as const;
 const privacyPaths = { es: '/es/privacidad', en: '/en/privacy' };
 
 for (const locale of locales) {
@@ -85,14 +86,31 @@ for (const locale of locales) {
       await expect(steps.locator('img')).toHaveCount(3);
     });
 
-    test('names the five territories in order, each with its piece and its line', async ({ page }) => {
+    test('names the six territories in order: Quindío first with its plan, then the five that come after it', async ({ page }) => {
       await page.goto(`/${locale}`);
-      const territories = page.getByRole('list', { name: Prelaunch.thesis.territoriesLabel, exact: true });
+      const territories = page.getByRole('group', { name: Prelaunch.thesis.territoriesLabel, exact: true });
 
-      await expect(territories.getByRole('listitem')).toHaveCount(5);
-      await expect(territories.getByRole('heading', { level: 3 })).toHaveText(['Quindío', 'Risaralda', 'Caldas', 'Valle del Cauca', 'Chocó']);
-      await expect(territories.locator('p')).toHaveText((['quindio', 'risaralda', 'caldas', 'valle', 'choco'] as const).map((key) => Prelaunch.places[key]));
-      await expect(territories.locator('img')).toHaveCount(5);
+      await expect(territories.getByRole('heading', { level: 3 })).toHaveText(['Quindío', 'Risaralda', 'Caldas', 'Valle del Cauca', 'Chocó', 'Nariño']);
+      await expect(territories.locator('img')).toHaveCount(6);
+      // Quindío has a plan, so it has its own text and its status; the five others share one status and no repeated paragraph
+      await expect(territories.getByText(Prelaunch.places.quindio, { exact: true })).toBeVisible();
+      await expect(territories.getByText(Prelaunch.places.status.design, { exact: true })).toHaveCount(1);
+      const rest = page.getByRole('list', { name: Prelaunch.places.nextLabel, exact: true });
+      await expect(rest.getByRole('listitem')).toHaveCount(5);
+      await expect(rest.getByText(Prelaunch.places.status.upcoming, { exact: true })).toHaveCount(5);
+    });
+
+    test('the origin comes with its author, and the four commitments are a list of their own', async ({ page }) => {
+      await page.goto(`/${locale}`);
+      const thesis = page.locator('section[aria-labelledby="thesis-title"]');
+
+      await expect(thesis.locator('figure p')).toHaveText(Prelaunch.thesis.stance);
+      await expect(thesis.locator('figure figcaption')).toHaveText(Prelaunch.thesis.stanceAuthor);
+      const commitments = thesis.getByRole('list', { name: Prelaunch.thesis.commitmentsLabel, exact: true });
+      await expect(commitments.getByRole('listitem')).toHaveCount(4);
+      await expect(commitments.getByRole('heading', { level: 3 })).toHaveText(
+        (['listen', 'recognize', 'connect', 'decide'] as const).map((key) => Prelaunch.thesis.commitments[key].title),
+      );
     });
 
     test('only the hero art is fetched first; every other piece is lazy, decorative and sized before it loads', async ({ page }) => {
@@ -106,8 +124,8 @@ for (const locale of locales) {
           .filter((image) => !image.closest('section[aria-labelledby="hero-title"]'))
           .map((image) => ({ loading: image.getAttribute('loading'), alt: image.getAttribute('alt'), width: image.getAttribute('width'), height: image.getAttribute('height') })),
       );
-      // Five territories, three steps and Turismo Vivo; the footer's horizon and mark
-      expect(art).toHaveLength(11);
+      // Six territories, three steps and Turismo Vivo; the footer's horizon and mark
+      expect(art).toHaveLength(12);
       for (const image of art) expect(image).toMatchObject({ loading: 'lazy', alt: '', width: expect.stringMatching(/^\d+$/), height: expect.stringMatching(/^\d+$/) });
     });
 
@@ -134,6 +152,27 @@ for (const locale of locales) {
       await expect(page.locator('section[aria-labelledby="allies-title"]').getByText(Prelaunch.allies.email.address, { exact: true })).toBeVisible();
       await expect(email).toHaveAttribute('href', /^mailto:info@rutaopta\.org\?subject=/);
       await expect(page.getByRole('button', { name: Prelaunch.copyEmail, exact: true })).toBeVisible();
+    });
+
+    // Every kind of ally has its own verb, and the message it opens is already written for that kind: the lead arrives qualified
+    test('each ally route opens a WhatsApp message and an email subject written for that kind of ally', async ({ page }) => {
+      await page.goto(`/${locale}`);
+      const allies = page.locator('section[aria-labelledby="allies-title"]');
+      const list = allies.getByRole('list', { name: Prelaunch.allies.title, exact: true });
+
+      await expect(list.getByRole('listitem')).toHaveCount(routes.length);
+      await expect(list.getByRole('heading', { level: 3 })).toHaveText(routes.map((route) => Prelaunch.allies.routes[route].verb));
+      for (const route of routes) {
+        const copy = Prelaunch.allies.routes[route];
+        const whatsapp = list.getByRole('link', { name: new RegExp(`^${copy.cta}`) });
+        const email = list.getByRole('link', { name: `${Prelaunch.allies.byEmail}: ${copy.verb}`, exact: true });
+
+        await expect(whatsapp).toHaveAttribute('href', `https://wa.me/${Prelaunch.allies.whatsapp.number}?text=${encodeURIComponent(copy.message)}`);
+        await expect(whatsapp).toHaveAttribute('target', '_blank');
+        await expect(whatsapp).toHaveAttribute('rel', /noopener/);
+        await expect(whatsapp).toHaveAttribute('aria-label', Prelaunch.allies.whatsapp.opensNewTab.replace('{label}', copy.cta));
+        await expect(email).toHaveAttribute('href', `mailto:${Prelaunch.allies.email.address}?subject=${encodeURIComponent(copy.subject)}`);
+      }
     });
 
     test('the copy button puts the address on the clipboard and says so, politely', async ({ page, context }) => {
@@ -307,7 +346,7 @@ for (const locale of locales) {
         await page.evaluate(() => document.fonts.ready);
 
         const groups = [
-          ['#tourism-title ~ p.t-body-lg', '#places li:first-child p', '#places li:last-child h3'],
+          ['#tourism-title ~ p.t-body-lg', '#places li:first-child p', '#places li:last-child h3', '#places p.t-body-md'],
           ['footer p.t-body-lg', 'footer nav li:first-child a'],
         ];
         for (const [index, targets] of groups.entries()) {
@@ -423,8 +462,8 @@ for (const locale of locales) {
       const pieces = await page.locator('main img[loading="lazy"], footer img[src*="/_next/image"]').evaluateAll((images) =>
         (images as HTMLImageElement[]).map((image) => ({ failed: image.complete && image.naturalWidth === 0, height: image.getBoundingClientRect().height })),
       );
-      // Nine pieces in main and the footer's horizon (its mark is a static SVG, not an optimised image)
-      expect(pieces).toHaveLength(10);
+      // Ten pieces in main (six territories, three steps, Turismo Vivo) and the footer's horizon (its mark is a static SVG, not an optimised image)
+      expect(pieces).toHaveLength(11);
       for (const { failed, height } of pieces) {
         expect(failed, 'the piece really failed').toBe(true);
         expect(height, 'a failed piece keeps the height its file gives it').toBeGreaterThan(0);
@@ -467,14 +506,14 @@ for (const locale of locales) {
   const { Prelaunch } = messages[locale];
 
   test.describe(`/${locale} reading and keyboard`, () => {
-    test('the verbs and the territories keep their list roles and the paragraphs keep a readable measure', async ({ page }) => {
+    test('the territories and the commitments keep their list roles and the paragraphs keep a readable measure', async ({ page }) => {
       await page.setViewportSize({ width: 1440, height: 900 });
       await page.goto(`/${locale}`);
 
-      await expect(page.getByRole('main').locator('ul[role="list"][aria-label]')).toHaveCount(2);
-      await expect(page.getByRole('list', { name: Prelaunch.thesis.verbsLabel, exact: true }).getByRole('listitem')).toHaveText(
-        (['listen', 'recognize', 'connect', 'build'] as const).map((verb) => Prelaunch.thesis.verbs[verb]),
-      );
+      // The territories are one named group; the lists are named by a heading or a visible label
+      await expect(page.getByRole('main').locator('[role="group"][aria-label]')).toHaveCount(1);
+      await expect(page.getByRole('main').locator('ul[role="list"][aria-label]')).toHaveCount(0);
+      await expect(page.getByRole('list', { name: Prelaunch.thesis.commitmentsLabel, exact: true }).getByRole('listitem')).toHaveCount(4);
       const leads = ['#hero-title + p', '#thesis-title + p', '#places-title + p', '#method-title + p', '#tourism-title ~ p.t-body-lg', '#allies-title + p', '#list-title + p'];
       for (const selector of leads) {
         const paragraph = await page.locator(selector).first().boundingBox();
@@ -510,7 +549,7 @@ for (const locale of locales) {
 
       // Closed FAQ panels are inert: their policy link is skipped until its question opens
       const order: string[] = [];
-      for (let step = 0; step < 13; step++) {
+      for (let step = 0; step < 25; step++) {
         await page.keyboard.press('Tab');
         order.push(
           await page.evaluate(() => {
@@ -522,6 +561,8 @@ for (const locale of locales) {
       expect(order.map((href) => (href.startsWith('https://wa.me') ? 'whatsapp' : href.startsWith('mailto:') ? 'email' : href))).toEqual([
         '#allies',
         '#lista',
+        // Each route: its WhatsApp button, then its email link
+        ...routes.flatMap(() => ['whatsapp', 'email']),
         'whatsapp',
         'email',
         `button:${Prelaunch.copyEmail}`,

@@ -80,10 +80,13 @@ Flow "Ruta Opta · home proposal art (2026-11-24)", `idacBsR8IeBn8Cv558Mn`. Styl
 | Caldas (Nevado del Ruiz, frailejones) | krea-3, 1K | `JUGQblgoLMuL3cx15Vjc` | `B4fJkvgTgVHBzq9CVarh` |
 | Valle del Cauca (cane, river, Farallones) | krea-3, 1K | `QTXyS3UavOBSuOQPJkJg` | `tNbae1lpHYNASiFYfvfz` |
 | Chocó (Pacific, whale tail, canoe) | krea-3, 1K | `HgNOmxoQw3r4VbBXRNjf` | `iXo7Bo9SAfJ22O9eFD2w` |
+| Nariño, replaced 2026-11-24 (La Cocha and the island of La Corota, a terracotta boat) | krea-3, 1K | `Rcspng1kdtJnFKuNyFbY` | `4nmvpGfNW4QAPUBuOHBI` |
 | Turismo Vivo (veranda table) | gpt-image-2.5-sunburst, 1K, paper relief | `0aeI4yTKqzb2n6ioXAuJ` | `KevR7qaRdzWgFQ3cgGZf` |
 | Footer horizon (3:1) | gpt-image-2.5-sunburst, 2K, paper relief | `kwrLF4KyFw87TIaBuh5o` | `YEuu5KiUDa0B0PW9Pi7S` |
 
 Spend: 48 generations, 8,820 credits (about USD 1.60): 4 x 510 (Turismo Vivo), 4 x 427 (horizon), 32 x 151 (collage). Then the eight collage picks went through background removal (`birefnet-v2-bg-removal`, 8 x 30 credits; cutout nodes `MhBiwnuAP1VOkzh7DDUR`, `9N5hskiI0Fh3N9zvgSXP`, `H4zXL0Ic1HZhhl8GaJSS`, `B6tidkRb9f111D6SGxjp`, `WymWXaT3pE3ABo1QsKnr`, `OtAeoJOpLEjOxVEW19cv`, `7VpC6bE8ouy6xO0HCSIH`, `a0EdaRbaVL5XIiS2qSZZ`), and one soft shadow was baked in locally (ImageMagick `-shadow 26x16+0+12` in the ink colour) before the transparent WebP export. To swap a piece, keep its file name in `_art/`.
+
+Nariño was redone on 2026-11-24 at the owner's request, because its first piece (flat shapes and a black ellipse) did not read as a place. Same flow, recipe and style paragraph as the other pieces: 4 x 151 credits, then the cutout (`birefnet-v2-bg-removal`, node `pNOV2oi2jLiQz6mWXCjX`, generation `0Tx3rU0spQ5S3PZEQw2M`, 30 credits) and the same baked shadow (`-shadow 26x16+0+12` in the ink colour). About 636 credits (USD 0.12) in all. Its file keeps the name `home-place-narino.webp`.
 
 ## References
 - Refero round 3 ledger: `docs/references/home-round3.md` (57 calls; 89 across the three rounds).
