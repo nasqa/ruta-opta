@@ -1,6 +1,0 @@
-.slot {
-  aspect-ratio: 4 / 3;
-  border: var(--border-width-hairline) dashed var(--color-territory-border-hover);
-  border-radius: var(--shape-container);
-  background: var(--color-territory-bg);
-}

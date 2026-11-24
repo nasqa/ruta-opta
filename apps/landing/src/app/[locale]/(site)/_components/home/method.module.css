@@ -58,3 +58,22 @@
 .card > * {
   margin: 0;
 }
+
+/* On phones the marker and its gap shrink so the card keeps its width */
+@media (max-width: 30em) {
+  .step {
+    grid-template-columns: var(--space-6) minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+
+  .step::before {
+    width: var(--space-6);
+    height: var(--space-6);
+    font-size: var(--text-title-font-size);
+  }
+
+  .step:not(:last-child)::after {
+    inset-block-start: var(--space-6);
+    inset-inline-start: calc(var(--space-6) / 2);
+  }
+}

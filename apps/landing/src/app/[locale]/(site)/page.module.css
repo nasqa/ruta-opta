@@ -1,6 +1,8 @@
 .page {
   display: grid;
   gap: var(--space-section);
+  max-width: var(--mantine-breakpoint-lg);
+  margin-inline: auto;
   padding: var(--space-inset-page);
 }
 
@@ -9,44 +11,7 @@
   margin: 0;
 }
 
-.hero {
-  display: grid;
-  gap: var(--space-group);
-  align-items: center;
-  padding: var(--space-inset-container);
-  border: var(--border-width-hairline) solid var(--color-territory-border);
-  border-radius: var(--shape-container);
-  background: var(--color-territory-bg-subtle);
-}
-
-.heroText {
-  display: grid;
-  gap: var(--space-related);
-  justify-items: start;
-}
-
-.heroText > * {
-  margin: 0;
-}
-
-.section {
-  display: grid;
-  gap: var(--space-group);
-}
-
-.section > * {
-  margin: 0;
-}
-
-.stages {
-  display: grid;
-  gap: var(--space-group);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.card {
+.list {
   display: grid;
   gap: var(--space-related);
   align-content: start;
@@ -56,16 +21,6 @@
   background: var(--color-surface-raised);
 }
 
-.card > * {
+.list > * {
   margin: 0;
-}
-
-@media (min-width: 48em) {
-  .hero {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .stages {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }

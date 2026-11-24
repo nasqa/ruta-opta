@@ -79,11 +79,8 @@ for (const { locale, path } of pages) {
 }
 
 test.describe('no page scrolls sideways at 320 px', () => {
-  for (const { href, path } of pages) {
+  for (const { path } of pages) {
     test(path, async ({ page }) => {
-      // Known before the shell: the home hero's display heading has a word wider than its padded column at 320 px. The home's
-      // rewrite owns that layout; this expectation fails loudly once it is fixed, so the marker can go
-      test.fail(href === '/', 'the home hero overflows at 320 px (pre-existing, owned by the home rewrite)');
       await page.setViewportSize({ width: 320, height: 640 });
       await page.goto(path);
 

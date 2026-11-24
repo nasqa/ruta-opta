@@ -17,7 +17,7 @@ test.describe('smoke page on /es', () => {
     await page.goto('/es');
     await expect(page.locator('html')).toHaveAttribute('lang', 'es');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    await expect(page.locator('[data-territory="quindio"] section')).toBeVisible();
+    await expect(page.locator('section[aria-labelledby="hero-title"]')).toBeVisible();
   });
 
   test('loads the display font from the theme package', async ({ page }) => {

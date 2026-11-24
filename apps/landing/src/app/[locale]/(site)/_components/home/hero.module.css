@@ -15,8 +15,12 @@
   text-wrap: balance;
 }
 
-@media (min-width: 48em) {
-  .text > h1,
+/* The headline takes two lines on wide screens; the lead keeps a readable measure */
+@media (min-width: 62em) {
+  .text > h1 {
+    max-width: 68%;
+  }
+
   .text > p {
     max-width: 54%;
   }
