@@ -262,7 +262,7 @@ const backdrop = async (page: Page, selector: string): Promise<Rgb[]> => {
 const widths = [375, 768, 1440];
 
 for (const locale of locales) {
-  test.describe(`/${locale} hero text contrast on the real pixels`, () => {
+  test.describe(`/${locale} text contrast on the real pixels`, () => {
     for (const width of widths) {
       test(`the headline and the lead keep 7:1 at ${width} px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
@@ -277,6 +277,29 @@ for (const locale of locales) {
           if (!text) throw new Error(`no colour for ${selector}`);
           const worst = Math.min(...(await backdrop(page, selector)).map((pixel) => contrastRatio(text, pixel)));
           expect(worst, `${selector} worst pixel contrast`).toBeGreaterThanOrEqual(7);
+        }
+      });
+
+      // Text beside the art (Turismo Vivo), under it (a territory) and on the footer's dark band, whose tokens re-resolve there
+      test(`the text beside and under the art, and on the dark footer, keeps 7:1 at ${width} px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(`/${locale}`, { waitUntil: 'networkidle' });
+        await page.evaluate(() => document.fonts.ready);
+
+        const groups = [
+          ['#tourism-title ~ p.t-body-lg', '#places li:first-child p', '#places li:last-child h3'],
+          ['footer p.t-body-lg', 'footer nav li:first-child a'],
+        ];
+        for (const [index, targets] of groups.entries()) {
+          // The footer waits under the curtain until the end of the scroll
+          if (index === 1) await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+          for (const selector of targets) {
+            await page.locator(selector).scrollIntoViewIfNeeded();
+            const text = await textColor(page, selector);
+            await page.addStyleTag({ content: `${selector} { color: transparent !important; }` });
+            const worst = Math.min(...(await backdrop(page, selector)).map((pixel) => contrastRatio(text, pixel)));
+            expect(worst, `${selector} worst pixel contrast`).toBeGreaterThanOrEqual(7);
+          }
         }
       });
     }
@@ -331,6 +354,16 @@ const watchLayoutShift = (page: Page) =>
 
 const layoutShift = (page: Page) => page.evaluate(() => Number(Reflect.get(window, 'shift')));
 
+// Down the page half a window at a time, so every lazy piece is requested, then back to the top
+const scrollThrough = (page: Page) =>
+  page.evaluate(async () => {
+    for (let y = 0; y < document.documentElement.scrollHeight; y += window.innerHeight / 2) {
+      window.scrollTo(0, y);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    window.scrollTo(0, 0);
+  });
+
 for (const locale of locales) {
   test.describe(`/${locale} with the hero image blocked`, () => {
     test('the text stays readable and nothing moves when the image never arrives', async ({ page }) => {
@@ -355,6 +388,39 @@ for (const locale of locales) {
       await page.goto(`/${locale}`, { waitUntil: 'networkidle' });
       await page.evaluate(() => document.fonts.ready);
 
+      expect(await layoutShift(page)).toBeLessThanOrEqual(0.1);
+    });
+
+    test('every lazy piece keeps its box when its image never arrives', async ({ page }) => {
+      await watchLayoutShift(page);
+      await page.route(/\/_next\/image/, (route) => route.abort());
+      await page.goto(`/${locale}`, { waitUntil: 'networkidle' });
+      await page.evaluate(() => document.fonts.ready);
+      const before = await page.evaluate(() => document.documentElement.scrollHeight);
+      await scrollThrough(page);
+      await page.waitForLoadState('networkidle');
+
+      const pieces = await page.locator('main img[loading="lazy"], footer img[src*="/_next/image"]').evaluateAll((images) =>
+        (images as HTMLImageElement[]).map((image) => ({ failed: image.complete && image.naturalWidth === 0, height: image.getBoundingClientRect().height })),
+      );
+      // Nine pieces in main and the footer's horizon (its mark is a static SVG, not an optimised image)
+      expect(pieces).toHaveLength(10);
+      for (const { failed, height } of pieces) {
+        expect(failed, 'the piece really failed').toBe(true);
+        expect(height, 'a failed piece keeps the height its file gives it').toBeGreaterThan(0);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(before);
+      expect(await layoutShift(page)).toBeLessThanOrEqual(0.1);
+    });
+
+    test('the layout shift stays within 0.1 while the lazy art arrives', async ({ page }) => {
+      await watchLayoutShift(page);
+      await page.goto(`/${locale}`, { waitUntil: 'networkidle' });
+      await page.evaluate(() => document.fonts.ready);
+      await scrollThrough(page);
+      await page.waitForLoadState('networkidle');
+
+      expect(await page.locator('main img, footer img').evaluateAll((images) => (images as HTMLImageElement[]).filter((image) => !image.complete).length)).toBe(0);
       expect(await layoutShift(page)).toBeLessThanOrEqual(0.1);
     });
   });
