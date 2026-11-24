@@ -321,6 +321,63 @@ test("the source records the policy version sealed in the token, not the current
   assert.equal(audience.contacts.size, 0);
 });
 
+test('a tagged signup seals its origin tag and the source ends with it', async () => {
+  for (const locale of ['es', 'en']) {
+    const { mailer, audience, waitlist } = setup();
+    const calls = counted(audience);
+    assert.equal(await waitlist.requestConfirmation(values, locale, ip, 'ig'), 'sent');
+    const token = tokenOf(mailer);
+    assert.deepEqual(openToken('confirm', token, keys, start), {
+      status: 'valid', payload: { email: values.email, name: values.name, locale, consentAt: start, policyVersion: '2026-01', o: 'ig' },
+    });
+    // The confirm page reads only the name and locale, never the tag
+    assert.deepEqual(waitlist.readConfirmation(token), { status: 'valid', name: values.name, locale });
+    assert.deepEqual(await waitlist.confirmSubscription(token), { status: 'subscribed', locale });
+    assert.deepEqual(calls, [[{ email: values.email, name: values.name }, locale, `rutaopta.org/${locale} · 2026-01 · o=ig`]]);
+  }
+});
+
+test('a signup without a tag seals no o key and keeps the source it had before tags', async () => {
+  const { mailer, audience, waitlist } = setup();
+  const calls = counted(audience);
+  await waitlist.requestConfirmation(values, 'es', ip, undefined);
+  const opened = openToken('confirm', tokenOf(mailer), keys, start);
+  assert.ok(!('o' in opened.payload));
+  await waitlist.confirmSubscription(tokenOf(mailer));
+  assert.equal(calls[0][2], 'rutaopta.org/es · 2026-01');
+});
+
+test('a link emailed before tags existed still confirms with its old source', async () => {
+  const { audience, waitlist } = setup();
+  const calls = counted(audience);
+  const legacy = sealToken('confirm', { email: values.email, name: values.name, locale: 'es', consentAt: start, policyVersion: '2026-11-draft' }, keys, confirmTtlMs, start);
+  assert.deepEqual(await waitlist.confirmSubscription(legacy), { status: 'subscribed', locale: 'es' });
+  assert.equal(calls[0][2], 'rutaopta.org/es · 2026-11-draft');
+});
+
+test('the longest tag adds at most 42 characters to the emailed link', async () => {
+  const link = async (tag) => {
+    const { mailer, waitlist } = setup();
+    await waitlist.requestConfirmation(values, 'es', ip, tag);
+    return /https:\/\/x\/es\/confirm\?t=[\w-]+/.exec(mailer.sent[0].text)[0];
+  };
+  const untagged = await link(undefined);
+  assert.ok((await link('ig')).length - untagged.length <= 12);
+  assert.ok((await link('a'.repeat(24))).length - untagged.length <= 42);
+});
+
+test('the origin tag never reaches a log', async () => {
+  const tag = 'flyer-armenia-plaza';
+  const failing = setup({ mailer: { send: async () => ({ ok: false, code: 'E_1' }) }, audience: { subscribe: async () => ({ status: 'unavailable', code: 'Z_1' }) } });
+  await failing.waitlist.requestConfirmation(values, 'es', ip, tag);
+  const { mailer, logs, waitlist } = setup({ audience: { subscribe: async () => { throw new Error(tag); } } });
+  await waitlist.requestConfirmation(values, 'es', ip, tag);
+  await waitlist.confirmSubscription(tokenOf(mailer));
+  const all = [...failing.logs, ...logs];
+  assert.ok(all.length >= 2);
+  assert.ok(!JSON.stringify(all).includes(tag));
+});
+
 // A store whose every operation hangs, as Netlify Blobs does while it retries an outage
 const hanging = () => {
   const never = () => new Promise(() => {});

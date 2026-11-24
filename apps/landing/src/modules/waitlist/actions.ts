@@ -4,6 +4,7 @@ import { hasLocale } from 'next-intl';
 import { headers } from 'next/headers';
 import { redirect } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
+import { readOriginTag } from './origin-tag';
 import { confirmSubscription, requestConfirmation } from './server';
 import { signupLocales } from './signup-locales';
 import type { ConfirmState, WaitlistState } from './state';
@@ -22,8 +23,9 @@ export const joinWaitlist = async (_previous: WaitlistState, form: FormData): Pr
   const locale = form.get('locale');
   if (!hasLocale(signupLocales(), locale)) return { status: 'unavailable', values: validation.values };
 
-  const ip = (await headers()).get('x-nf-client-connection-ip') ?? undefined;
-  const result = await requestConfirmation(validation.values, locale, ip);
+  const request = await headers();
+  const ip = request.get('x-nf-client-connection-ip') ?? undefined;
+  const result = await requestConfirmation(validation.values, locale, ip, readOriginTag(request.get('referer')));
   // The same answer for a new address and one already on the list: the form never reveals who is subscribed
   return result === 'sent' ? { status: 'sent', name: validation.values.name } : { status: 'unavailable', values: validation.values };
 };
