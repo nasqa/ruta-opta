@@ -39,13 +39,6 @@ Page ids are Refero screen UUIDs; open at `https://refero.design/pages/<id>`.
 5. **Contents is a left column with an overline and short labels, one column above the text on phones** -> `Card` with `<nav aria-label>`, the overline «En esta página» (ref 5's label), an ordered list of anchors; sticky only on desktop; **no scroll-spy**, because it needs client JS and the route budget only goes down (refs 4 and 5 mark the current item with a rule; we leave it static). Spanish section labels run long, so write them as short noun phrases that fit a 240 px column in one or two lines. Task 7.
 6. **Data rights go through a contact card, not a form or a modal** -> a closing `Card` in the accent family with a one-sentence list of what a person can ask (see, correct, delete, stop) and both `mailto:` addresses; a response-time sentence only with the legally confirmed term (ref 8's pattern), written as `[PENDIENTE: plazo de respuesta, confirmar con la Fundación]` and not invented. Task 7 (the footer address link in Task 4).
 
-## Proposed microcopy (all `[PENDIENTE: copy de campaña]`)
-- Contents overline: «En esta página».
-- Contact card title: «¿Preguntas sobre tus datos?» (already in the design).
-- Rights sentence: «Puedes pedirnos ver, corregir o borrar tus datos, o dejar de recibir correos.» `[PENDIENTE: copy de campaña]`
-- Response time: `[PENDIENTE: plazo de respuesta, confirmar con la Fundación]`
-No numbers, proof or testimonials are used.
-
 ## Open questions for the owner
 - Verify the header at 320 px before Task 4 is merged; the label is the first thing to give up (decision 1), not the switch.
 - Which response time applies to the Fundación under Colombian data-protection rules? This is a legal fact for Santiago or the Fundación, not for Refero.
@@ -56,4 +49,5 @@ Links and notes only; no Refero images stored in the repo; no Refero colours, fo
 
 ## Controller rulings (2026-11-23)
 - Decision 1's fallback (drop «Ruta Opta» under about 360 px) is NOT applied: header B is Santiago's decision. At 320 px the header keeps logo, hairline, label and switch, and fits by tightening gaps and the 96 px logo. If it truly cannot fit, that goes to Santiago.
-- Decision 6's response-time sentence and the "Proposed microcopy" are evidence for Santiago, not copy to ship. The privacy page adds only the spec's new keys (`overline`, `effective`, `toc`, `questions`); the legal text stays as it is.
+- Decision 6's response-time sentence is evidence for Santiago, not copy to ship. The privacy page adds only the spec's new keys (`overline`, `effective`, `toc`, `questions`); the legal text stays as it is.
+- Refero's microcopy proposals were moved out of the repo (the repo is English-only); Santiago approved the existing copy.

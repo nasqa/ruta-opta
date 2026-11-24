@@ -41,7 +41,7 @@ test('every route has its namespace in Spanish, the source of the types', () => 
 });
 
 test('alternates list the covered locales and x-default, the unprefixed path where the proxy negotiates the locale', () => {
-  // A page that exists in both locales, here the home as if it were translated
+  // The home exists in both locales
   const home = alternates('/', ['es', 'en']).languages;
   assert.deepEqual(home, { es: '/es', en: '/en', 'x-default': '/' });
   assert.deepEqual(home, proxyLinks(routing.pathnames, '/es'));

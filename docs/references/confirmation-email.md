@@ -32,13 +32,6 @@ Page ids are Refero screen UUIDs; web at `https://refero.design/pages/<id>`, iOS
 4. **The subject states the action and the sender, and the preheader repeats the reason in one short clause** -> `subject` string from the `Waitlist` email messages («Confirma tu suscripción a Ruta Opta» style), preheader from the existing hidden block (ref 6). No code, no emoji, no urgency. Both strings are new copy, so they carry the pending tag. Task 8.
 5. **Keep the footer reason line, the organisation line and the privacy link exactly as designed** -> it already covers the "why am I receiving this" role that refs 2 and 4 handle with helper links; do not add a language selector or a resend control to the email (a resend would be a second sign-up). Task 8.
 
-## Proposed microcopy (all `[PENDIENTE: copy de campaña]`)
-- Subject: «Confirma tu suscripción a Ruta Opta» `[PENDIENTE: copy de campaña]`
-- Button: «Confirmar suscripción» `[PENDIENTE: copy de campaña]`
-- Ignore line: «Si no fuiste tú, puedes ignorar este correo: no te inscribiremos.» `[PENDIENTE: copy de campaña]`
-- Validity: `[PENDIENTE: vigencia del enlace]`
-Existing designed strings (fallback label, reason line, organisation line) stay as the design has them. No numbers, proof or testimonials are used. English strings follow through `translate-namespace`.
-
 ## Open questions for the owner
 - How long is the confirmation link valid? The email should say it only if the service enforces it; this needs a look at the waitlist code in Task 8.
 - Should the home page's own "check your email" message (the screen that precedes this email) get provider quick-open buttons (Open Gmail / Open Outlook, as refs 5 and 4 show)? That is a landing change outside this PR; recorded for a later pass.
@@ -48,5 +41,6 @@ Existing designed strings (fallback label, reason line, organisation line) stay 
 Links and notes only; no Refero images stored in the repo; no Refero colours, fonts or radii used; copy invents no proof.
 
 ## Controller rulings (2026-11-23)
-- The "Proposed microcopy" above is evidence for Santiago, not copy to ship. The email keeps Santiago's approved `ConfirmEmail` strings (subject «Confirma tu inscripción a OPTA», action «Confirmar mi inscripción»). The spec allows new strings only for the layout (`EmailLayout`).
+- Refero's microcopy proposals were moved out of the repo (the repo is English-only); Santiago approved the existing copy.
+- The email keeps Santiago's approved `ConfirmEmail` strings (subject «Confirma tu inscripción a OPTA», action «Confirmar mi inscripción»). The spec allows new strings only for the layout (`EmailLayout`).
 - Decisions 2 and 3 are already met by the existing copy: `ConfirmEmail.p3` is the "it was not me" line and `ConfirmEmail.p2` states the real validity, 7 days. No new line.

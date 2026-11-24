@@ -37,12 +37,6 @@ Page ids are Refero screen UUIDs; open them at `https://refero.design/pages/<id>
 5. **`/unsubscribed` confirms immediately and offers no persuasion** -> `SceneBand short` + `SceneCard narrow`: title, one sentence that says what stopped, and one quiet `Link` «Volver al inicio». No reasons list, no "stay" button, no feedback ask (rejected set). Optionally one sentence saying that signing up again is possible from the home, like ref 7's reversal line. Task 7.
 6. **Every page is a page, not a modal, and carries its own heading, one primary path and the shared header/footer** -> matches the approved D2/C1 compositions; refs 5 and 10 are the only modal/panel patterns and are taken for copy only. Tasks 5, 6, 7.
 
-## Proposed microcopy (all `[PENDIENTE: copy de campaña]`)
-- Failed link: «Este enlace ya no sirve. Inscríbete de nuevo y te enviamos otro.» `[PENDIENTE: copy de campaña]`
-- Confirmed next step: «Te escribiremos pocas veces; cada correo trae un enlace para darte de baja.» `[PENDIENTE: copy de campaña]` (do not state a frequency number; use the existing `frequency` string.)
-- Unsubscribed: «Listo, no volverás a recibir correos de Ruta Opta.» and «Si fue sin querer, puedes inscribirte de nuevo desde el inicio.» `[PENDIENTE: copy de campaña]`
-No numbers, proof or testimonials are used.
-
 ## Open questions for the owner
 - None that conflict with decisions 1 to 12 of the design. Refero shows no evidence against D2, C1, header B or the reveal footer for these pages.
 - Is a re-subscribe sentence on `/baja` welcome? Design says one quiet `Link` only; the sentence is a copy addition, not a structural change.
@@ -51,4 +45,5 @@ No numbers, proof or testimonials are used.
 Links and notes only; no Refero images stored in the repo; no Refero colours, fonts or radii used; copy invents no proof.
 
 ## Controller rulings (2026-11-23)
-- The "Proposed microcopy" above is evidence for Santiago, not copy to ship. The pages keep the existing `Confirm`, `Confirmed` and `Unsubscribed` strings; the spec adds no new campaign copy to them.
+- Refero's microcopy proposals were moved out of the repo (the repo is English-only); Santiago approved the existing copy.
+- The pages keep the existing `Confirm`, `Confirmed` and `Unsubscribed` strings; the spec adds no new campaign copy to them.
