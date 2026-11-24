@@ -42,7 +42,7 @@
       "error": "Revisa el correo: parece que le falta algo. Ejemplo: nombre@correo.com."
     },
     "consent": {
-      "label": "Autorizo a Fundación OPTA a tratar mis datos para enviarme novedades y avisarme cuando abramos. Puedo retirar mi autorización cuando quiera. Conoce la <privacy>política de tratamiento de datos</privacy>.",
+      "label": "Autorizo a la Fundación Embajadores de la Paz, responsable de OPTA, a tratar mis datos para enviarme novedades y avisarme cuando abramos. Puedo retirar mi autorización cuando quiera. Conoce la <privacy>política de tratamiento de datos</privacy>.",
       "error": "Para inscribirte necesitamos tu autorización."
     },
     "submit": "Quiero que me avisen",
@@ -60,7 +60,7 @@
     "sections": {
       "controller": {
         "title": "Responsable del tratamiento",
-        "text": "Fundación OPTA, NIT [PENDIENTE], con domicilio en [PENDIENTE]. Representante legal: Stephania Forero."
+        "text": "Fundación Embajadores de la Paz, responsable de OPTA, NIT 901679710-4, con domicilio en Carrera 13 #2N-49, Torre Fundadores 202, Armenia, Quindío. Representante legal: Stephania Forero."
       },
       "data": {
         "title": "Qué datos pedimos",
@@ -89,18 +89,18 @@
     "metaTitle": "Inscripción confirmada",
     "title": "Listo, quedaste en la lista",
     "lead": "Te escribiremos cuando haya novedades.",
-    "frequency": "Serán pocos correos: cuándo abrimos y cómo ser parte. [PENDIENTE: copy de campaña]",
+    "frequency": "Serán pocos correos: cuándo abrimos y cómo ser parte.",
     "home": "Volver al inicio"
   },
   "Unsubscribed": {
     "metaTitle": "Te diste de baja",
-    "title": "Listo, ya no te escribiremos [PENDIENTE: copy de campaña]",
+    "title": "Listo, ya no te escribiremos",
     "lead": "Sacamos tu correo de la lista. Si fue un error, puedes inscribirte de nuevo desde el inicio.",
     "home": "Volver al inicio"
   },
   "Confirm": {
     "metaTitle": "Confirma tu inscripción",
-    "title": "Confirma tu inscripción [PENDIENTE: copy de campaña]",
+    "title": "Confirma tu inscripción",
     "greeting": "Hola, {name}.",
     "lead": "Toca el botón para confirmar que quieres recibir las novedades de OPTA en este correo.",
     "submit": "Confirmar mi inscripción",
@@ -122,7 +122,7 @@
   },
   "ConfirmEmail": {
     "sender": "Ruta OPTA",
-    "subject": "Confirma tu inscripción en OPTA [PENDIENTE: copy de campaña]",
+    "subject": "Confirma tu inscripción a OPTA",
     "preheader": "Un clic y quedas en la lista.",
     "heading": "Confirma tu inscripción",
     "p1": "Alguien, ojalá tú, pidió recibir las novedades de OPTA en este correo.",

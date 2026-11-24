@@ -12,7 +12,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - Show figures as goals until evidence backs them.
 - Text over a photo always gets a scrim (a veil).
-- Every form returns a request number and reaches an owner. The waitlist form is the exception to the number: our own confirmation email is its receipt, and the list belongs to Fundación OPTA.
+- Every form returns a request number and reaches an owner. The waitlist form is the exception to the number: our own confirmation email is its receipt, and the list belongs to Fundación Embajadores de la Paz (OPTA).
 
 ## Client islands
 
