@@ -1,0 +1,65 @@
+/* A fixed ratio per height keeps the crop, and the sun's place in the sky, the same at every width, and reserves the space
+   before the image loads */
+.band {
+  position: relative;
+  overflow: hidden;
+}
+
+.tall {
+  aspect-ratio: 30 / 11;
+}
+
+.short {
+  aspect-ratio: 4;
+}
+
+.strip {
+  aspect-ratio: 60 / 11;
+}
+
+/* The top edge fades into the canvas; routes pass the focal point (object-position) as imageClassName */
+.scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mask-image: linear-gradient(to bottom, transparent, var(--color-surface-canvas) var(--space-9));
+}
+
+/* The real mark as its own layer: the ring is 300 of sun.svg's 420 units, so 16.1 % of the band makes an 11.5 % ring */
+.sun {
+  position: absolute;
+  top: 20%;
+  left: 80%;
+  width: 16.1%;
+  height: auto;
+  translate: -50% -50%;
+  animation: rise var(--motion-brand-duration) var(--motion-brand-easing) both;
+}
+
+/* Under reduced motion the theme sets the travel to 0 and the duration to 0.1s, so the rise becomes a fade */
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: -50% calc(-50% + var(--motion-travel));
+  }
+}
+
+@media (max-width: 30em) {
+  .tall {
+    aspect-ratio: 25 / 16;
+  }
+
+  .short {
+    aspect-ratio: 15 / 8;
+  }
+
+  .strip {
+    aspect-ratio: 75 / 28;
+  }
+
+  .scene {
+    mask-image: linear-gradient(to bottom, transparent, var(--color-surface-canvas) var(--space-8));
+  }
+}

@@ -6,7 +6,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { alternates } from '@/i18n/alternates';
 import { localesFor } from '@/i18n/coverage';
-import { Link } from '@/i18n/navigation';
+import { SiteHeader } from '@/modules/site-shell';
 import { IllustrationSlot } from './_components/illustration-slot';
 import { WaitlistForm } from './_components/waitlist-form';
 import styles from './page.module.css';
@@ -32,6 +32,7 @@ const PrelaunchPage = () => {
 
   return (
     <>
+      <SiteHeader href="/" />
       <main className={styles.page}>
         <Scope territory="quindio">
           <section className={styles.hero} aria-labelledby="hero-title">
@@ -72,11 +73,6 @@ const PrelaunchPage = () => {
           </NextIntlClientProvider>
         </section>
       </main>
-      <footer className={styles.footer}>
-        <Link className="t-body-sm" href="/privacy">
-          {t('privacyLink')}
-        </Link>
-      </footer>
     </>
   );
 };

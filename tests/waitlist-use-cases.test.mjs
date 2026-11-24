@@ -18,6 +18,10 @@ const start = Date.UTC(2026, 0, 10, 10, 0, 0);
 const values = { name: 'Ana Pérez', email: 'ana@example.com', consent: true };
 const ip = '203.0.113.7';
 const copy = { sender: 'Ruta Opta', subject: 'Confirm your subscription', preheader: 'One step left', heading: 'Confirm', paragraphs: ['Click the button.'], action: 'Confirm' };
+const chrome = {
+  logoUrl: 'https://x/email/opta-horizontal-plate@2x.png', logoAlt: 'Opta', privacyUrl: 'https://x/en/privacy', privacyLabel: 'Privacy',
+  reason: 'Why you got this.', organization: 'Who sent it.', fallback: 'Copy this link:',
+};
 
 const setup = (overrides = {}) => {
   const clock = { now: start };
@@ -30,7 +34,7 @@ const setup = (overrides = {}) => {
   const guard = createConfirmGuard(store, hashKey, () => clock.now);
   const waitlist = createWaitlist({
     mailer, audience, throttle, guard, keys, policyVersion: '2026-01', now: () => clock.now, reference: () => 'ref-1',
-    confirmEmail: (locale, url) => buildConfirmEmail(copy, locale, url),
+    confirmEmail: (locale, url) => buildConfirmEmail(copy, locale, url, chrome),
     confirmUrl: (locale, token) => `https://x/${locale}/confirm?t=${token}`,
     log: (event, detail) => logs.push({ event, detail }),
     ...overrides,

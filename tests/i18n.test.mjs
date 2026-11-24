@@ -28,10 +28,12 @@ const proxyLinks = (pathnames, path) => {
 };
 
 test('a namespace exists in the locales whose messages have it', () => {
-  // The pre-launch pages are Spanish-only, so English has none of their namespaces
-  assert.deepEqual(localesWith('Prelaunch'), ['es']);
-  assert.ok(!('Prelaunch' in en));
   assert.deepEqual(localesWith('Prelaunch', { es, en: { Prelaunch: es.Prelaunch } }), ['es', 'en']);
+  assert.deepEqual(localesWith('Prelaunch', { es, en: {} }), ['es']);
+});
+
+test('every route exists in both locales', () => {
+  for (const href of Object.keys(routing.pathnames)) assert.deepEqual(localesFor(href), ['es', 'en']);
 });
 
 test('every route has its namespace in Spanish, the source of the types', () => {
@@ -39,7 +41,7 @@ test('every route has its namespace in Spanish, the source of the types', () => 
 });
 
 test('alternates list the covered locales and x-default, the unprefixed path where the proxy negotiates the locale', () => {
-  // A page that exists in both locales, here the home as if it were translated
+  // The home exists in both locales
   const home = alternates('/', ['es', 'en']).languages;
   assert.deepEqual(home, { es: '/es', en: '/en', 'x-default': '/' });
   assert.deepEqual(home, proxyLinks(routing.pathnames, '/es'));
@@ -49,13 +51,33 @@ test('alternates list the covered locales and x-default, the unprefixed path whe
   assert.deepEqual(aboutOpta, proxyLinks(translatedPathnames, '/es/conoce-opta'));
 });
 
-test('the pre-launch home lists only Spanish, with no x-default', () => {
-  assert.deepEqual(alternates('/').languages, { es: '/es' });
+test('the home lists both locales and x-default', () => {
+  assert.deepEqual(alternates('/').languages, { es: '/es', en: '/en', 'x-default': '/' });
 });
 
-test('a Spanish-only page lists only Spanish, with no x-default', () => {
+test('a single-locale page lists only its locale, with no x-default', () => {
   // The proxy would send an English browser from the unprefixed path to /en/..., which is a 404 for this page
   assert.deepEqual(alternates('/about-opta', ['es'], translated.getPathname), { languages: { es: '/es/conoce-opta' } });
+});
+
+const unmirroredMarkers = (source, target, path = '') =>
+  Object.entries(source).flatMap(([key, value]) =>
+    typeof value === 'object'
+      ? unmirroredMarkers(value, target?.[key], `${path}${key}.`)
+      : value.includes('[PENDIENTE') && !String(target?.[key]).includes('[PENDIENTE')
+        ? [`${path}${key}`]
+        : [],
+  );
+
+test('English messages mirror every Spanish [PENDIENTE] marker', () => {
+  assert.deepEqual(unmirroredMarkers(es, en), []);
+  // The walk is real: it reports a marker the English string dropped or a key English lacks
+  assert.deepEqual(unmirroredMarkers({ A: { b: 'x [PENDIENTE: y]', c: 'z [PENDIENTE]', d: 'ok' } }, { A: { b: 'x', c: 'z [PENDIENTE]' } }), ['A.b']);
+  assert.deepEqual(unmirroredMarkers({ A: { b: '[PENDIENTE]' } }, {}), ['A.b']);
+});
+
+test('every Spanish namespace exists in English', () => {
+  assert.deepEqual(Object.keys(en).sort(), Object.keys(es).sort());
 });
 
 test('Lighthouse budgets every route in each locale that has it', async () => {

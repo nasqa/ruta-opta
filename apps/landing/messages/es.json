@@ -42,7 +42,7 @@
       "error": "Revisa el correo: parece que le falta algo. Ejemplo: nombre@correo.com."
     },
     "consent": {
-      "label": "Autorizo a Fundación OPTA a tratar mis datos para enviarme novedades y avisarme cuando abramos. Puedo retirar mi autorización cuando quiera. Conoce la <privacy>política de tratamiento de datos</privacy>.",
+      "label": "Autorizo a la Fundación Embajadores de la Paz, responsable de OPTA, a tratar mis datos para enviarme novedades y avisarme cuando abramos. Puedo retirar mi autorización cuando quiera. Conoce la <privacy>política de tratamiento de datos</privacy>.",
       "error": "Para inscribirte necesitamos tu autorización."
     },
     "submit": "Quiero que me avisen",
@@ -55,16 +55,19 @@
   },
   "Privacy": {
     "metaTitle": "Política de tratamiento de datos",
+    "overline": "Fundación Embajadores de la Paz",
     "title": "Política de tratamiento de datos",
     "intro": "Esta política explica qué datos personales recoge la lista de espera de OPTA, para qué los usamos y cómo puedes ejercer tus derechos.",
+    "effective": "Vigente desde 2026",
+    "toc": "En esta página",
     "sections": {
       "controller": {
         "title": "Responsable del tratamiento",
-        "text": "Fundación OPTA, NIT [PENDIENTE], con domicilio en [PENDIENTE]. Representante legal: Stephania Forero."
+        "text": "Fundación Embajadores de la Paz, responsable de OPTA, NIT 901679710-4, con domicilio en Carrera 13 #2N-49, Torre Fundadores 202, Armenia, Quindío. Representante legal: Stephania Forero. Teléfono: +57 310 587 4657."
       },
       "data": {
         "title": "Qué datos pedimos",
-        "text": "Tu nombre y tu correo electrónico. Si eliges una opción en «¿Cómo quieres ser parte de esta transformación?», también la guardamos."
+        "text": "Tu nombre y tu correo electrónico. Los conservamos hasta que te des de baja; después los guardamos solo para no volver a escribirte."
       },
       "purpose": {
         "title": "Para qué los usamos",
@@ -79,6 +82,7 @@
         "text": "Puedes conocer, actualizar y corregir tus datos, pedir que los eliminemos y retirar tu autorización cuando quieras. También puedes usar el enlace para darte de baja que trae cada correo."
       }
     },
+    "questions": "¿Preguntas sobre tus datos?",
     "contactEs": "Escríbenos a",
     "emailEs": "privacidad@rutaopta.org",
     "contactEn": "Si prefieres escribir en inglés:",
@@ -89,18 +93,18 @@
     "metaTitle": "Inscripción confirmada",
     "title": "Listo, quedaste en la lista",
     "lead": "Te escribiremos cuando haya novedades.",
-    "frequency": "Serán pocos correos: cuándo abrimos y cómo ser parte. [PENDIENTE: copy de campaña]",
+    "frequency": "Serán pocos correos: cuándo abrimos y cómo ser parte.",
     "home": "Volver al inicio"
   },
   "Unsubscribed": {
     "metaTitle": "Te diste de baja",
-    "title": "Listo, ya no te escribiremos [PENDIENTE: copy de campaña]",
+    "title": "Listo, ya no te escribiremos",
     "lead": "Sacamos tu correo de la lista. Si fue un error, puedes inscribirte de nuevo desde el inicio.",
     "home": "Volver al inicio"
   },
   "Confirm": {
     "metaTitle": "Confirma tu inscripción",
-    "title": "Confirma tu inscripción [PENDIENTE: copy de campaña]",
+    "title": "Confirma tu inscripción",
     "greeting": "Hola, {name}.",
     "lead": "Toca el botón para confirmar que quieres recibir las novedades de OPTA en este correo.",
     "submit": "Confirmar mi inscripción",
@@ -122,7 +126,7 @@
   },
   "ConfirmEmail": {
     "sender": "Ruta OPTA",
-    "subject": "Confirma tu inscripción en OPTA [PENDIENTE: copy de campaña]",
+    "subject": "Confirma tu inscripción a OPTA",
     "preheader": "Un clic y quedas en la lista.",
     "heading": "Confirma tu inscripción",
     "p1": "Alguien, ojalá tú, pidió recibir las novedades de OPTA en este correo.",
@@ -130,8 +134,29 @@
     "p3": "Si no fuiste tú, ignora este mensaje: no te escribiremos.",
     "action": "Confirmar mi inscripción"
   },
+  "EmailLayout": {
+    "logoAlt": "Opta",
+    "reason": "Recibiste este correo porque alguien escribió esta dirección en rutaopta.org.",
+    "organization": "Fundación Embajadores de la Paz · Armenia, Quindío, Colombia",
+    "privacyLabel": "Política de tratamiento de datos",
+    "fallback": "¿El botón no funciona? Copia este enlace en tu navegador:"
+  },
   "NotFound": {
     "title": "No encontramos esta página",
     "home": "Ir al inicio"
+  },
+  "SiteShell": {
+    "home": "Ruta Opta, inicio",
+    "product": "Ruta Opta",
+    "languageNav": "Idioma",
+    "languages": {
+      "es": "Español",
+      "en": "English"
+    },
+    "footer": {
+      "initiative": "Ruta Opta es una iniciativa de la Fundación Embajadores de la Paz.",
+      "privacy": "Política de tratamiento de datos",
+      "email": "privacidad@rutaopta.org"
+    }
   }
 }

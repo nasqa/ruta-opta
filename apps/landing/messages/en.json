@@ -6,8 +6,157 @@
   "Common": {
     "close": "Close"
   },
+  "Prelaunch": {
+    "metaDescription": "OPTA connects people's potential with opportunities to transform their territories. Leave us your email and we'll let you know when we open.",
+    "title": "The talent in communities can transform their territories.",
+    "lead": "OPTA connects people's potential with opportunities to transform their territories. We're building the route and want to tell you when it opens.",
+    "cta": "Keep me posted",
+    "buildingTitle": "What we're building",
+    "stages": {
+      "grow": {
+        "name": "Grow",
+        "text": "Emotional well-being and recognition of the abilities each person already has."
+      },
+      "create": {
+        "name": "Create",
+        "text": "Training in entrepreneurship, finance, technology and marketing."
+      },
+      "connect": {
+        "name": "Connect",
+        "text": "Links to jobs, markets, funding and allies."
+      }
+    },
+    "territory": "We're starting in Quindío.",
+    "listTitle": "Leave us your email",
+    "listLead": "Leave us your name and email and we'll let you know when we open.",
+    "privacyLink": "Data protection policy"
+  },
+  "Waitlist": {
+    "name": {
+      "label": "What should we call you?",
+      "error": "Tell us what to call you."
+    },
+    "email": {
+      "label": "Your email",
+      "placeholder": "name@email.com",
+      "error": "Check your email: something seems to be missing. Example: name@email.com."
+    },
+    "consent": {
+      "label": "I authorize Fundación Embajadores de la Paz, responsible for OPTA, to process my data to send me news and let me know when we open. I can withdraw my authorization at any time. Read the <privacy>data protection policy</privacy>.",
+      "error": "We need your authorization to sign you up."
+    },
+    "submit": "Keep me posted",
+    "note": "Few emails, only the important ones.",
+    "sent": {
+      "title": "Almost there, {name}.",
+      "text": "We sent you an email to confirm your signup. If you don't see it in a few minutes, check your spam folder."
+    },
+    "unavailable": "We couldn't send your signup. Your details are still here: try again in a few minutes."
+  },
+  "Privacy": {
+    "metaTitle": "Data protection policy",
+    "overline": "Fundación Embajadores de la Paz",
+    "title": "Data protection policy",
+    "intro": "This policy explains what personal data the OPTA waitlist collects, what we use it for and how you can exercise your rights.",
+    "effective": "Effective from 2026",
+    "toc": "On this page",
+    "sections": {
+      "controller": {
+        "title": "Data controller",
+        "text": "Fundación Embajadores de la Paz, responsible for OPTA, NIT 901679710-4, based at Carrera 13 #2N-49, Torre Fundadores 202, Armenia, Quindío. Legal representative: Stephania Forero. Phone: +57 310 587 4657."
+      },
+      "data": {
+        "title": "What data we ask for",
+        "text": "Your name and your email address. We keep them until you unsubscribe; after that we keep them only so we never email you again."
+      },
+      "purpose": {
+        "title": "What we use it for",
+        "text": "To send you news from OPTA and let you know when we open. We don't use it for anything else."
+      },
+      "processor": {
+        "title": "Who helps us send the emails",
+        "text": "We send newsletters with Zoho Campaigns and confirmation emails with Zoho CPaaS, both from Zoho Corporation. The site is hosted on Netlify. These providers may store data on servers outside Colombia."
+      },
+      "rights": {
+        "title": "Your rights",
+        "text": "You can access, update and correct your data, ask us to delete it and withdraw your authorization at any time. You can also use the unsubscribe link in every email."
+      }
+    },
+    "questions": "Questions about your data?",
+    "contactEs": "Write to us at",
+    "emailEs": "privacidad@rutaopta.org",
+    "contactEn": "If you prefer to write in English:",
+    "emailEn": "privacy@rutaopta.org",
+    "home": "Back to the home page"
+  },
+  "Confirmed": {
+    "metaTitle": "Signup confirmed",
+    "title": "Done, you're on the list",
+    "lead": "We'll write to you when there's news.",
+    "frequency": "Few emails: when we open and how to take part.",
+    "home": "Back to the home page"
+  },
+  "Unsubscribed": {
+    "metaTitle": "You've unsubscribed",
+    "title": "Done, we won't write to you again",
+    "lead": "We removed your email from the list. If this was a mistake, you can sign up again from the home page.",
+    "home": "Back to the home page"
+  },
+  "Confirm": {
+    "metaTitle": "Confirm your signup",
+    "title": "Confirm your signup",
+    "greeting": "Hi, {name}.",
+    "lead": "Tap the button to confirm that you want to receive OPTA news at this email address.",
+    "submit": "Confirm my signup",
+    "again": "Sign up again",
+    "expired": {
+      "title": "This link has expired",
+      "text": "Confirmation links last 7 days. Sign up again and we'll send you a new one."
+    },
+    "invalid": {
+      "title": "We don't recognize this link",
+      "text": "It may be incomplete. Copy the full link from the email or sign up again."
+    },
+    "blocked": {
+      "text": "This email address asked not to receive messages from OPTA. If you want to come back, write to us at privacy@rutaopta.org."
+    },
+    "unavailable": {
+      "text": "We couldn't confirm your signup. Try again in a few minutes."
+    }
+  },
+  "ConfirmEmail": {
+    "sender": "Ruta OPTA",
+    "subject": "Confirm your signup to OPTA",
+    "preheader": "One click and you're on the list.",
+    "heading": "Confirm your signup",
+    "p1": "Someone, hopefully you, asked to receive OPTA news at this email address.",
+    "p2": "If it was you, confirm with the button. The link lasts 7 days.",
+    "p3": "If it wasn't you, ignore this message: we won't write to you.",
+    "action": "Confirm my signup"
+  },
+  "EmailLayout": {
+    "logoAlt": "Opta",
+    "reason": "You received this email because someone entered this address on rutaopta.org.",
+    "organization": "Fundación Embajadores de la Paz · Armenia, Quindío, Colombia",
+    "privacyLabel": "Data protection policy",
+    "fallback": "Button not working? Copy this link into your browser:"
+  },
   "NotFound": {
     "title": "We couldn't find this page",
     "home": "Go to the home page"
+  },
+  "SiteShell": {
+    "home": "Ruta Opta, home",
+    "product": "Ruta Opta",
+    "languageNav": "Language",
+    "languages": {
+      "es": "Español",
+      "en": "English"
+    },
+    "footer": {
+      "initiative": "Ruta Opta is an initiative of Fundación Embajadores de la Paz.",
+      "privacy": "Data protection policy",
+      "email": "privacy@rutaopta.org"
+    }
   }
 }

@@ -22,10 +22,10 @@ The first version let Zoho Campaigns own the double opt-in. Its confirmation ema
 - **No typed text in the email.** The confirmation email goes to an unverified address, so it carries neither name nor address. Only the confirm page greets by name.
 - **Modes.** `fake` (in-memory mailer and audience, for local runs, e2e and previews) or `live`. A production build with anything but `WAITLIST_ADAPTER=live` fails in `next.config.ts`, and so does a deploy preview or branch deploy with `live` (any `CONTEXT` other than `production` or `dev`, which netlify dev sets), because a new Netlify variable reaches every deploy context by default. Invalid live configuration fails closed, and the log names the variables, never their values.
 - **Unsubscribe.** Zoho adds the mandatory unsubscribe link to every newsletter and redirects to our static `/unsubscribed` (es `/baja`), which is noindex.
-- **English is shipped but switched off.** Every piece of code handles `en`, and both list keys are required. English goes live when its namespaces are complete, with no code change beyond its URLs in `lighthouserc.json` and `localeDetection`.
+- **English is live.** Every piece of code handles `en`, both list keys are required, and the English namespaces are complete. `localeDetection` is `true` and the English URLs are in `lighthouserc.json`. English signups go to the «Newsletter» list.
 - **Merge order.** Set the Netlify Production-context variables, including `WAITLIST_ADAPTER=live`, before merging. Until then production builds fail by design, and the last deploy stays up.
 - **Not in v1.** Turnstile, until abuse shows up (Santiago approved). The daily cap is a circuit breaker, so an attacker can exhaust it and lock new signups out for the day. That tradeoff is accepted: it protects the domain's reputation.
-- The waitlist form is still the exception to "every form returns a request number": our confirmation email is its receipt, and the list belongs to Fundación OPTA. `apps/landing/AGENTS.md` says so.
+- The waitlist form is still the exception to "every form returns a request number": our confirmation email is its receipt, and the list belongs to Fundación Embajadores de la Paz (OPTA). `apps/landing/AGENTS.md` says so.
 - The Spanish copy is a draft with `[PENDIENTE]` markers. `npm run check:pending` checks every locale file and blocks publishing until they are gone.
 
 ## Open

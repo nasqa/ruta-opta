@@ -1,9 +1,52 @@
+/* The card ends the page with room before the footer */
 .page {
-  display: grid;
-  gap: var(--space-group);
-  padding: var(--space-inset-page);
+  padding-bottom: var(--space-8);
 }
 
-.page > * {
+/* Focal points: on desktop the band is wider than the art, so it keeps the ground and loses sky */
+.stage,
+.road {
+  object-position: 50% 80%;
+}
+
+/* As Trama's Title would set it: no lone word on the heading's last line */
+.page h1 {
+  text-wrap: balance;
+}
+
+/* The greeting and the lead read as one block */
+.lead {
+  display: grid;
+  gap: var(--space-related);
+}
+
+.lead > * {
   margin: 0;
+}
+
+/* A name can be 80 letters with no break */
+.greeting {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 30em) {
+  .page {
+    padding-bottom: var(--space-6);
+  }
+
+  /* On phones the band is narrower than the art: the stage keeps the house and the picker, the road keeps the jeep */
+  .stage {
+    object-position: 10% 50%;
+  }
+
+  .road {
+    object-position: 85% 50%;
+  }
+
+  /* The mockup's phone size (heading-lg's): at display-md's, «reconocemos» is wider than a 320 px card */
+  .page h1 {
+    font-size: var(--text-heading-lg-font-size);
+    line-height: var(--text-heading-lg-line-height);
+    letter-spacing: var(--text-heading-lg-letter-spacing);
+  }
 }

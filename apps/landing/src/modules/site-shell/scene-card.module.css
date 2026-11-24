@@ -1,0 +1,59 @@
+/* Trama's card (raised surface, hairline, container corner, container inset, no shadow) with its stack's gap; it rides over
+   the lower edge of the band before it */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-group);
+  width: calc(100% - 2 * var(--space-inset-page));
+  margin: calc(-1 * (var(--space-9) + var(--space-7))) auto 0;
+  padding: var(--space-inset-container);
+  border: var(--border-width-hairline) solid var(--card-border);
+  border-radius: var(--card-border-radius);
+  background: var(--card-bg-rest);
+}
+
+/* Spacing comes from the gap, not from browser margins */
+.card > * {
+  margin: 0;
+}
+
+/* Its width and height attributes give the 56 px; it keeps its size where the card stretches its children (phones) */
+.mark {
+  display: block;
+  flex: none;
+  align-self: flex-start;
+  height: auto;
+}
+
+/* Mantine's container sizes exist only inside a Container; its breakpoints are declared on :root */
+.narrow {
+  max-width: var(--mantine-breakpoint-xs);
+}
+
+.wide {
+  max-width: var(--mantine-breakpoint-md);
+}
+
+@media (max-width: 48em) {
+  .card {
+    margin-top: calc(-1 * var(--space-9));
+  }
+}
+
+@media (max-width: 30em) {
+  .card {
+    align-items: stretch;
+    width: calc(100% - 2 * var(--space-4));
+    margin-top: calc(-1 * var(--space-7));
+  }
+
+  .card :global(.mantine-Button-root) {
+    width: 100%;
+  }
+
+  .mark {
+    width: var(--space-7);
+  }
+}

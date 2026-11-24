@@ -60,9 +60,18 @@ const isMailProvider = (value: string): value is keyof typeof mailers => Object.
 const isAudienceProvider = (value: string): value is keyof typeof audiences => Object.hasOwn(audiences, value);
 
 const confirmEmail: WaitlistDeps['confirmEmail'] = async (locale, confirmUrl) => {
-  const t = await getTranslations({ locale, namespace: 'ConfirmEmail' });
+  const [t, layout] = await Promise.all([getTranslations({ locale, namespace: 'ConfirmEmail' }), getTranslations({ locale, namespace: 'EmailLayout' })]);
   const copy = { sender: t('sender'), subject: t('subject'), preheader: t('preheader'), heading: t('heading'), paragraphs: [t('p1'), t('p2'), t('p3')], action: t('action') };
-  return buildConfirmEmail(copy, locale, confirmUrl);
+  const chrome = {
+    logoUrl: new URL('/email/opta-horizontal-plate@2x.png', siteUrl).href,
+    logoAlt: layout('logoAlt'),
+    privacyUrl: new URL(getPathname({ locale, href: '/privacy' }), siteUrl).href,
+    privacyLabel: layout('privacyLabel'),
+    reason: layout('reason'),
+    organization: layout('organization'),
+    fallback: layout('fallback'),
+  };
+  return buildConfirmEmail(copy, locale, confirmUrl, chrome);
 };
 
 const confirmUrl: WaitlistDeps['confirmUrl'] = (locale, token) =>

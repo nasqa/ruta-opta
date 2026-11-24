@@ -1,9 +1,45 @@
+/* Text on top, the dawn band closing the page */
 .page {
   display: grid;
-  gap: var(--space-group);
-  padding: var(--space-inset-page);
+  gap: var(--space-section);
 }
 
-.page > * {
+/* Mantine's container sizes exist only inside a Container; its breakpoints are declared on :root */
+.column {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-group);
+  width: 100%;
+  max-width: var(--mantine-breakpoint-xs);
+  margin: 0 auto;
+  padding: var(--space-section) var(--space-inset-page) 0;
+}
+
+.column > * {
   margin: 0;
+}
+
+.column h1 {
+  text-wrap: balance;
+}
+
+/* The band is wider than the art on desktop: it keeps the sky where the sun rises */
+.dawn {
+  object-position: 50% 25%;
+}
+
+@media (max-width: 30em) {
+  .column {
+    padding-top: var(--space-7);
+  }
+
+  .column h1 {
+    font-size: var(--text-heading-lg-font-size);
+    line-height: var(--text-heading-lg-line-height);
+    letter-spacing: var(--text-heading-lg-letter-spacing);
+  }
+
+  .home {
+    width: 100%;
+  }
 }

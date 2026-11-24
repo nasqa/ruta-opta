@@ -65,12 +65,14 @@ test('a long near-miss name is refused without backtracking', () => {
   assert.ok(performance.now() - started < 100);
 });
 
-test('a locale takes signups only when its email, confirm page and confirmed page all exist', () => {
-  const { Confirm, ConfirmEmail, Confirmed } = es;
-  assert.deepEqual(signupLocales(), ['es']);
-  assert.deepEqual(signupLocales({ es, en: { Confirm, ConfirmEmail, Confirmed } }), ['es', 'en']);
+test('a locale takes signups only when its email, its layout strings, confirm page and confirmed page all exist', () => {
+  const { Confirm, ConfirmEmail, EmailLayout, Confirmed } = es;
+  const complete = { Confirm, ConfirmEmail, EmailLayout, Confirmed };
+  assert.deepEqual(signupLocales(), ['es', 'en']);
+  assert.deepEqual(signupLocales({ es, en: complete }), ['es', 'en']);
   // A partial English go-live: any missing namespace keeps English out, so no email goes out with raw keys
-  for (const en of [{ Confirm, Confirmed }, { ConfirmEmail, Confirmed }, { Confirm, ConfirmEmail }]) {
-    assert.deepEqual(signupLocales({ es, en }), ['es'], Object.keys(en).join(','));
+  for (const missing of Object.keys(complete)) {
+    const en = Object.fromEntries(Object.entries(complete).filter(([namespace]) => namespace !== missing));
+    assert.deepEqual(signupLocales({ es, en }), ['es'], `without ${missing}`);
   }
 });

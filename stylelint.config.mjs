@@ -27,6 +27,18 @@ const stylelintConfig = {
       { message: 'Custom properties come from the theme: read its tokens with var(--…) instead of defining one here.' },
     ],
   },
+  overrides: [
+    {
+      // 100svh: a viewport height is not a design-scale length, and the theme cannot provide it (site-shell's content wrapper only)
+      files: ['apps/*/src/modules/site-shell/site-frame.module.css'],
+      rules: {
+        'value-type-custom-property-required-list': [
+          ['color', 'length'],
+          { ignoreValues: ['0', 'transparent', '/^currentcolor$/i', '100svh'] },
+        ],
+      },
+    },
+  ],
 };
 
 export default stylelintConfig;
