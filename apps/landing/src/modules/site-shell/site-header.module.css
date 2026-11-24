@@ -28,9 +28,10 @@
   }
 }
 
-/* In-page links and focus land below the header instead of under it: its height is the 48 px link target plus its padding */
+/* In-page links and focus land below the header instead of under it: its height is the 48 px link target, its padding and its
+   hairline */
 html:has(.header) {
-  scroll-padding-top: calc(var(--control-height-lg) + 2 * var(--space-4));
+  scroll-padding-top: calc(var(--control-height-lg) + 2 * var(--space-4) + var(--border-width-hairline));
 }
 
 .brand {
