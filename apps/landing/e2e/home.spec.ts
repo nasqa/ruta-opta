@@ -131,11 +131,20 @@ for (const locale of locales) {
       await expect(scripts).toHaveCount(1);
       const data = JSON.parse((await scripts.textContent()) ?? '');
       const organization = data['@graph'].find((node: { '@type': string }) => node['@type'] === 'Organization');
+      const website = data['@graph'].find((node: { '@type': string }) => node['@type'] === 'WebSite');
       expect(data['@context']).toBe('https://schema.org');
       expect(organization.name).toBe('Ruta Opta');
-      expect(organization.legalName).toBe(Prelaunch.who.legalName);
-      expect(organization.url).toBe(`${site.origin}/${locale}`);
-      expect(data['@graph'].find((node: { '@type': string }) => node['@type'] === 'WebSite').inLanguage).toBe(locale);
+      // Ruta Opta is the foundation's initiative: the legal name is the parent's
+      expect(organization.legalName).toBeUndefined();
+      expect(organization.parentOrganization).toMatchObject({ '@type': 'Organization', name: Prelaunch.who.legalName });
+      // Both point at the site root in every language; the @id stays per language
+      expect(organization.url).toBe(`${site.origin}/`);
+      expect(website.url).toBe(`${site.origin}/`);
+      expect(organization['@id']).toBe(`${site.origin}/${locale}#organization`);
+      expect(website['@id']).toBe(`${site.origin}/${locale}#website`);
+      expect(website.alternateName).toEqual(['rutaopta.org']);
+      expect(website.inLanguage).toBe(locale);
+      expect(organization.contactPoint).toMatchObject({ email: Prelaunch.allies.email.address, telephone: `+${Prelaunch.allies.whatsapp.number}` });
       expect((await request.get(new URL(organization.logo).pathname)).status()).toBe(200);
     });
   });

@@ -8,55 +8,87 @@ const { homeJsonLd, jsonLdScript } = await import(join(home, 'structured-data.ts
 const { homeMetadata } = await import(join(home, 'metadata.ts'));
 
 const org = {
-  url: 'https://www.rutaopta.org/es',
+  page: 'https://www.rutaopta.org/es',
+  site: 'https://www.rutaopta.org/',
   logo: 'https://www.rutaopta.org/brand/opta-icon-512.png',
   name: 'Ruta Opta',
-  legalName: 'Fundación Embajadores de la Paz',
   description: 'Ruta Opta conecta el talento de las personas con oportunidades.',
   locality: 'Armenia',
   region: 'Quindío',
   areas: ['Quindío', 'Risaralda', 'Caldas', 'Valle del Cauca', 'Chocó'],
   language: 'es',
+  email: 'info@rutaopta.org',
+  phone: '573105874657',
+  parent: 'Fundación Embajadores de la Paz',
 };
 
 const keysDeep = (value) =>
   value && typeof value === 'object' ? Object.entries(value).flatMap(([key, child]) => [key, ...keysDeep(child)]) : [];
+const typesDeep = (value) =>
+  value && typeof value === 'object' ? [...(value['@type'] ? [value['@type']] : []), ...Object.values(value).flatMap(typesDeep)] : [];
 
 const graph = homeJsonLd(org);
-const organization = graph['@graph'].find((node) => node['@type'] === 'Organization');
-const website = graph['@graph'].find((node) => node['@type'] === 'WebSite');
+const english = homeJsonLd({ ...org, page: 'https://www.rutaopta.org/en', language: 'en' });
+const node = (data, type) => data['@graph'].find((entry) => entry['@type'] === type);
+const organization = node(graph, 'Organization');
+const website = node(graph, 'WebSite');
+const address = { '@type': 'PostalAddress', addressLocality: 'Armenia', addressRegion: 'Quindío', addressCountry: 'CO' };
 
 test('the graph is a schema.org context with exactly an Organization and a WebSite', () => {
   assert.equal(graph['@context'], 'https://schema.org');
-  assert.deepEqual(graph['@graph'].map((node) => node['@type']).sort(), ['Organization', 'WebSite']);
+  assert.deepEqual(graph['@graph'].map((entry) => entry['@type']).sort(), ['Organization', 'WebSite']);
 });
 
-test('the Organization carries the name, legal name, address, areas and languages it was given', () => {
-  assert.equal(organization['@id'], 'https://www.rutaopta.org/es#organization');
+test('the Organization carries the name, address, areas and languages it was given', () => {
   assert.equal(organization.name, 'Ruta Opta');
-  assert.equal(organization.legalName, 'Fundación Embajadores de la Paz');
-  assert.equal(organization.url, org.url);
   assert.equal(organization.logo, org.logo);
   assert.equal(organization.description, org.description);
-  assert.deepEqual(organization.address, { '@type': 'PostalAddress', addressLocality: 'Armenia', addressRegion: 'Quindío', addressCountry: 'CO' });
+  assert.deepEqual(organization.address, address);
   assert.deepEqual(organization.areaServed.map((area) => area.name), org.areas);
   assert.deepEqual(organization.knowsLanguage, ['es', 'en']);
 });
 
-test('the Organization is not typed as an NGO, which would imply a status we have not confirmed', () => {
-  assert.equal(organization['@type'], 'Organization');
+test('both nodes point at the site root, the same in every language, and keep an @id per language', () => {
+  for (const data of [graph, english]) {
+    assert.equal(node(data, 'Organization').url, 'https://www.rutaopta.org/');
+    assert.equal(node(data, 'WebSite').url, 'https://www.rutaopta.org/');
+  }
+  assert.equal(organization['@id'], 'https://www.rutaopta.org/es#organization');
+  assert.equal(website['@id'], 'https://www.rutaopta.org/es#website');
+  assert.equal(node(english, 'Organization')['@id'], 'https://www.rutaopta.org/en#organization');
+  assert.equal(node(english, 'WebSite')['@id'], 'https://www.rutaopta.org/en#website');
 });
 
-test('the WebSite names itself, its URL and its language', () => {
+test('the Organization is reachable by email and by phone, in E.164, in both languages', () => {
+  assert.deepEqual(organization.contactPoint, {
+    '@type': 'ContactPoint',
+    contactType: 'general inquiries',
+    email: 'info@rutaopta.org',
+    telephone: '+573105874657',
+    availableLanguage: ['es', 'en'],
+  });
+  assert.match(organization.contactPoint.telephone, /^\+[1-9]\d{7,14}$/);
+});
+
+test('Ruta Opta is an initiative of the foundation, not the foundation: the legal name is its parent', () => {
+  assert.ok(!('legalName' in organization), 'Ruta Opta has no legal name of its own');
+  assert.deepEqual(organization.parentOrganization, { '@type': 'Organization', name: 'Fundación Embajadores de la Paz', address });
+});
+
+test('every node is a plain schema.org type: no NGO, whose status we have not confirmed, and no FAQPage or Tourist* type', () => {
+  assert.deepEqual([...new Set(typesDeep(graph))].sort(), ['AdministrativeArea', 'ContactPoint', 'Organization', 'PostalAddress', 'WebSite']);
+});
+
+test('the WebSite names itself, its domain as the alternate name, and its language', () => {
   assert.equal(website.name, 'Ruta Opta');
-  assert.equal(website.url, org.url);
+  assert.deepEqual(website.alternateName, ['rutaopta.org']);
   assert.equal(website.inLanguage, 'es');
-  assert.equal(homeJsonLd({ ...org, language: 'en' })['@graph'].find((node) => node['@type'] === 'WebSite').inLanguage, 'en');
+  assert.equal(node(english, 'WebSite').inLanguage, 'en');
 });
 
 test('no field that is not confirmed appears anywhere in the graph', () => {
   const present = new Set(keysDeep(graph));
-  for (const key of ['sameAs', 'aggregateRating', 'review', 'telephone', 'email', 'taxID', 'foundingDate', 'potentialAction', 'contactPoint', 'streetAddress']) {
+  for (const key of ['sameAs', 'aggregateRating', 'review', 'taxID', 'foundingDate', 'potentialAction', 'streetAddress', 'legalName']) {
     assert.ok(!present.has(key), `JSON-LD must not carry ${key}`);
   }
 });

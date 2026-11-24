@@ -53,15 +53,18 @@ const PrelaunchPage = () => {
   const { Waitlist } = useMessages();
 
   const jsonLd = homeJsonLd({
-    url: new URL(getPathname({ locale, href: '/' }), siteUrl).href,
+    page: new URL(getPathname({ locale, href: '/' }), siteUrl).href,
+    site: new URL('/', siteUrl).href,
     logo: new URL(logoPath, siteUrl).href,
     name: site('name'),
-    legalName: t('who.legalName'),
     description: t('metaDescription'),
     locality: t('who.locality'),
     region: t('who.region'),
     areas: territories.map((territory) => t(`thesis.territories.${territory}`)),
     language: locale,
+    email: t('allies.email.address'),
+    phone: t('allies.whatsapp.number'),
+    parent: t('who.legalName'),
   });
 
   return (
