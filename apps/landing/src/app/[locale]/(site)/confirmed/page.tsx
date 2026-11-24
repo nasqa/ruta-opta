@@ -36,7 +36,7 @@ const ConfirmedPage = async () => {
           <h1 className="t-display-lg">{t('title')}</h1>
           <p className="t-body-lg">{t('lead')}</p>
           <p className="t-body-lg">{t('frequency')}</p>
-          <Button component="a" href={getPathname({ locale, href: '/' })} size="lg">
+          <Button component="a" className={styles.home} href={getPathname({ locale, href: '/' })} size="lg" variant="default">
             {t('home')}
           </Button>
         </div>
