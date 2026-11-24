@@ -22,6 +22,22 @@ const homeKeys = [
   ...['title', 'label', 'opensNewTab', 'number', 'message'].map((field) => `allies.whatsapp.${field}`),
   ...['title', 'label', 'address', 'subject'].map((field) => `allies.email.${field}`),
   'listTitle', 'listLead', 'privacyLink',
+  'overline', 'ctaAllies', 'ctaNote',
+  'thesis.verbsLabel', ...['listen', 'recognize', 'connect', 'build'].map((verb) => `thesis.verbs.${verb}`), 'thesis.stance',
+  'places.title', 'places.lead', ...territoryKeys.map((key) => `places.${key}`),
+  'methodLead', 'tourismOverline', 'tourismLink',
+  ...['label', 'designed', 'decides', 'price'].map((field) => `tourismPrinciples.${field}`),
+  ...['title', 'companies', 'agencies', 'lodgings', 'institutions', 'people'].map((field) => `alliesFor.${field}`),
+  'alliesWhatsappText', 'alliesEmailText', 'copyEmail', 'copiedEmail',
+  'faq.title', ...['what', 'how', 'tourism', 'book', 'allies', 'data'].flatMap((question) => [`faq.${question}.q`, `faq.${question}.a`]),
+  'listPromise',
+];
+
+const shellKeys = [
+  ...['label', 'places', 'method', 'tourism', 'allies', 'faq'].map((key) => `sections.${key}`),
+  ...['initiative', 'privacy', 'email', 'mission', 'explore', 'contact', 'legal', 'whatsapp', 'whatsappNumber', 'infoEmail', 'place', 'rights'].map(
+    (key) => `footer.${key}`,
+  ),
 ];
 
 test('every home key is a non-empty string in both locales, and the retired keys are gone', () => {
@@ -31,6 +47,15 @@ test('every home key is a non-empty string in both locales, and the retired keys
       assert.ok(typeof value === 'string' && value.trim() !== '', `${locale}: Prelaunch.${key} is missing or empty`);
     }
     for (const retired of ['buildingTitle', 'territory']) assert.ok(!(retired in messages.Prelaunch), `${locale}: Prelaunch.${retired} must be removed`);
+  }
+});
+
+test('every shell key the home and the footer read is a non-empty string in both locales', () => {
+  for (const [locale, messages] of Object.entries(locales)) {
+    for (const key of shellKeys) {
+      const value = at(messages.SiteShell, key);
+      assert.ok(typeof value === 'string' && value.trim() !== '', `${locale}: SiteShell.${key} is missing or empty`);
+    }
   }
 });
 
@@ -54,6 +79,24 @@ test('contact constants identical across locales and well formed', () => {
   assert.equal(es.Prelaunch.allies.email.address, en.Prelaunch.allies.email.address);
   assert.match(es.Prelaunch.allies.whatsapp.number, /^57\d{10}$/);
   assert.match(es.Prelaunch.allies.email.address, /^[^\s@]+@rutaopta\.org$/);
+});
+
+// The footer, the allies' cards, the FAQ and the privacy policy name the same number and addresses: one changed alone would send
+// people to a dead end
+test('the footer, the allies, the FAQ and the policy agree on every contact, in both locales', () => {
+  for (const [locale, { Prelaunch, SiteShell, Privacy }] of Object.entries(locales)) {
+    const { footer } = SiteShell;
+    assert.equal(footer.whatsappNumber, Prelaunch.allies.whatsapp.number, `${locale}: footer.whatsappNumber`);
+    assert.equal(footer.whatsapp.replace(/\D/g, ''), footer.whatsappNumber, `${locale}: the visible WhatsApp number`);
+    assert.equal(footer.infoEmail, Prelaunch.allies.email.address, `${locale}: footer.infoEmail`);
+    // Each locale's footer names its own privacy address (privacidad@ in Spanish, privacy@ in English)
+    assert.equal(footer.email, locale === 'es' ? Privacy.emailEs : Privacy.emailEn, `${locale}: footer.email is the policy's address`);
+    const phone = footer.whatsapp.match(/\+[\d ]+\d/)?.[0];
+    assert.ok(phone && Privacy.sections.controller.text.includes(phone), `${locale}: the policy names the phone ${phone}`);
+    assert.ok(Prelaunch.faq.allies.a.includes(footer.infoEmail), `${locale}: the FAQ names ${footer.infoEmail}`);
+    assert.ok(footer.rights.includes(Prelaunch.who.legalName) && footer.rights.includes('{year}'), `${locale}: footer.rights`);
+    assert.ok(footer.place.startsWith(`${Prelaunch.who.locality}, ${Prelaunch.who.region}`), `${locale}: footer.place`);
+  }
 });
 
 test('meta lengths', () => {
