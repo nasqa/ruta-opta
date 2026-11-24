@@ -31,6 +31,23 @@ test.describe('the waitlist form on /es', () => {
     await expect(page.getByRole('status')).toContainText(es.Waitlist.sent.title.replace('{name}', 'Ana'));
     await expect(page.getByRole('status')).toContainText(es.Waitlist.sent.text);
   });
+
+  // The action reads the tag from the Referer, which is the tagged page (origin-tag.ts). The fake audience lives in the server process, so the
+  // sealed tag and Zoho's source are checked in tests/waitlist-use-cases.test.mjs
+  test('a tracked link stays a static page and its tag reaches the signup', async ({ page }) => {
+    const response = await page.goto('/es?o=ig#lista');
+    // Served from the prerender, not rendered per visit: reading the tag in the page would cost every visitor the static home
+    expect(response?.headers()['cache-control']).toContain('s-maxage');
+    await page.getByLabel(es.Waitlist.name.label).fill('Ana');
+    await page.getByLabel(es.Waitlist.email.label, { exact: true }).fill('ana.ig@example.com');
+    await page.getByRole('checkbox').check();
+    const signup = page.waitForRequest((request) => request.method() === 'POST' && 'next-action' in request.headers());
+    await page.getByRole('button', { name: es.Waitlist.submit }).click();
+
+    const { referer } = await (await signup).allHeaders();
+    expect(new URL(referer ?? 'about:blank').searchParams.get('o')).toBe('ig');
+    await expect(page.getByRole('status')).toContainText(es.Waitlist.sent.title.replace('{name}', 'Ana'));
+  });
 });
 
 // Links sealed with the key the e2e server runs with, as the confirmation email would carry them
