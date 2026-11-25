@@ -21,7 +21,7 @@ The layer must keep working, and keep its history comparable, while the code cha
 
 - **Links:** UTM parameters only. The waitlist reads `utm_source` (it replaces the `?o=` of PR #15, which never shipped). This branch is built on PR #15 and supersedes it; he closes #15. Instagram uses `utm_campaign=lanzamiento-2026-12`; course channels keep `diplomado-2026-11`.
 - **Privacy:** one consolidated change, policy version `2026-11-25-draft`, with a paragraph on the language cookie, and the controller section naming Ruta Opta.
-- **Timing:** ship with that interim text without waiting for counsel. This overrides the issue's acceptance criterion "reviewed by counsel before the merge". He accepts the risk. The production variable is the kill switch. Merging still needs his explicit approval of the finished PR.
+- **Timing:** ship with that interim text; counsel review follows. This replaces the issue's acceptance criterion "reviewed by counsel before the merge" (owner decision, 2026-11-25). The production variable is the kill switch: unset it and rebuild. Merging still needs his explicit approval of the finished PR.
 - **Architecture:** `modules/analytics`, composed by the route.
 - **Vendor:** Plausible, as in the issue. Recommended again on 2026-11-25; **his yes is pending**. Nothing vendor-specific is built before it.
 
@@ -75,7 +75,8 @@ Cleaning the payload is not enough: the browser also sends headers, and a proxy 
 
 - **Measured** on a local build before the fix (2026-11-25, Chromium): on `/es/confirmar?t=…` and `/en/confirm?t=…`, 22 to 23 subresource requests per page carried the token, every `async` script among them. React writes async scripts above the page's `no-referrer` meta tag.
 - **Fix (built):** `next.config.ts` answers the two confirm pages with `Referrer-Policy: no-referrer`, so the policy holds from the first byte and stays with the document through soft navigations. Only those pages: the waitlist reads `utm_source` from the `Referer`, so a site-wide policy would break attribution. Guards: an e2e on real requests and a contract test against `routing`. After a deploy, check the header with `curl -I` (the page renders in a Function).
-- **Still open, other pages.** Netlify passes the browser's headers on through a 200 rewrite (its support staff confirm it for cookies). So the vendor would receive the full page address in `Referer` (an `fbclid`, for example) and every first-party cookie of this domain. Today that is only `NEXT_LOCALE`; a signed-in platform on this domain would hand its session cookie to the analytics vendor. Rule: the two rewrites override `Cookie` and `Referer` with the `headers` map in `netlify.toml`. Whether Netlify overrides an incoming header is unverified: prove it on a deploy preview against an echo endpoint, with fake values, before pointing the rewrites at the vendor in production. If it does not, stop and ask the owner to choose between the direct-script fallback (a cross-origin request gets only the origin and no cookies; blockers hide more visits) and a proxy function with a header allow-list (departs from the issue's rewrites).
+- **Residual, other pages (best effort).** Netlify passes the browser's headers on through a 200 rewrite (its support staff confirm it for cookies). So the vendor can receive a page's non-secret address in `Referer` (UTM parameters, at most an ad click id) and this domain's first-party cookies, today only `NEXT_LOCALE` (`es` or `en`). The two rewrites try to override `Cookie` and `Referer` with the `headers` map in `netlify.toml`; whether Netlify overrides an incoming header is unverified, so check it on a deploy preview against an echo endpoint, with fake values. If it does not, keep the proxy and say so in `docs/analytics.md`.
+- **Hard rule for later:** before anything that signs people in shares this domain, either the override is proven or the proxy goes. Otherwise its session cookie reaches the analytics vendor.
 
 ### Gate and delivery
 
@@ -158,6 +159,6 @@ The repo rules in `AGENTS.md`; test first; `npm run check`, build, e2e and budge
 
 ## Open
 
-Vendor yes; the per-site `pa-…js` URL; whether `fix/hero-copy-and-note` lands; whether the mailing list shows the source field; counsel's answers; whether Netlify lets a rewrite override `Cookie` and `Referer`.
+Vendor yes; the per-site `pa-…js` URL; whether `fix/hero-copy-and-note` lands; whether the mailing list shows the source field; counsel's answers; whether Netlify lets a rewrite override `Cookie` and `Referer`; whether the deploy preview answers the confirm pages with the referrer header.
 
 **Owner decision pending:** what ships if the vendor yes or the script URL is missing on 2026-11-29. Proposed: a first pull request with only the `utm_source` change and the privacy sentences about the link (no measurement section), so sign-ups from the launch are attributed in the mailing list, which cannot be backfilled. It means two privacy changes instead of one.
