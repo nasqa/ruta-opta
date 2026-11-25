@@ -51,7 +51,7 @@ No `index.ts`: nothing here belongs in client JavaScript, and `server-only` plus
 
 - `eventProps(id: EventId, className?: string)` returns attributes to spread on the element, keeping the call site's class. It is a set of attributes and not a class string because the fallback vendor in the issue marks elements with `data-` attributes.
 - `noEvent(reason)` returns a neutral marker attribute for a route-owned element that leads to a conversion destination and is deliberately not counted. Only reason today: `recovery` (the "sign up again" links on the confirm page).
-- `parse(attributes)` in the adapter returns the goal name an element carries. Every guard reads markup through it, so the guards are vendor-neutral.
+- `goalOf(attributes)` in the adapter returns the goal name an element carries, from its `class` and `data-*` attributes. Every guard reads markup through it, so the guards are vendor-neutral.
 
 Event attributes render in every build. Only the script is gated.
 
