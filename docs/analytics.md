@@ -47,7 +47,7 @@ Each name in the first column is an event the site sends. The Plausible goal mus
 | Footer WhatsApp | Ally route | Whether the footer brings contact clicks | Footer, every page; no written message |
 | Footer Email | Ally route | Whether the footer brings contact clicks | Footer, every page; no written subject |
 | Footer Instagram | Instagram | Whether the site sends people to the profile. It does not show what Instagram brings in: tagged links do | Footer, every page |
-| Signup Submit | Funnel, Channel, Instagram | Whether people who reach the form send it; by source, which channel produces attempts | Sign-up form, on submit. Counts attempts, refused ones included |
+| Signup Submit | Funnel, Channel, Instagram | Whether people who reach the form send it; by source, which channel produces attempts | Sign-up form, on submit. Its Total counts every attempt, refused ones included |
 
 Not counted, on purpose: menu links to the home's sections (in the header, and under "Explore" in the footer), the privacy e-mail addresses, and the "sign up again" links on the confirm page.
 
@@ -60,7 +60,7 @@ Not counted, on purpose: menu links to the home's sections (in the header, and u
 - `/es/baja`: saw the "unsubscribed" page (Spanish)
 - `/en/unsubscribed`: the same, English
 
-These count page views, not people. The confirm page has the same address for a valid, expired or broken link. The unsubscribed pages count leavers only if Zoho Campaigns sends people there after they unsubscribe, which is **not yet verified** (ADR 0003, "Open").
+In the Goals report, **Total** counts every view of these pages, reloads included, and **Uniques** counts the visitors who saw them. Neither is the number of people who confirmed or left: the mailing list is where to read that. The confirm page has the same address for a valid, expired or broken link. The unsubscribed pages count leavers only if Zoho Campaigns sends people there after they unsubscribe, which is **not yet verified** (ADR 0003, "Open").
 
 ## Tagged links
 
@@ -97,17 +97,17 @@ Put all three tags on every link or QR code shared outside the site. WhatsApp an
 | Visits by channel | Visits by `utm_source` | Plausible |
 | Visits by language | Pages under `/es`, and the bare `/`, are Spanish; pages under `/en` are English | Plausible |
 | Visits by device | Device type | Plausible |
-| Clicks by call to action | The goal's count | Plausible |
-| Sign-up attempts | `Signup Submit`, refused attempts included | Plausible |
-| Confirm links opened | `/es/confirmar` plus `/en/confirm` | Plausible |
-| Confirmed pages seen | `/es/confirmado` plus `/en/confirmed` | Plausible |
+| Clicks by call to action | The goal's **Total** | Plausible |
+| Sign-up attempts | **Total** of `Signup Submit`: every attempt, refused ones included | Plausible |
+| Confirm links opened | **Total** of `/es/confirmar` plus `/en/confirm` | Plausible |
+| Confirmed pages seen | **Total** of `/es/confirmado` plus `/en/confirmed` | Plausible |
 | **Confirmed sign-ups** (the sign-up number to report) | New contacts on the list, our own tests left out | Mailing list |
 | Confirmed sign-ups by channel | Contacts whose source ends in `o=<utm_source>` (see the unverified points below) | Mailing list |
 | Messages by ally route | Conversations that start with that route's written message or subject | Inboxes |
-| Clicks against messages | Both counts side by side, for example "3 messages from 11 clicks" | Weekly tally |
-| Left the list | `/es/baja` plus `/en/unsubscribed` (not yet verified, see Pageview goals) | Plausible |
+| Clicks against messages | Messages and click **Total** side by side, for example "3 messages from 11 clicks" | Weekly tally |
+| Unsubscribed pages seen | **Total** of `/es/baja` plus `/en/unsubscribed` (that leavers reach them is not yet verified, see Pageview goals) | Plausible |
 
-Plausible recognises a visitor for one day only: someone who returns another day counts again.
+For every goal, read the **Total** column of the Goals report: it counts every conversion, repeats by the same visitor included. **Uniques**, the other column, counts visitors who converted, so one visitor's repeated clicks or attempts count once. A person counts as one visitor within a day, and as another one on another day or device ([Plausible's metrics definitions](https://github.com/plausible/docs/blob/master/docs/metrics-definitions.md), read 2026-11-25).
 
 ## Reading rules
 
@@ -125,14 +125,14 @@ Plausible recognises a visitor for one day only: someone who returns another day
 Once a week while the course runs (it ends 2026-12-18). Use the same seven days in all three sources. Who does the tally: **nobody is named yet**.
 
 1. **Visits (2 min).** In Plausible, note visits by source, language (from the page paths) and device.
-2. **Clicks (2 min).** Note each goal's count, `Signup Submit` and the pageview goals.
+2. **Clicks (2 min).** In the Goals report, note the **Total** column for each goal, `Signup Submit` and the pageview goals included. Not Uniques, which counts visitors.
 3. **Inboxes (4 min).** For each new conversation in WhatsApp and info@rutaopta.org, match its first message or subject to a route and count it.
 4. **List (1 min).** In Zoho Campaigns, count new contacts without our own tests. Each sign-up language goes to the list set for it: count every such list once. Split by source if you can see it.
 5. **Decide (1 min).** One line per question: a decision, "no change" or "not enough data", with its confidence.
 
 Copy this table into your own sheet, and keep it out of this repository, which is public. It holds counts only: never a name, a phone number or message text.
 
-| Week | Route | Clicks (WhatsApp) | WhatsApp messages received | Clicks (e-mail) | E-mails received | List sign-ups | Confirmed |
+| Week | Route | Clicks (WhatsApp) | WhatsApp messages received | Clicks (e-mail) | E-mails received | Sign-up attempts | Confirmed |
 |---|---|---|---|---|---|---|---|
 | | Train | | | | | | |
 | | Link | | | | | | |
@@ -150,7 +150,7 @@ Copy this table into your own sheet, and keep it out of this repository, which i
 - **Other:** clicks come from the two `Ally Other` goals. Add `Copy Email` apart in the e-mail clicks, as "+ 2 copies".
 - **Footer:** clicks come from `Footer WhatsApp` and `Footer Email`. These links write nothing, so their messages cannot be recognised.
 - **Unmatched:** anything without a written message or subject. It may come from a footer link, from a copied or typed address or number, or from someone who edited the text.
-- **List sign-ups** (week total only): `Signup Submit`. These are attempts. The list receives a person only after they confirm, so neither it nor Plausible counts accepted sign-ups still waiting.
+- **Sign-up attempts** (week total only): `Signup Submit`. It replaces issue #14's "List sign-ups", because the list receives only confirmed people.
 - **Confirmed** (week total only): new contacts on the list.
 
 To recognise a route, press its button or link on the live site and read what it writes, in a browser with your own visits excluded so that you add no clicks. In code the texts are in `apps/landing/messages/es.json` and `en.json`: `Prelaunch.allies.routes.<route>.message` and `.subject`; for Other, `Prelaunch.allies.whatsapp.message` and `Prelaunch.allies.email.subject`; for Floating, `SiteShell.whatsappFloat.message`.
@@ -231,7 +231,7 @@ There are no goals in the dashboard yet, on purpose. After release:
    - **Result:** not yet checked.
    - **The proxy rule:** before anything that signs people in shares this domain, either the override is proven or the proxy goes. Otherwise its session cookie reaches the analytics vendor.
 
-3. **Before publishing: is anyone already on the list?** Check in Zoho. The owner says nobody is (**unverified**). The form has been live under the older policy. Decree 1074, art. 2.2.2.25.2.2, asks that people hear of substantial changes to the controller's identity or the purpose no later than when the new policy applies, and that a change of purpose get a new authorization. This change adds purposes, so anyone found there is a question for counsel before they are measured by link.
+3. **Before publishing: is anyone already on the list?** Check in Zoho. The owner says nobody is (**unverified**). The form has been live under the older policy. Decree 1074 of 2015, art. 2.2.2.25.2.2 ([official text](https://www.cancilleria.gov.co/sites/default/files/Normograma/docs/decreto_1074_2015_pr025.htm), read 2026-11-25): when there are substantial changes to the content of the processing policies about the identification of the controller or the purpose of the processing, which can affect the content of the authorization, the controller must tell the data subject before, or at the latest when, the new policies are applied, and must obtain a new authorization when the change is about the purpose. This is not legal advice: counsel confirms how it applies. This change adds purposes, so anyone found there is a question for counsel before they are measured by link.
 
 4. **After the owner's approval and the merge,** set `ANALYTICS_SCRIPT_SRC=/o/s.js` in Netlify, for the **Production context only**, and rebuild (Netlify's "Trigger deploy"). Then open the live site with a tagged link, in a browser without the own-visit exclusion, click a call to action. The visitor's IP address must be forwarded, because Plausible's bot filter drops events without it. No direct way to see that is verified here, so check:
    - no response to `/o/e` carries `x-plausible-dropped` (browser developer tools, Network);

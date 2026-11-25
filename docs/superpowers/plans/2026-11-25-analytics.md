@@ -166,7 +166,7 @@ Rule 8, verbatim:
 
 `AGENTS.md`, under "UI": `- Every call to action takes an event from \`modules/analytics\` (see \`docs/analytics.md\`). \`e2e/analytics.spec.ts\` fails on a conversion link without one.`
 
-ADR 0003, under its decisions: `- **Measurement and privacy text (2026-11-25).** The visit measurement and the origin tag ship with the interim policy version \`2026-11-25-draft\`; counsel review follows (owner decision). This replaces issue #14's criterion of a review before the merge. The Netlify variable \`ANALYTICS_SCRIPT_SRC\` turns the measurement off: unset it and rebuild.` Also there: the origin tag's policy version becomes `2026-11-25-draft`, and the owner's answers to the questions meant for counsel are recorded as his.
+ADR 0003, under its decisions: `- **Measurement and privacy text (2026-11-25).** The visit measurement and the origin tag ship with the interim policy version \`2026-11-25-draft\`; counsel review follows (owner decision). This replaces issue #14's criterion of a review before the merge. The Netlify variable \`ANALYTICS_SCRIPT_SRC\` turns the measurement off: unset it and rebuild.` Also there: the origin tag's policy version becomes `2026-11-25-draft`, and, for the questions meant for counsel, the owner's words as relayed, with the working answers apart, labelled as proposed and not confirmed.
 
 - [ ] **Step 1: Write the test:** the goal names in the `## Goals` table equal the active goals of `catalog.ts`; the `## Pageview goals` paths equal those derived from `pageGoalRoutes` and `routing`; `SKILL.md` no longer contains `?o=`.
 - [ ] **Step 2: Run** — expected FAIL.
