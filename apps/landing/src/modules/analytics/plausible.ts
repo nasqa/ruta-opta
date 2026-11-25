@@ -2,7 +2,8 @@
 
 export const proxyPaths = { script: '/o/s.js', event: '/o/e' } as const;
 export const vendorEventUrl = 'https://plausible.io/api/event';
-const vendorScripts = 'https://plausible.io/js/';
+// Only the per-site script: plausible.io's older ones ignore the options of plausible.init, so the sanitiser would never run
+const perSiteScript = /^https:\/\/plausible\.io\/js\/pa-[\w-]+\.js$/;
 
 export type TrackingAttributes = { className?: string; [key: `data-${string}`]: string | undefined };
 
@@ -24,9 +25,10 @@ const stub =
 const queryNames = ['ref', 'source', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
 
 // Source text, not fn.toString(): what runs in the page is what the tests evaluate, whatever the compiler does.
-// transformRequest fails closed: an event it cannot clean is dropped
+// transformRequest fails closed: an event it cannot clean is dropped. Strict mode makes a write that would not stick throw
 export const initSnippet = ({ host, endpoint }: { host: string; endpoint?: string }) => `${stub}
 plausible.init({${endpoint ? `endpoint:${JSON.stringify(endpoint)},` : ''}transformRequest:function(payload){
+"use strict";
 try{
 if(location.hostname!==${JSON.stringify(host)})return null;
 var bare=function(address,base){var url=new URL(address,base);url.search="";url.hash="";return url.href};
@@ -41,10 +43,14 @@ return clean
 }catch(error){return null}
 }})`;
 
+const probeHost = 'first-party.invalid';
+
+// Resolved as a browser would: it drops tabs and newlines and reads \ as /, any of which can make a path name another host
+const isFirstPartyPath = (src: string) => src.startsWith('/') && URL.parse(src, `https://${probeHost}`)?.host === probeHost;
+
 export const scriptTags = (src: string | undefined, host: string) => {
   if (!src) return undefined;
-  // One leading slash only: //name points at another host, and browsers read /\name the same way
-  if (/^\/(?![/\\])/.test(src)) return { src, init: initSnippet({ host, endpoint: proxyPaths.event }) };
-  if (src.startsWith(vendorScripts)) return { src, init: initSnippet({ host }) };
+  if (isFirstPartyPath(src)) return { src, init: initSnippet({ host, endpoint: proxyPaths.event }) };
+  if (perSiteScript.test(src)) return { src, init: initSnippet({ host }) };
   return undefined;
 };
