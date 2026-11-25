@@ -51,7 +51,8 @@ test('the controller section ends with the privacy address', () => {
 
 test('the effective line is dated and promises the yearly reminder', () => {
   for (const [locale, { policy, yearly }] of Object.entries(locales)) {
-    for (const fact of ['2026', yearly]) assert.ok(policy.effective.includes(fact), `${locale}: the effective line does not say "${fact}"`);
+    assert.match(policy.effective, /\b\d{4}\b/, `${locale}: the effective line has no year`);
+    assert.ok(policy.effective.includes(yearly), `${locale}: the effective line does not say "${yearly}"`);
   }
 });
 

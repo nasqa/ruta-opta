@@ -25,6 +25,7 @@
       "due": null,
       "repeat": null,
       "blocks": "publish",
+      "gates": "2026-11-25-draft",
       "status": "open",
       "workbook": "#11-publishing-a-policy-version"
     },
@@ -35,6 +36,7 @@
       "due": null,
       "repeat": null,
       "blocks": "publish",
+      "gates": "2026-11-25-draft",
       "status": "open",
       "workbook": "#11-publishing-a-policy-version"
     },
@@ -45,6 +47,7 @@
       "due": null,
       "repeat": null,
       "blocks": "publish",
+      "gates": "2026-11-25-draft",
       "status": "open",
       "workbook": "#2-a-new-purpose-or-a-new-use-of-data-we-hold"
     },
@@ -55,6 +58,7 @@
       "due": null,
       "repeat": null,
       "blocks": "publish",
+      "gates": "2026-11-25-draft",
       "status": "open",
       "workbook": "#what-we-hold-and-where"
     },
@@ -65,6 +69,7 @@
       "due": null,
       "repeat": null,
       "blocks": "publish",
+      "gates": "2026-11-25-draft",
       "status": "open",
       "workbook": "#5-a-wording-change"
     },

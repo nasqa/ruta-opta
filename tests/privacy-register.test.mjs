@@ -13,19 +13,20 @@ const registerPath = 'docs/privacy/register.json';
 const skillPath = '.claude/skills/privacy-changes/SKILL.md';
 const testPath = 'tests/privacy-register.test.mjs';
 
-// A published text never changes and never leaves the register. Marking a version published means adding its pair here, which review sees
+// The sha256 of each published entry, every field with keys sorted (sha256 below). A published entry never changes unseen and never leaves the
+// register. Marking a version published means adding its line here, which review sees
 const publishedPins = {
-  '2026-11-draft': '8f12ee233492dded124d378dabdfa0ce6b5dc54a1a8b7026d566a098bf6544d5',
+  '2026-11-draft': '667ee53eacab2f3db5524d51d520ba1a7236413e05d266f48b612583b9c3d5a8',
 };
 
-// Every action and what it blocks. An action is closed with status "done", never deleted, and what it blocks never changes unseen.
-// Opening one means adding it here (docs/privacy/workbook.md, "Open an action")
+// Every action and what it blocks: null, 'measurement', or 'publish:<the version it gates>' (scope below). An action is closed with status
+// "done", never deleted, and what it blocks never changes unseen. Opening one means adding it here (docs/privacy/workbook.md, "Open an action")
 const actionPins = {
-  'check-subscribers-before-publish': 'publish',
-  'confirm-effective-date': 'publish',
-  'consent-wording-purpose': 'publish',
-  'abuse-protection-records-in-policy': 'publish',
-  'unsubscribe-sentence': 'publish',
+  'check-subscribers-before-publish': 'publish:2026-11-25-draft',
+  'confirm-effective-date': 'publish:2026-11-25-draft',
+  'consent-wording-purpose': 'publish:2026-11-25-draft',
+  'abuse-protection-records-in-policy': 'publish:2026-11-25-draft',
+  'unsubscribe-sentence': 'publish:2026-11-25-draft',
   'plausible-hostname-allow-list': 'measurement',
   'netlify-script-variable': 'measurement',
   'record-publication-2026-11-25-draft': null,
@@ -49,11 +50,14 @@ const sortKeys = (value) =>
     ? Object.fromEntries(Object.keys(value).toSorted().map((key) => [key, sortKeys(value[key])]))
     : value;
 
+const sha256 = (value) => createHash('sha256').update(JSON.stringify(sortKeys(value))).digest('hex');
+const scope = ({ blocks, gates }) => (blocks === 'publish' ? `publish:${gates}` : blocks);
+
 // What a person reads before authorizing: the whole Privacy namespace and the consent label, in both locales
 const fingerprint = async () => {
   const [en, es] = await Promise.all(['en', 'es'].map((locale) => readJSON(`apps/landing/messages/${locale}.json`)));
   const text = ({ Privacy, Waitlist }) => ({ consent: Waitlist.consent.label, privacy: Privacy });
-  return createHash('sha256').update(JSON.stringify(sortKeys({ en: text(en), es: text(es) }))).digest('hex');
+  return sha256({ en: text(en), es: text(es) });
 };
 
 // GitHub's heading ids: lowercase, punctuation dropped, each space a hyphen, -1, -2 for repeats. Headings inside code fences do not count
@@ -116,7 +120,7 @@ const actionProblems = ({ actions }, workbookAnchors) => {
     ...actions.flatMap((action, index) => {
       const name = action.id ?? `#${index}`;
       return [
-        Object.keys(action).toSorted().join() !== actionKeys.join() && `${name}: keys must be ${actionKeys.join(', ')}`,
+        Object.keys(action).filter((key) => key !== 'gates').toSorted().join() !== actionKeys.join() && `${name}: keys must be ${actionKeys.join(', ')}, and gates for a publish blocker`,
         !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(action.id) && `${name}: id is not kebab-case`,
         !isText(action.title) && `${name}: title is empty`,
         !isText(action.owner) && `${name}: owner is empty`,
@@ -138,39 +142,51 @@ const yearlyProblems = ({ policyVersions, actions }) =>
 
 const pinProblems = ({ policyVersions }) => {
   const byName = new Map(policyVersions.map((entry) => [entry.version, entry]));
+  const line = (entry) => `'${entry.version}': '${sha256(entry)}',`;
   return [
     ...Object.entries(publishedPins).flatMap(([version, hash]) => {
       const entry = byName.get(version);
       if (!entry) return [`${version}: a published version left the register`];
-      return [
-        entry.publishedOn === null && `${version}: a published version is marked unpublished`,
-        entry.textSha256 !== hash && `${version}: a published version's hash changed. Never edit it: add a new version`,
-      ].filter(Boolean);
+      return sha256(entry) === hash
+        ? []
+        : [
+            `${version}: a published entry changed. Change one only to record what happened later, such as that people were told (subjectsTold), ` +
+              `never its text: a new text is a new version. If the change is right, put ${line(entry)} in publishedPins in ${testPath}`,
+          ];
     }),
     ...policyVersions
       .filter(({ version, publishedOn }) => publishedOn !== null && !Object.hasOwn(publishedPins, version))
-      .map(({ version, textSha256 }) => `${version}: marked published but not pinned. Add '${version}': '${textSha256}' to publishedPins in ${testPath}`),
+      .map((entry) => `${entry.version}: marked published but not pinned. Add ${line(entry)} to publishedPins in ${testPath}`),
   ];
 };
 
 const actionPinProblems = ({ actions }) => {
   const byId = new Map(actions.map((action) => [action.id, action]));
+  const pin = (action) => (scope(action) === null ? 'null' : `'${scope(action)}'`);
   return [
-    ...Object.entries(actionPins).flatMap(([id, blocks]) => {
+    ...Object.entries(actionPins).flatMap(([id, pinned]) => {
       if (!byId.has(id)) return [`${id}: an action left the register. Close it with status "done" instead`];
-      return byId.get(id).blocks === blocks ? [] : [`${id}: blocks changed from ${blocks} to ${byId.get(id).blocks}. That needs the owner's yes and the pin updated in ${testPath}`];
+      const action = byId.get(id);
+      return scope(action) === pinned ? [] : [`${id}: what it blocks changed from ${pinned} to ${scope(action)}. Pin it as '${id}': ${pin(action)} in ${testPath}; a new scope needs the owner's yes`];
     }),
-    ...actions
-      .filter(({ id }) => !Object.hasOwn(actionPins, id))
-      .map(({ id, blocks }) => `${id}: not pinned. Add '${id}': ${blocks === null ? 'null' : `'${blocks}'`} to actionPins in ${testPath}`),
+    ...actions.filter(({ id }) => !Object.hasOwn(actionPins, id)).map((action) => `${action.id}: not pinned. Add '${action.id}': ${pin(action)} to actionPins in ${testPath}`),
   ];
 };
 
-const publishBlockerProblems = ({ policyVersions, actions }) => {
-  const newest = policyVersions.at(-1);
-  return newest?.publishedOn
-    ? actions.filter(({ blocks, status }) => blocks === 'publish' && status === 'open').map(({ id }) => `${id}: blocks publishing and is open, but ${newest.version} is marked published`)
-    : [];
+// A publish blocker names the publication it holds back: a registered version, or "next" for one with no entry yet
+const gatesProblems = ({ policyVersions, actions }) => {
+  const published = new Set(policyVersions.filter(({ publishedOn }) => publishedOn !== null).map(({ version }) => version));
+  const labels = new Set(policyVersions.map(({ version }) => version));
+  const newestPublished = Boolean(policyVersions.at(-1)?.publishedOn);
+  return actions.flatMap(({ id, blocks, gates = null, status }) => {
+    if (blocks !== 'publish') return gates === null ? [] : [`${id}: only a publish blocker has gates`];
+    if (gates === 'next')
+      return status === 'open' && !newestPublished
+        ? [`${id}: gates "next", but ${policyVersions.at(-1).version} is not published yet. Point it at the version it holds back`]
+        : [];
+    if (!labels.has(gates)) return [`${id}: gates must be "next" or a registered version, not ${gates}`];
+    return status === 'open' && published.has(gates) ? [`${id}: open, but the version it gates, ${gates}, is marked published`] : [];
+  });
 };
 
 // Until the publication is recorded, the live text still reads as an editable draft, so recording it is an open action of its own
@@ -230,14 +246,15 @@ test('once the newest version is published, every open yearly duty has a due dat
   assert.deepEqual(yearlyProblems({ policyVersions: versions('2026-11-23', '2026-12-01'), actions: undated }), ['probe: a yearly duty with no due date']);
 });
 
-test('published versions match their pins, and every published version is pinned', async () => {
+test('published entries match their pins, every field included, and every published entry is pinned', async () => {
   const register = await readJSON(registerPath);
   assert.deepEqual(pinProblems(register), []);
   const [first, ...rest] = register.policyVersions;
   assert.deepEqual(pinProblems({ policyVersions: rest }), ['2026-11-draft: a published version left the register']);
-  assert.match(pinProblems({ policyVersions: [{ ...first, textSha256: '0'.repeat(64) }, ...rest] }).join(), /hash changed/);
+  const edits = [{ textSha256: '0'.repeat(64) }, { publishedOn: '2026-11-24' }, { publishedOn: null }, { substantial: !first.substantial }, { subjectsTold: 'probe' }, { summary: 'probe' }];
+  for (const edit of edits) assert.match(pinProblems({ policyVersions: [{ ...first, ...edit }, ...rest] }).join(), /2026-11-draft: a published entry changed/, JSON.stringify(edit));
   const unpinned = { ...first, version: 'probe', publishedOn: '2026-12-01' };
-  assert.match(pinProblems({ policyVersions: [...register.policyVersions, unpinned] }).join(), /probe: marked published but not pinned/);
+  assert.match(pinProblems({ policyVersions: [...register.policyVersions, unpinned] }).join(), /probe: marked published but not pinned. Add 'probe': '[0-9a-f]{64}',/);
 });
 
 test('actions are never deleted, and what each blocks is pinned', async () => {
@@ -245,17 +262,31 @@ test('actions are never deleted, and what each blocks is pinned', async () => {
   assert.deepEqual(actionPinProblems(register), []);
   const withoutBlockers = register.actions.filter(({ blocks }) => blocks !== 'publish');
   assert.match(actionPinProblems({ actions: withoutBlockers }).join(), /left the register/);
-  const rescoped = register.actions.map((action) => ({ ...action, blocks: null }));
-  assert.match(actionPinProblems({ actions: rescoped }).join(), /blocks changed/);
+  const rescoped = register.actions.map((action) => ({ ...action, blocks: null, gates: null }));
+  assert.match(actionPinProblems({ actions: rescoped }).join(), /what it blocks changed/);
+  const repointed = register.actions.map((action) => (action.blocks === 'publish' ? { ...action, gates: 'next' } : action));
+  assert.match(actionPinProblems({ actions: repointed }).join(), /changed from publish:.+ to publish:next/);
 });
 
-test('a version is not marked published while a publish blocker is open', async () => {
+test('a publish blocker gates a version: never a published one, and "next" only after the newest is published', async () => {
   const register = await readJSON(registerPath);
-  assert.deepEqual(publishBlockerProblems(register), []);
-  const policyVersions = register.policyVersions.map((version) => ({ ...version, publishedOn: version.publishedOn ?? '2026-12-01' }));
+  assert.deepEqual(gatesProblems(register), []);
+  const policyVersions = [
+    { version: 'old', publishedOn: '2026-11-23' },
+    { version: 'new', publishedOn: null },
+  ];
   const blocker = { id: 'probe', blocks: 'publish', status: 'open' };
-  assert.equal(publishBlockerProblems({ policyVersions, actions: [blocker] }).length, 1);
-  assert.deepEqual(publishBlockerProblems({ policyVersions, actions: [{ ...blocker, status: 'done' }] }), []);
+  const check = (actions, versions = policyVersions) => gatesProblems({ policyVersions: versions, actions }).join();
+  assert.equal(check([{ ...blocker, gates: 'new' }]), '');
+  assert.match(check([blocker]), /gates must be "next" or a registered version/);
+  assert.match(check([{ ...blocker, gates: 'unknown' }]), /gates must be/);
+  assert.match(check([{ id: 'probe', blocks: null, gates: 'new' }]), /only a publish blocker has gates/);
+  assert.match(check([{ ...blocker, gates: 'old' }]), /open, but the version it gates, old, is marked published/);
+  assert.equal(check([{ ...blocker, gates: 'old', status: 'done' }]), '');
+  assert.match(check([{ ...blocker, gates: 'next' }]), /gates "next", but new is not published yet/);
+  assert.equal(check([{ ...blocker, gates: 'next' }], [policyVersions[0]]), '');
+  const allPublished = policyVersions.map((version) => ({ ...version, publishedOn: version.publishedOn ?? '2026-12-01' }));
+  assert.match(check([{ ...blocker, gates: 'new' }], allPublished), /new, is marked published/);
 });
 
 test('an unpublished newest version has an open action to record its publication', async () => {

@@ -128,7 +128,7 @@ Decree 1074, art. 2.2.2.25.3.1 also says substantial changes to the policy are t
 2. **You:** while the newest version in the register is unpublished, its text may still change: once the owner approves the exact text, put the hash the test prints in its `textSha256`. Once a version is published, **never** edit its hash: add a new version.
 3. Then [11](#11-publishing-a-policy-version).
 
-**One label, one text.** Once a version is published, its label never carries another text. `2026-11-draft` did: three texts were merged under it on 2026-11-23 and 2026-11-24 (its `summary` in the register names them). Now each published version's hash is pinned in `tests/privacy-register.test.mjs`: changing or dropping a published entry fails, and marking a version published means adding its pin, which review sees. What the pins cannot catch is under [Limits of the guards](#limits-of-the-guards).
+**One label, one text.** Once a version is published, its label never carries another text. `2026-11-draft` did: three texts were merged under it on 2026-11-23 and 2026-11-24 (its `summary` in the register names them). Now each published entry is pinned whole, as a hash of every field, in `tests/privacy-register.test.mjs`. Changing any field of a published entry, or dropping it, fails, and the failure prints the new pin line. Marking a version published means adding its pin, which review sees. Change a published entry only to record what happened later, such as that people were told (`subjectsTold`), and never its text: a new text is a new version. What the pins cannot catch is under [Limits of the guards](#limits-of-the-guards).
 
 Already open: the rights text says every e-mail has an unsubscribe link, and the confirmation e-mail has none (`unsubscribe-sentence`). Decree 1074, art. 2.2.2.25.2.6: people may ask for deletion or revoke the authorization at any time, and free, easy ways to do it must be offered.
 
@@ -215,25 +215,25 @@ What counts, SIC, Circular Única, Título V: a breach of security codes, or the
 
 ## 11. Publishing a policy version
 
-**Blocks:** no merge that publishes a version while an action with `blocks: "publish"` is open in the register.
+**Blocks:** no merge that publishes a version while an open action in the register has `blocks: "publish"` and gates that version.
 
 1. **You:** classify the change ([Which case is it](#which-case-is-it), then [5](#5-a-wording-change)): substantial or not.
 2. **You:** draft the Spanish and the English text outside the repository, which is public.
 3. **You:** a plain-language pass: short sentences, words the reader knows. Spanish copy goes through the humanizer pass (`growth-opta`).
 4. **Owner:** approves the exact text in both languages, in the pull request or before it. Nothing below happens without it.
 5. **Counsel:** answers the points flagged for them. For `2026-11-25-draft` the owner chose to publish before counsel's review (ADR 0003, "Measurement and privacy text"). For a later version, ask him.
-6. **Owner:** first `check-subscribers-before-publish`: is anyone already on the list? If the change is substantial and someone is, tell them before it applies, and get a new authorization if the purpose changed ([5](#5-a-wording-change)). How to collect it: counsel ([open an action](#open-an-action)).
+6. **Owner:** first, is anyone already on the list? This is the version's `check-subscribers-<version>` action (for `2026-11-25-draft`, `check-subscribers-before-publish`). If the change is substantial and someone is, tell them before it applies, and get a new authorization if the purpose changed ([5](#5-a-wording-change)). How to collect it: counsel ([open an action](#open-an-action)).
 7. **You:** put the approved text in `apps/landing/messages/es.json` and `en.json` (`Privacy` and `Waitlist.consent.label`).
-8. **You:** the effective date in `Privacy.effective` is the day it will be published (`confirm-effective-date`). If publishing slips, the date changes and the owner approves the new one.
+8. **You:** the effective date in `Privacy.effective` is the day it will be published. This is the version's `confirm-effective-date-<version>` action (for `2026-11-25-draft`, `confirm-effective-date`). If publishing slips, the date changes and the owner approves the new one.
 9. **You:** give `policyVersion` in `apps/landing/src/modules/waitlist/server.ts` a new name, never used before.
 10. **You:** add the version at the end of `policyVersions` in `docs/privacy/register.json`: `publishedOn: null`, the `textSha256` the test prints, a one-line `summary`, `substantial`, and `subjectsTold` (how and when people were told, or why it was not needed). Never edit a published version's hash.
-11. **You:** every publishing pull request carries an open action `record-publication-<version>` (owner Santiago, `blocks: null`, workbook `#11-publishing-a-policy-version`), with its pin ([open an action](#open-an-action)). The tests fail while the newest version is unpublished and has none.
+11. **You:** in the same pull request, open the version's own actions, with ids that name it and are never reused, each with its pin ([open an action](#open-an-action)). They are `check-subscribers-<version>` and `confirm-effective-date-<version>` (`blocks: "publish"`, `gates: "<version>"`), and `record-publication-<version>` (`blocks: null`, workbook `#11-publishing-a-policy-version`). Re-point every open blocker with `gates: "next"` to the new label, and its pin with it. The tests fail until every such blocker is re-pointed, and while the newest version is unpublished without its `record-publication-<version>`.
 12. **You:** update `tests/privacy-measurement.test.mjs` with the text. It pins the policy's section keys and their order (controller, data, purpose, measurement, contact, processor, rights, requests). It pins the measurement section as two paragraphs, the first naming Plausible and the second the cookie, and `Plausible Insights OÜ` in the providers section. In the requests section it pins four paragraphs that name who attends and the privacy address, with the terms 10, 5, 15 and 8 business days in that order. It also pins the controller section ending with the privacy address, the effective line with the year and the yearly phrase in each language, no "OPTA" without "Ruta", and no "[" placeholder.
 13. **You:** `npm run check` and `npm run check:pending` pass.
 14. **You:** open the pull request and list in it the register's open publish blockers.
 15. **Owner:** on the deploy preview, reads `/es/privacidad`, `/en/privacy` and the consent on the sign-up form.
 16. **Owner:** merges only when no publish blocker is open. The deploy publishes it. No test sees the merge: this check is the owner's.
-17. **You, the same day, in a follow-up pull request:** set `publishedOn` to the publication day. Add the version and its `textSha256` to `publishedPins` in `tests/privacy-register.test.mjs`. Give every open yearly duty its `due` date (proposed: one year after publication; the owner confirms). Then close `record-publication-<version>`. The tests fail if the register marks it published without its pin, while a publish blocker is open, or with an undated yearly duty. Until this pull request merges, the live text still reads as an unpublished draft in the register: do not change it in between.
+17. **You, the same day, in a follow-up pull request:** set `publishedOn` to the publication day. Give every open yearly duty its `due` date (proposed: one year after publication; the owner confirms). Close `record-publication-<version>`. Then add to `publishedPins` in `tests/privacy-register.test.mjs` the line the test prints, which pins the whole entry. The tests fail if the register marks it published without its pin, while a blocker that gates it is open, or with an undated yearly duty. Until this pull request merges, the live text still reads as an unpublished draft in the register: do not change it in between. A blocker for the next version can be opened only once the publication is recorded: do it in this pull request, or after it.
 18. **Owner:** reads the live pages on www.rutaopta.org, and checks with a throwaway address of our own that a new sign-up's source in Zoho carries the new version.
 
 Git history keeps every published text and the register its fingerprint. Decree 1074 asks to keep the proof of authorization (art. 2.2.2.25.2.5) and the privacy notice used (art. 2.2.2.25.3.4). Whether these records are enough: counsel.
@@ -253,7 +253,7 @@ When a yearly duty is done, keep it `open` and move its `due` one year on, in a 
 
 ## What blocks publishing or measurement
 
-- `blocks: "publish"`: the newest policy version is not published while the action is open. Publishing is the merge that deploys it. The owner checks this before merging. A test fails if the register marks the newest version published while one is open.
+- `blocks: "publish"`: the version named in the action's `gates` is not published while the action is open. Publishing is the merge that deploys it, and the owner checks this before merging. `gates` is the label of a registered version, or `"next"` for a version that has no register entry yet. `"next"` is allowed only while the newest registered version is recorded as published, so adding the next version's entry forces every open `"next"` blocker to be re-pointed to its label. A test fails when an open blocker gates a version that the register marks published.
 - `blocks: "measurement"`: measurement does not start while the action is open. It starts when `ANALYTICS_SCRIPT_SRC` is set in Netlify, which is itself the last of these actions (`netlify-script-variable`). The steps are in `docs/analytics.md`, "Before the production variable is set". The variable is set only after the merge that publishes the policy describing the measurement (its step 4), so publish blockers come first. No test sees the variable.
 - `blocks: null`: blocks nothing, but has an owner and stays listed until done.
 - A new blocker: [open an action](#open-an-action).
@@ -271,13 +271,14 @@ Add it to `actions` in `docs/privacy/register.json`, in the pull request that fi
 | `owner` | Who acts: a role, or the owner's name. When unsure, Santiago |
 | `due` | `YYYY-MM-DD` when a date is known, such as a legal deadline or a launch. Otherwise `null` |
 | `repeat` | `"yearly"` for a duty that comes back every year. Otherwise `null` |
-| `blocks` | `"publish"` if publishing the newest policy version would be wrong while it is open. `"measurement"` if measurement must not start while it is open. Otherwise `null`. A blocker holds back a release: say why in the title, and the owner confirms it |
+| `blocks` | `"publish"` if publishing a policy version would be wrong while it is open. `"measurement"` if measurement must not start while it is open. Otherwise `null`. A blocker holds back a release: say why in the title, and the owner confirms it |
+| `gates` | Only with `blocks: "publish"`: the label of the registered version it holds back, or `"next"` for a version not yet in the register. `"next"` needs the newest registered version recorded as published: if the live version is not recorded yet, record the publication in the same pull request, or first ([11](#11-publishing-a-policy-version), step 17). Leave it out on every other action |
 | `status` | `"open"` |
 | `workbook` | The anchor of the section here that says how to do it, such as `#10-a-security-incident` |
 
-Then add `'<id>': <blocks>` to `actionPins` in `tests/privacy-register.test.mjs`, in the same pull request; the tests fail until you do.
+Then add `'<id>': <scope>` to `actionPins` in `tests/privacy-register.test.mjs`, in the same pull request. The scope is `null`, `'measurement'` or `'publish:<gates>'`. The tests fail until you add it, and the failure prints the line.
 
-**Closing:** set `status: "done"` in the pull request that does it, or in one that records it was done. Never delete an action: the pins make that fail. A yearly duty stays open and its `due` moves on ([12](#12-recurring-duties)). Changing what an action blocks needs the owner's yes, and its pin changes with it.
+**Closing:** set `status: "done"` in the pull request that does it, or in one that records it was done. Never delete an action: the pins make that fail. A yearly duty stays open and its `due` moves on ([12](#12-recurring-duties)). Changing what an action blocks or gates needs the owner's yes, except re-pointing a `"next"` blocker to the new version's label ([11](#11-publishing-a-policy-version), step 11); its pin changes with it. Per-publication checks are opened again for each version with new ids ([11](#11-publishing-a-policy-version), step 11).
 
 ## Questions for counsel
 
@@ -310,16 +311,17 @@ The owner's approval of an exact text holds no personal data: record it in the p
 `tests/privacy-register.test.mjs` runs with `npm test` and in CI. It fails when:
 
 - the policy text or the consent wording changes without its version;
-- a published version's entry changes or leaves the register, or a version is marked published without its pin;
-- the newest version is marked published while a publish blocker is open, or with an undated yearly duty;
-- an action is deleted, or what it blocks changes, without its pin changing too;
+- any field of a published entry changes (each entry is pinned whole), a published entry leaves the register, or a version is marked published without its pin;
+- an open publish blocker gates a version marked published, or still gates `"next"` once a newer version is registered; a publish blocker has no valid `gates`, or another action has one;
+- the newest version is marked published with an undated yearly duty;
+- an action is deleted, or what it blocks or gates changes, without its pin changing too;
 - the newest version is unpublished and has no open `record-publication-<version>` action;
 - the register is malformed, a `workbook` anchor does not exist, or `docs/privacy/` holds an address outside rutaopta.org.
 
 What it cannot catch:
 
 - **Behaviour.** It sees text, not behaviour. A new use of data that leaves the text alone passes it. The `privacy-changes` skill and [Which case is it](#which-case-is-it) are the only cover.
-- **Edited pins.** The pins live in the test file. Editing or deleting a pin, or deleting an action together with its pin, passes: only review catches it.
+- **Matching edits.** The pins live in the test file. A pin edited on its own fails, but a pin changed to match a changed register entry or action passes, and so does an action deleted together with its pin. Only review catches those.
 - **The merge and the variable.** It reads the register, not the merge or Netlify. Merging while a publish blocker is open, or setting the analytics variable early, is stopped only by the owner.
 - **The gap after a merge.** Until the follow-up pull request records it ([11](#11-publishing-a-policy-version), step 17), a live text still reads as an unpublished draft: changing it and its hash then passes.
 - **Older versions.** Only the newest version's hash is checked against the text. An older one is a pinned value: `2026-11-draft`'s is the hash of its last text, read from git history.
