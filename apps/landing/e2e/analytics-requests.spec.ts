@@ -11,7 +11,8 @@ import { testTokenKey } from './fixtures';
 import { pathFor } from './pages';
 
 // Our real per-site script, on real requests. The browser believes it is on the production host, so the server must be the local one:
-// Chromium maps the test hosts to it and every other name to nothing, and each navigation checks where its document came from.
+// Chromium connects directly and maps the test hosts to it and every other name to nothing, every lab first proves that on a name only the
+// mapping resolves, and each navigation checks where its document came from.
 // Never route.fetch, page.request, the request fixture or Node's fetch here: Node's network ignores the browser's resolver rules
 
 const messages = { es, en };
@@ -27,6 +28,11 @@ const resolverRules = [
   'EXCLUDE localhost',
   'EXCLUDE 127.0.0.1',
 ].join(',');
+// Direct connections only: through a proxy, the proxy resolves the names and the mapping never runs. Both browsers launch with these
+const chromiumArgs = ['--proxy-server=direct://', `--host-resolver-rules=${resolverRules}`];
+// The first page of every lab: no public resolver knows the name, so it loads only if the mapping is in force, before a live name is requested.
+// A text file runs no script, and nothing is recorded yet
+const gate = `${preview}/robots.txt`;
 
 const adapter = scriptTags(proxyPaths.script, new URL(site).hostname);
 if (!adapter) throw new Error('The adapter renders no tags for the first-party script path');
@@ -53,7 +59,13 @@ const isEvent = ({ method, url }: Seen) => method === 'POST' && testOrigins.incl
 const pathOf = (address: string) => new URL(address).pathname;
 const slow = expect.configure({ timeout: 30_000 });
 
-const makeLab = async (page: Page, context: BrowserContext) => {
+// args: what the browser was launched with, which a Browser object cannot tell
+const makeLab = async (page: Page, context: BrowserContext, args: readonly string[]) => {
+  // Before any navigation: only Chromium reads these switches
+  if (context.browser()?.browserType().name() !== 'chromium') throw new Error('This spec needs Chromium: it reads the resolver rules');
+  const missing = chromiumArgs.filter((arg) => !args.includes(arg));
+  if (missing.length > 0) throw new Error(`The browser was launched without ${missing.join(' ')}`);
+
   const vendorRequests: string[] = [];
   const pageErrors: string[] = [];
   const requests: Request[] = [];
@@ -62,7 +74,6 @@ const makeLab = async (page: Page, context: BrowserContext) => {
   const payloads: Payload[] = [];
 
   context.on('request', (request) => {
-    requests.push(request);
     if (isVendor(new URL(request.url()).hostname)) vendorRequests.push(request.url());
   });
   page.on('request', (request) => {
@@ -110,6 +121,10 @@ const makeLab = async (page: Page, context: BrowserContext) => {
     return response;
   };
 
+  // Fails closed: with no mapping, or a proxy in the way, this throws before anything asks for a live name
+  await open(gate);
+  context.on('request', (request) => requests.push(request));
+
   const expectVetted = () =>
     expect(documents.filter((request) => !vetted.has(request)).map((request) => request.url()), 'documents opened without the address check').toEqual([]);
 
@@ -129,15 +144,20 @@ const makeLab = async (page: Page, context: BrowserContext) => {
 
 type Lab = Awaited<ReturnType<typeof makeLab>>;
 
+// Automatic, so every test's browser passes the gate before its body runs, whether or not it asks for the lab
 const test = base.extend<{ lab: Lab }>({
-  lab: async ({ page, context }, provide) => {
-    const lab = await makeLab(page, context);
-    await provide(lab);
-    lab.verify();
-  },
+  lab: [
+    async ({ page, context, launchOptions, connectOptions }, provide) => {
+      if (connectOptions) throw new Error('A remote browser ignores the launch switches this spec depends on');
+      const lab = await makeLab(page, context, launchOptions.args ?? []);
+      await provide(lab);
+      lab.verify();
+    },
+    { auto: true },
+  ],
 });
 
-test.use({ baseURL: site, launchOptions: { args: [`--host-resolver-rules=${resolverRules}`] } });
+test.use({ baseURL: site, launchOptions: { args: chromiumArgs } });
 
 // The DOM and the requests are the same under high contrast
 test.beforeEach(({}, testInfo) => test.skip(testInfo.project.name.endsWith('-hc')));
@@ -278,14 +298,13 @@ for (const locale of routing.locales) {
       const netlog = testInfo.outputPath('netlog.json');
       const token = seal(locale);
       const { viewport, userAgent, deviceScaleFactor, isMobile, hasTouch } = testInfo.project.use;
-      const browser = await playwright.chromium.launch({
-        args: [`--host-resolver-rules=${resolverRules}`, `--log-net-log=${netlog}`, '--net-log-capture-mode=Everything'],
-      });
+      const args = [...chromiumArgs, `--log-net-log=${netlog}`, '--net-log-capture-mode=Everything'];
+      const browser = await playwright.chromium.launch({ args });
       const intercepted = await (async () => {
         try {
           const context = await browser.newContext({ baseURL: site, viewport, userAgent, deviceScaleFactor, isMobile, hasTouch });
           const page = await context.newPage();
-          const lab = await makeLab(page, context);
+          const lab = await makeLab(page, context, args);
           await lab.inject();
           await lab.open(`${confirm}?t=${token}&utm_source=email`);
           await arrived(lab, 'pageview', confirm);
