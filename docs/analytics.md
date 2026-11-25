@@ -6,7 +6,7 @@ For whoever runs the campaign. We read three sources, as counts:
 - **The mailing list** (Zoho Campaigns): confirmed sign-ups.
 - **The inboxes** (WhatsApp and info@rutaopta.org): messages that were really sent.
 
-Day to day you need [Tagged links](#tagged-links), [Weekly review](#weekly-review-10-minutes) and [Reading rules](#reading-rules). Requirements are in GitHub issue #14. How it is built is in `docs/superpowers/specs/2026-11-25-analytics-design.md`.
+Day to day you need [Tagged links](#tagged-links), [Weekly review](#weekly-review-10-minutes) and [Reading rules](#reading-rules). Requirements are in GitHub issue #14. How it is built is in `docs/superpowers/specs/2026-11-25-analytics-design.md`. When a change touches personal data, a provider or the privacy policy, follow [the privacy workbook](privacy/workbook.md).
 
 **Status on 2026-11-25: Plausible counts nothing yet.** It starts when the variable in step 4 of [Before the production variable is set](#before-the-production-variable-is-set) is set. To switch it off, unset the Netlify variable `ANALYTICS_SCRIPT_SRC` and trigger a deploy. Visits from before the start cannot be recovered.
 
@@ -197,6 +197,8 @@ There are no goals in the dashboard yet, on purpose. After release:
 - [ ] Add the 6 [pageview goals](#pageview-goals) by hand.
 
 ## Before the production variable is set
+
+**First, the blockers** in `docs/privacy/register.json`. The policy is published only when no open action has `blocks` set to `publish` ([the workbook's publishing section](privacy/workbook.md#11-publishing-a-policy-version)). The variable is set only after that, once every other open action with `blocks` set to `measurement` is done.
 
 **Done:**
 

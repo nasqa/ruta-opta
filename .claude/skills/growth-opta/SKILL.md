@@ -7,6 +7,8 @@ description: Use when designing or reviewing anything that captures, converts or
 
 Trama and the project rules stay the authority for design. This skill is the authority for how we ask people for things. The files under `references/` are copied third-party material (MIT, pinned commits, see `references/SOURCES.md`). They are useful and they are wrong for us in places; when they disagree with this file, this file wins.
 
+Anything that touches personal data, consent or privacy wording, measurement or a provider also follows `docs/privacy/workbook.md` (skill `privacy-changes`): who approves, what blocks publishing, what to record.
+
 ## Who we are talking to
 The first visitors are attendees of a rural-tourism course (about 250 people: tourism entrepreneurs, rural women, youth, Indigenous and Afro-descendant participants) on mid and low-end phones, with weak signal, and WhatsApp as their usual channel. Spanish first. Later: allies (businesses, agencies, lodgings, institutions). Do not name the course organizer or imply an agreement with it.
 

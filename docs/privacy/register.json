@@ -1,0 +1,164 @@
+{
+  "policyVersions": [
+    {
+      "version": "2026-11-25-draft",
+      "publishedOn": null,
+      "textSha256": "1a17839a71eda7f5b1f365566e59c1666905b4dec6c2fe8fdec1b24fd805db82",
+      "summary": "Replaces 2026-11-draft. Adds the link a sign-up came through and its use (counting sign-ups per link), the visit measurement with Plausible and the language cookie, messages by WhatsApp or e-mail, Plausible among the providers, the full rights with who attends them and the terms, the list's lifetime with a yearly reminder, the privacy address and the effective date. The consent wording is unchanged.",
+      "substantial": true,
+      "subjectsTold": "Nobody yet: not published. Whether anyone is on the list under 2026-11-draft is open (check-subscribers-before-publish)."
+    }
+  ],
+  "actions": [
+    {
+      "id": "check-subscribers-before-publish",
+      "title": "Check in Zoho Campaigns whether anyone is already on the list. Anyone found is a question for counsel before publishing (docs/analytics.md, Before the production variable is set, step 3)",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": "publish",
+      "status": "open",
+      "workbook": "#11-publishing-a-policy-version"
+    },
+    {
+      "id": "confirm-effective-date",
+      "title": "Set the policy's effective date to the day it is published",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": "publish",
+      "status": "open",
+      "workbook": "#11-publishing-a-policy-version"
+    },
+    {
+      "id": "consent-wording-purpose",
+      "title": "The consent names the foundation as responsible for OPTA and does not name the per-link sign-up count; the authorization must name all specific purposes (Decree 1074, art. 2.2.2.25.2.2). A draft was sent to the owner",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": "publish",
+      "status": "open",
+      "workbook": "#2-a-new-purpose-or-a-new-use-of-data-we-hold"
+    },
+    {
+      "id": "abuse-protection-records-in-policy",
+      "title": "The policy does not mention the codes the sign-up protection keeps. A draft was sent to the owner",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": "publish",
+      "status": "open",
+      "workbook": "#what-we-hold-and-where"
+    },
+    {
+      "id": "unsubscribe-sentence",
+      "title": "The rights text says every e-mail has an unsubscribe link; the confirmation e-mail has none. A draft was sent to the owner",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": "publish",
+      "status": "open",
+      "workbook": "#5-a-wording-change"
+    },
+    {
+      "id": "plausible-hostname-allow-list",
+      "title": "In Plausible, Shields, Hostnames, allow only www.rutaopta.org",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": "measurement",
+      "status": "open",
+      "workbook": "#what-blocks-publishing-or-measurement"
+    },
+    {
+      "id": "netlify-script-variable",
+      "title": "After the merge that publishes the policy, set ANALYTICS_SCRIPT_SRC=/o/s.js in Netlify, Production context only, rebuild and check the live site (docs/analytics.md, Before the production variable is set, step 4)",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": "measurement",
+      "status": "open",
+      "workbook": "#what-blocks-publishing-or-measurement"
+    },
+    {
+      "id": "counsel-review",
+      "title": "Counsel reviews the interim policy: prior authorization for cookieless measurement, the transfer, notice and authorization for anyone already listed, the consent wording, the yearly reminder. The owner ships before counsel",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#questions-for-counsel"
+    },
+    {
+      "id": "rnbd-threshold",
+      "title": "Check whether the foundation's total assets reach 100,000 UVT, the threshold for registering in the RNBD",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#the-national-database-register-rnbd"
+    },
+    {
+      "id": "delete-old-throttle-records",
+      "title": "Delete the sign-up protection's codes once they no longer serve (Decree 1074, art. 2.2.2.25.2.8). A code change, proposed as a separate pull request",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#7-retention-or-how-long-the-database-lasts"
+    },
+    {
+      "id": "course-whatsapp-utm-source",
+      "title": "Confirm the utm_source for links shared in the course's WhatsApp groups before sharing them (diplomado is a suggestion). Sign-ups cannot be re-tagged",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#what-we-hold-and-where"
+    },
+    {
+      "id": "name-weekly-tally-owner",
+      "title": "Name who does the weekly tally",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#12-recurring-duties"
+    },
+    {
+      "id": "yearly-list-reminder",
+      "title": "Send the list the yearly e-mail that reminds people and offers to unsubscribe",
+      "owner": "Ruta Opta team",
+      "due": null,
+      "repeat": "yearly",
+      "blocks": null,
+      "status": "open",
+      "workbook": "#12-recurring-duties"
+    },
+    {
+      "id": "yearly-policy-review",
+      "title": "Review the policy, the workbook and what we hold. Proposed: the owner has not confirmed it",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": "yearly",
+      "blocks": null,
+      "status": "open",
+      "workbook": "#12-recurring-duties"
+    },
+    {
+      "id": "calendar-reminder",
+      "title": "Create a calendar reminder for the yearly e-mail, only with Santiago's explicit yes",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#12-recurring-duties"
+    }
+  ]
+}
