@@ -1,25 +1,51 @@
-// Which elements must, may or must not carry an event. It knows no vendor: the caller reads the goal through the adapter
+// Which elements must, may or must not carry an event. It knows no vendor: the caller reads the goal through the adapter.
+// For server and test code only (URL.parse). Links are judged by where they lead, so rewriting one cannot slip past
 
 // The addresses the site shows; the tests compare them with the messages
 export const infoEmail = 'info@rutaopta.org';
 export const instagramUrl = 'https://www.instagram.com/rutaopta/';
 export const rightsEmails = ['privacidad@rutaopta.org', 'privacy@rutaopta.org'];
 
+// href is the attribute as written (getAttribute), not the resolved address: resolved, #lista would take the host and path of its page
 export type PageElement = { href?: string; inNav: boolean; optedOut: boolean; goal?: string };
 
-const sectionLink = /^(?:\/(?:es|en))?#(?:lista|allies)$/;
+const site = 'https://www.rutaopta.org';
+const siteHosts = ['rutaopta.org', 'www.rutaopta.org'];
+const homePath = /^\/(?:(?:es|en)\/?)?$/;
+const sections = ['#lista', '#allies'];
+const instagramHandle = new URL(instagramUrl).pathname.split('/')[1];
 
-// Both lists match by prefix: whatever follows (a message, a subject, a second recipient), the link still reaches that address
-const conversionPrefixes = ['https://wa.me/', `mailto:${infoEmail}`, instagramUrl.slice(0, -1)];
+// Escape by escape, so it never throws and a malformed one cannot hide the addresses around it
+const percentDecode = (text: string) => text.replace(/%([\da-f]{2})/gi, (_, hex: string) => String.fromCharCode(Number.parseInt(hex, 16)));
 
-const rightsPrefixes = rightsEmails.map((address) => `mailto:${address}`);
+// A name may come before the address, which then sits in angle brackets
+const addressOf = (recipient: string) => (/<([^<>]*)>/.exec(recipient)?.[1] ?? recipient).trim().toLowerCase();
 
-const startsWithAny = (href: string, prefixes: string[]) => prefixes.some((prefix) => href.startsWith(prefix));
+const recipientsOf = ({ protocol, pathname, searchParams }: URL) => {
+  if (protocol !== 'mailto:') return [];
+  const fields = [...searchParams].filter(([name]) => ['to', 'cc', 'bcc'].includes(name.toLowerCase())).map(([, value]) => value);
+  // Some mail clients also take a semicolon between addresses
+  return [percentDecode(pathname), ...fields].flatMap((list) => list.split(/[,;]/)).map(addressOf);
+};
+
+// Where WhatsApp and Instagram reach Ruta Opta; their other pages are ordinary links
+const isContactPage = ({ hostname, pathname }: URL) => {
+  const [first, second] = pathname.toLowerCase().split('/').slice(1);
+  if (['wa.me', 'api.whatsapp.com', 'chat.whatsapp.com'].includes(hostname)) return true;
+  if (['whatsapp.com', 'www.whatsapp.com'].includes(hostname)) return first === 'channel';
+  if (['instagram.com', 'www.instagram.com'].includes(hostname)) return first === instagramHandle;
+  return hostname === 'ig.me' && first === 'm' && second === instagramHandle;
+};
+
+const isSectionLink = ({ hostname, pathname, hash }: URL) => siteHosts.includes(hostname) && homePath.test(pathname) && sections.includes(hash);
 
 export const violation = ({ href = '', inNav, optedOut, goal }: PageElement) => {
-  if (goal && startsWithAny(href, rightsPrefixes)) return 'A rights-request address must carry no event.';
-  if (!goal && startsWithAny(href, conversionPrefixes)) return 'A WhatsApp, contact e-mail or Instagram link must carry an event.';
-  const toSection = sectionLink.test(href);
+  // An address that cannot be parsed leads nowhere: it counts as the home with no section
+  const url = URL.parse(href, site) ?? new URL(site);
+  const recipients = recipientsOf(url);
+  if (goal && recipients.some((address) => rightsEmails.includes(address))) return 'A rights-request address must carry no event.';
+  if (!goal && (recipients.includes(infoEmail) || isContactPage(url))) return 'A WhatsApp, contact e-mail or Instagram link must carry an event.';
+  const toSection = isSectionLink(url);
   if (optedOut && !toSection) return 'Only a link to the sign-up or the ally section may opt out of events.';
   if (toSection && !goal && !optedOut && !inNav) return 'A link to the sign-up or the ally section outside a <nav> must carry an event or opt out.';
   return undefined;
