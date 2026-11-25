@@ -87,6 +87,7 @@ Cleaning the payload is not enough: the browser also sends headers, and a proxy 
 - The root layout renders a plain `<script async src>` and the inline init (not `next/script`, to add no client code of ours).
 - `netlify.toml`: two `status = 200` rewrites with neutral paths (no "analytics", "stats" or "plausible"). The per-site script URL is public, so it is written there.
 - **The proxy matcher in `src/proxy.ts` must exclude those paths.** Netlify runs the Next proxy before the rewrites; the event path has no dot, so next-intl would redirect it and every event would be lost without an error. Next requires the matcher to be a literal, so a test checks it against the adapter's constants.
+- A unit test cannot prove Netlify's routing order, so every rule that depends on it is also checked on the deploy preview with `curl`, using GET or HEAD only so that no event reaches the vendor: the event path must not answer with next-intl's redirect.
 - In production, verify that the visitor IP is forwarded and that responses carry no `x-plausible-dropped` header.
 
 ## What is tagged
@@ -162,4 +163,4 @@ The repo rules in `AGENTS.md`; test first; `npm run check`, build, e2e and budge
 
 Vendor yes; the per-site `pa-…js` URL; whether `fix/hero-copy-and-note` lands; whether the mailing list shows the source field; counsel's answers; whether Netlify lets a rewrite override `Cookie` and `Referer`; the referrer header on both confirm pages is checked on every deploy preview that touches the proxy.
 
-**Owner decision pending:** what ships if the vendor yes or the script URL is missing on 2026-11-29. Proposed: a first pull request with only the `utm_source` change and the privacy sentences about the link (no measurement section), so sign-ups from the launch are attributed in the mailing list, which cannot be backfilled. It means two privacy changes instead of one.
+**Owner decision pending:** what ships if the vendor yes or the script URL is missing on Saturday 2026-11-28. Proposed: a first pull request with only the `utm_source` change and the privacy sentences about the link (no measurement section), so sign-ups from the launch are attributed in the mailing list, which cannot be backfilled. It means two privacy changes instead of one.
