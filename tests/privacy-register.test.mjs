@@ -11,6 +11,38 @@ const readJSON = async (path) => JSON.parse(await read(path));
 const workbookPath = 'docs/privacy/workbook.md';
 const registerPath = 'docs/privacy/register.json';
 const skillPath = '.claude/skills/privacy-changes/SKILL.md';
+const testPath = 'tests/privacy-register.test.mjs';
+
+// A published text never changes and never leaves the register. Marking a version published means adding its pair here, which review sees
+const publishedPins = {
+  '2026-11-draft': '8f12ee233492dded124d378dabdfa0ce6b5dc54a1a8b7026d566a098bf6544d5',
+};
+
+// Every action and what it blocks. An action is closed with status "done", never deleted, and what it blocks never changes unseen.
+// Opening one means adding it here (docs/privacy/workbook.md, "Open an action")
+const actionPins = {
+  'check-subscribers-before-publish': 'publish',
+  'confirm-effective-date': 'publish',
+  'consent-wording-purpose': 'publish',
+  'abuse-protection-records-in-policy': 'publish',
+  'unsubscribe-sentence': 'publish',
+  'plausible-hostname-allow-list': 'measurement',
+  'netlify-script-variable': 'measurement',
+  'record-publication-2026-11-25-draft': null,
+  'counsel-review': null,
+  'name-counsel': null,
+  'rnbd-threshold': null,
+  'delete-old-throttle-records': null,
+  'course-whatsapp-utm-source': null,
+  'name-weekly-tally-owner': null,
+  'consent-proof': null,
+  'name-incident-owner': null,
+  'set-mailbox-check': null,
+  'choose-records-location': null,
+  'yearly-list-reminder': null,
+  'yearly-policy-review': null,
+  'calendar-reminder': null,
+};
 
 const sortKeys = (value) =>
   value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -104,6 +136,52 @@ const yearlyProblems = ({ policyVersions, actions }) =>
     ? actions.filter(({ repeat, status, due }) => repeat === 'yearly' && status === 'open' && due === null).map(({ id }) => `${id}: a yearly duty with no due date`)
     : [];
 
+const pinProblems = ({ policyVersions }) => {
+  const byName = new Map(policyVersions.map((entry) => [entry.version, entry]));
+  return [
+    ...Object.entries(publishedPins).flatMap(([version, hash]) => {
+      const entry = byName.get(version);
+      if (!entry) return [`${version}: a published version left the register`];
+      return [
+        entry.publishedOn === null && `${version}: a published version is marked unpublished`,
+        entry.textSha256 !== hash && `${version}: a published version's hash changed. Never edit it: add a new version`,
+      ].filter(Boolean);
+    }),
+    ...policyVersions
+      .filter(({ version, publishedOn }) => publishedOn !== null && !Object.hasOwn(publishedPins, version))
+      .map(({ version, textSha256 }) => `${version}: marked published but not pinned. Add '${version}': '${textSha256}' to publishedPins in ${testPath}`),
+  ];
+};
+
+const actionPinProblems = ({ actions }) => {
+  const byId = new Map(actions.map((action) => [action.id, action]));
+  return [
+    ...Object.entries(actionPins).flatMap(([id, blocks]) => {
+      if (!byId.has(id)) return [`${id}: an action left the register. Close it with status "done" instead`];
+      return byId.get(id).blocks === blocks ? [] : [`${id}: blocks changed from ${blocks} to ${byId.get(id).blocks}. That needs the owner's yes and the pin updated in ${testPath}`];
+    }),
+    ...actions
+      .filter(({ id }) => !Object.hasOwn(actionPins, id))
+      .map(({ id, blocks }) => `${id}: not pinned. Add '${id}': ${blocks === null ? 'null' : `'${blocks}'`} to actionPins in ${testPath}`),
+  ];
+};
+
+const publishBlockerProblems = ({ policyVersions, actions }) => {
+  const newest = policyVersions.at(-1);
+  return newest?.publishedOn
+    ? actions.filter(({ blocks, status }) => blocks === 'publish' && status === 'open').map(({ id }) => `${id}: blocks publishing and is open, but ${newest.version} is marked published`)
+    : [];
+};
+
+// Until the publication is recorded, the live text still reads as an editable draft, so recording it is an open action of its own
+const recordProblems = ({ policyVersions, actions }) => {
+  const newest = policyVersions.at(-1);
+  const id = `record-publication-${newest?.version}`;
+  return newest && newest.publishedOn === null && !actions.some((action) => action.id === id && action.status === 'open')
+    ? [`${newest.version} is unpublished and has no open "${id}" action (${workbookPath}, case 11)`]
+    : [];
+};
+
 test('the policy version in the code is the newest in the register', async () => {
   const source = await read('apps/landing/src/modules/waitlist/server.ts');
   const inCode = /const policyVersion = '([^']+)'/.exec(source)?.[1];
@@ -150,6 +228,42 @@ test('once the newest version is published, every open yearly duty has a due dat
   const versions = (...dates) => dates.map((publishedOn, index) => ({ version: `probe-${index}`, publishedOn }));
   assert.deepEqual(yearlyProblems({ policyVersions: versions('2026-11-23', null), actions: undated }), []);
   assert.deepEqual(yearlyProblems({ policyVersions: versions('2026-11-23', '2026-12-01'), actions: undated }), ['probe: a yearly duty with no due date']);
+});
+
+test('published versions match their pins, and every published version is pinned', async () => {
+  const register = await readJSON(registerPath);
+  assert.deepEqual(pinProblems(register), []);
+  const [first, ...rest] = register.policyVersions;
+  assert.deepEqual(pinProblems({ policyVersions: rest }), ['2026-11-draft: a published version left the register']);
+  assert.match(pinProblems({ policyVersions: [{ ...first, textSha256: '0'.repeat(64) }, ...rest] }).join(), /hash changed/);
+  const unpinned = { ...first, version: 'probe', publishedOn: '2026-12-01' };
+  assert.match(pinProblems({ policyVersions: [...register.policyVersions, unpinned] }).join(), /probe: marked published but not pinned/);
+});
+
+test('actions are never deleted, and what each blocks is pinned', async () => {
+  const register = await readJSON(registerPath);
+  assert.deepEqual(actionPinProblems(register), []);
+  const withoutBlockers = register.actions.filter(({ blocks }) => blocks !== 'publish');
+  assert.match(actionPinProblems({ actions: withoutBlockers }).join(), /left the register/);
+  const rescoped = register.actions.map((action) => ({ ...action, blocks: null }));
+  assert.match(actionPinProblems({ actions: rescoped }).join(), /blocks changed/);
+});
+
+test('a version is not marked published while a publish blocker is open', async () => {
+  const register = await readJSON(registerPath);
+  assert.deepEqual(publishBlockerProblems(register), []);
+  const policyVersions = register.policyVersions.map((version) => ({ ...version, publishedOn: version.publishedOn ?? '2026-12-01' }));
+  const blocker = { id: 'probe', blocks: 'publish', status: 'open' };
+  assert.equal(publishBlockerProblems({ policyVersions, actions: [blocker] }).length, 1);
+  assert.deepEqual(publishBlockerProblems({ policyVersions, actions: [{ ...blocker, status: 'done' }] }), []);
+});
+
+test('an unpublished newest version has an open action to record its publication', async () => {
+  const register = await readJSON(registerPath);
+  assert.deepEqual(recordProblems(register), []);
+  const unpublished = { policyVersions: [{ version: 'probe', publishedOn: null }], actions: [] };
+  assert.match(recordProblems(unpublished).join(), /no open "record-publication-probe" action/);
+  assert.deepEqual(recordProblems({ ...unpublished, actions: [{ id: 'record-publication-probe', status: 'open' }] }), []);
 });
 
 test('claude finds the workbook', async () => {

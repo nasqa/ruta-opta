@@ -89,6 +89,36 @@
       "workbook": "#what-blocks-publishing-or-measurement"
     },
     {
+      "id": "record-publication-2026-11-25-draft",
+      "title": "After the merge that publishes 2026-11-25-draft: set its publishedOn to the publication day, add its pin to tests/privacy-register.test.mjs, give the yearly duties their due dates, and close this action",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#11-publishing-a-policy-version"
+    },
+    {
+      "id": "name-counsel",
+      "title": "Name the counsel who answers privacy questions, and how to reach them while a request's or an incident's deadline runs",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#who-does-what"
+    },
+    {
+      "id": "choose-records-location",
+      "title": "Choose where the request log and the incident notes are kept, outside this repository, and who can open them",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#records-kept-outside-this-repository"
+    },
+    {
       "id": "counsel-review",
       "title": "Counsel reviews the interim policy: prior authorization for cookieless measurement, the transfer, notice and authorization for anyone already listed, the consent wording, the yearly reminder. The owner ships before counsel",
       "owner": "Santiago",

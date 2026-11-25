@@ -1,6 +1,4 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { test } from 'node:test';
 import en from '../apps/landing/messages/en.json' with { type: 'json' };
 import es from '../apps/landing/messages/es.json' with { type: 'json' };
@@ -62,10 +60,4 @@ test('the policy never writes OPTA without Ruta, and has no placeholder left', (
     assert.doesNotMatch(JSON.stringify(policy), /(?<!Ruta )OPTA/, locale);
     assert.deepEqual(strings(policy).filter((text) => text.includes('[')), [], `${locale}: unfilled placeholders`);
   }
-});
-
-// server.ts imports server-only, which throws under plain Node, so it is read as text
-test('the consent version is the one of this policy text', () => {
-  const server = readFileSync(join(import.meta.dirname, '../apps/landing/src/modules/waitlist/server.ts'), 'utf8');
-  assert.ok(server.includes("const policyVersion = '2026-11-25-draft';"));
 });
