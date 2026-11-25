@@ -24,7 +24,7 @@ const redirects = (await read('netlify.toml'))
   .map((block) => {
     const value = (key) => new RegExp(`^\\s*${key}\\s*=\\s*(.+?)\\s*$`, 'm').exec(block)?.[1];
     const text = (key) => value(key)?.replace(/^"(.*)"$/, '$1');
-    return { from: text('from'), to: text('to'), status: value('status'), force: value('force'), headers: value('headers') };
+    return { from: text('from'), to: text('to'), writtenTo: value('to'), status: value('status'), force: value('force'), headers: value('headers') };
   });
 
 const rewriteFrom = (from) => {
@@ -52,6 +52,11 @@ test('the script path is rewritten to the per-site vendor script', () => {
   const rewrite = rewriteFrom(proxyPaths.script);
   assert.match(rewrite.to, /^https:\/\/plausible\.io\/js\/pa-[\w-]+\.js$/);
   assertFirstPartyRewrite(rewrite);
+});
+
+// TOML has other spellings of a string, and one this file does not unquote would hide its host from the next test
+test('every redirect target is written as a double-quoted string', () => {
+  for (const { from, writtenTo } of redirects) assert.match(writtenTo ?? '', /^"[^"]*"$/, `the target of the redirect from ${from}`);
 });
 
 test('nothing else is sent to the vendor', () => {

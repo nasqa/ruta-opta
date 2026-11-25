@@ -12,6 +12,10 @@ import { pages, pathFor } from './pages';
 const messages = { es, en };
 const eventsByGoal = new Map<string, (typeof events)[EventId]>(Object.values(events).map((event) => [event.goal, event]));
 const activeGoals = [...eventsByGoal.keys()];
+// The footer and the floating button are the site's frame, so their goals are owed by every page, not just by one of them
+const frameGoals = Object.values(events)
+  .filter(({ placement }) => placement === 'footer' || placement === 'floating')
+  .map(({ goal }) => goal);
 
 const localeOf = (address: string) => {
   const prefix = new URL(address).pathname.split('/')[1];
@@ -20,19 +24,20 @@ const localeOf = (address: string) => {
   return locale;
 };
 
-// The WhatsApp text or the e-mail subject an event's link must carry: null for none at all, undefined for no rule
+// The WhatsApp text or the e-mail subject an event's link must carry, or null for none at all
 const writtenFor = (event: (typeof events)[EventId], locale: keyof typeof messages) => {
   const { Prelaunch, SiteShell } = messages[locale];
   const whatsapp = event.channel === 'whatsapp';
   if (event.placement === 'floating') return SiteShell.whatsappFloat.message;
-  if (!('allyRoute' in event)) return whatsapp ? null : undefined;
+  if (!('allyRoute' in event)) return null;
   if (event.allyRoute === 'other') return whatsapp ? Prelaunch.allies.whatsapp.message : Prelaunch.allies.email.subject;
   const route = Prelaunch.allies.routes[event.allyRoute];
   return whatsapp ? route.message : route.subject;
 };
 
 // Whether a goal sits where its catalog entry says, judged by the element as written and the messages, never by page positions.
-// Hero Follow and Tourism Follow share intent and channel, so a swap of those two cannot be told apart this way
+// A page-channel goal is judged only by the section its link leads to. So a swap of Hero Follow and Tourism Follow passes, and so does an
+// extra one of the two on another #lista link, or an extra Hero Ally on another #allies link, if its page does not carry that goal already
 const misplacement = (event: (typeof events)[EventId], { tagName, href }: { tagName: string; href?: string }, locale: keyof typeof messages) => {
   const link = href ?? '';
   const fits = {
@@ -47,7 +52,7 @@ const misplacement = (event: (typeof events)[EventId], { tagName, href }: { tagN
   if (event.channel !== 'whatsapp' && event.channel !== 'email') return undefined;
   const expected = writtenFor(event, locale);
   const written = new URL(link).searchParams.get(event.channel === 'whatsapp' ? 'text' : 'subject');
-  return expected === undefined || written === expected ? undefined : `is on a link that says ${JSON.stringify(written)}, not ${JSON.stringify(expected)}.`;
+  return written === expected ? undefined : `is on a link that says ${JSON.stringify(written)}, not ${JSON.stringify(expected)}.`;
 };
 
 const seal = (locale: keyof typeof messages, now?: number) =>
@@ -167,6 +172,7 @@ for (const enabled of [true, false]) {
           onPage.add(goal);
           seen.add(goal);
         }
+        for (const goal of frameGoals.filter((name) => !onPage.has(name))) problems.push(`${state}: "${goal}" is missing.`);
       });
 
       expect({ problems, unseen: activeGoals.filter((goal) => !seen.has(goal)) }).toEqual({ problems: [], unseen: [] });
