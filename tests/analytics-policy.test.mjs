@@ -65,6 +65,11 @@ const mailtoSpellings = (address) => {
     `mailto:<${address}>`,
     `mailto:Team%20<${address}>`,
     `mailto:%zz,${encoded}`,
+    // Malformed endings: a mail client may still reach the address
+    `mailto:${address}&subject=x`,
+    `mailto:${address}%3Fsubject=x`,
+    `mailto:${address}.`,
+    `mailto:${address}.?subject=x`,
   ];
 };
 
@@ -134,6 +139,8 @@ describe('the destination policy', () => {
       'mailto:ana@example.com?body=privacy@rutaopta.org',
       'mailto:info@rutaopta.org.example.com',
       'mailto:privacy@rutaopta.org.example',
+      'mailto:privacy@rutaopta.organisation',
+      'mailto:info@rutaopta.org-example.com',
       'mailto:%',
       'mailto:%E0%A4%A',
       'mailto:',

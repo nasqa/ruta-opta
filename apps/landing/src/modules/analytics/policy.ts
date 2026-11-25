@@ -1,5 +1,5 @@
 // Which elements must, may or must not carry an event. It knows no vendor: the caller reads the goal through the adapter.
-// For server and test code only (URL.parse). Links are judged by where they lead, so rewriting one cannot slip past
+// For server and test code only (URL.parse). Links are judged by where they lead: the ordinary spellings in its tests, not every possible one
 
 // The addresses the site shows; the tests compare them with the messages
 export const infoEmail = 'info@rutaopta.org';
@@ -28,6 +28,12 @@ const recipientsOf = ({ protocol, pathname, searchParams }: URL) => {
   return [percentDecode(pathname), ...fields].flatMap((list) => list.split(/[,;]/)).map(addressOf);
 };
 
+// A recipient reaches an address when it starts with it and the domain stops there: a malformed ending (&subject, a final dot) still counts
+const domainGoesOn = /^\.?[a-z\d-]/;
+
+const includesAny = (recipients: string[], addresses: string[]) =>
+  recipients.some((recipient) => addresses.some((address) => recipient.startsWith(address) && !domainGoesOn.test(recipient.slice(address.length))));
+
 // Where WhatsApp and Instagram reach Ruta Opta; their other pages are ordinary links
 const isContactPage = ({ hostname, pathname }: URL) => {
   const [first, second] = pathname.toLowerCase().split('/').slice(1);
@@ -43,8 +49,8 @@ export const violation = ({ href = '', inNav, optedOut, goal }: PageElement) => 
   // An address that cannot be parsed leads nowhere: it counts as the home with no section
   const url = URL.parse(href, site) ?? new URL(site);
   const recipients = recipientsOf(url);
-  if (goal && recipients.some((address) => rightsEmails.includes(address))) return 'A rights-request address must carry no event.';
-  if (!goal && (recipients.includes(infoEmail) || isContactPage(url))) return 'A WhatsApp, contact e-mail or Instagram link must carry an event.';
+  if (goal && includesAny(recipients, rightsEmails)) return 'A rights-request address must carry no event.';
+  if (!goal && (includesAny(recipients, [infoEmail]) || isContactPage(url))) return 'A WhatsApp, contact e-mail or Instagram link must carry an event.';
   const toSection = isSectionLink(url);
   if (optedOut && !toSection) return 'Only a link to the sign-up or the ally section may opt out of events.';
   if (toSection && !goal && !optedOut && !inNav) return 'A link to the sign-up or the ally section outside a <nav> must carry an event or opt out.';
