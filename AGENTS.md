@@ -40,6 +40,7 @@ A file is born next to the route that uses it (`app/**/_components`). It moves t
 - Pages are Server Components with semantic HTML. A Mantine component without handlers may render directly from a server page; one with handlers, state, compound parts or client-side `useTranslations` goes in a `'use client'` island (see `apps/landing/AGENTS.md`).
 - Hand-written colors and lengths are lint errors. Font families, durations and z-index also come from the theme, even where lint cannot see them.
 - Names are kebab-case. Lint enforces it.
+- Every call to action takes an event from `modules/analytics` (see `docs/analytics.md`). `e2e/analytics.spec.ts` fails on a conversion link without one.
 
 ## i18n
 
