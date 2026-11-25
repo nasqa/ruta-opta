@@ -77,13 +77,26 @@ test('an English browser at the bare domain still gets the 307 to /en, so / neve
 test('every other path gets exactly what next-intl answers', () => {
   const handleI18nRouting = createMiddleware(routing);
   const request = (path, headers) => new NextRequest(new URL(path, 'http://localhost'), { headers });
-  for (const path of ['/es', '/en', '/privacidad', '/privacy', '/es/privacidad', '/en/privacy', '/fr/anything', '/es/confirmar?t=x']) {
+  for (const path of ['/es', '/en', '/privacidad', '/privacy', '/es/privacidad', '/en/privacy', '/fr/anything', '/es/confirmado']) {
     for (const headers of [{}, english]) {
       const ours = proxy(request(path, headers));
       const theirs = handleI18nRouting(request(path, headers));
       assert.equal(ours.status, theirs.status, path);
       assert.deepEqual([...ours.headers], [...theirs.headers], path);
     }
+  }
+});
+
+// The confirm page's address carries the signed token. The proxy sets the policy because it sees the address the browser asked for: on Netlify,
+// next.config headers are matched after next-intl's rewrite, so a rule for /es/confirmar never applied
+test('only the confirm pages answer with Referrer-Policy: no-referrer', () => {
+  for (const locale of routing.locales) {
+    const path = `/${locale}${routing.pathnames['/confirm'][locale]}?t=x`;
+    assert.equal(visit(path).headers.get('referrer-policy'), 'no-referrer', path);
+  }
+  // A policy for the whole site would drop the Referer the waitlist reads utm_source from
+  for (const path of ['/', '/es', '/en', '/es?utm_source=instagram', '/es/confirmado', '/en/confirmed', '/es/baja', '/es/privacidad']) {
+    assert.equal(visit(path).headers.get('referrer-policy'), null, path);
   }
 });
 

@@ -74,7 +74,8 @@ The confirmation token travels as `?t=`, so a guard that looks for the word "tok
 Cleaning the payload is not enough: the browser also sends headers, and a proxy on our own domain is a same-origin destination, so by default it gets the whole page address in `Referer`.
 
 - **Measured** on a local build before the fix (2026-11-25, Chromium): on `/es/confirmar?t=…` and `/en/confirm?t=…`, 22 to 23 subresource requests per page carried the token, every `async` script among them. React writes async scripts above the page's `no-referrer` meta tag.
-- **Fix (built):** `next.config.ts` answers the two confirm pages with `Referrer-Policy: no-referrer`, so the policy holds from the first byte and stays with the document through soft navigations. Only those pages: the waitlist reads `utm_source` from the `Referer`, so a site-wide policy would break attribution. Guards: an e2e on real requests and a contract test against `routing`. After a deploy, check the header with `curl -I` (the page renders in a Function).
+- **Fix (built):** `src/proxy.ts` answers the two confirm pages with `Referrer-Policy: no-referrer`, so the policy holds from the first byte and stays with the document through soft navigations. The paths come from `routing`. Only those pages: the waitlist reads `utm_source` from the `Referer`, so a site-wide policy would break attribution. Guards: an e2e on real requests and a unit test of the proxy.
+- **Not `headers()` in `next.config.ts`:** it was built that way first and passed locally, but on the deploy preview only `/en/confirm` got the header. `/es/confirmar` did not, nor did the redirect from `/es/confirm`: on Netlify the config headers are matched after next-intl's rewrite (inferred from those three responses). Any header or redirect rule that depends on a localised path must be checked on a deploy preview; `next start` is no proof.
 - **Residual, other pages (best effort).** Netlify passes the browser's headers on through a 200 rewrite (its support staff confirm it for cookies). So the vendor can receive a page's non-secret address in `Referer` (UTM parameters, at most an ad click id) and this domain's first-party cookies, today only `NEXT_LOCALE` (`es` or `en`). The two rewrites try to override `Cookie` and `Referer` with the `headers` map in `netlify.toml`; whether Netlify overrides an incoming header is unverified, so check it on a deploy preview against an echo endpoint, with fake values. If it does not, keep the proxy and say so in `docs/analytics.md`.
 - **Hard rule for later:** before anything that signs people in shares this domain, either the override is proven or the proxy goes. Otherwise its session cookie reaches the analytics vendor.
 
@@ -109,7 +110,7 @@ Not counted, by rule rather than by list:
 | Rendered-HTML crawl of every route in `routing.pathnames` in each locale, plus states driven with the fake adapter (confirm valid, expired, invalid; form after "sent"; closed FAQ panels from the server HTML) | a conversion destination (WhatsApp, contact e-mail, Instagram, `#lista`, `#allies` outside a `<nav>`, the sign-up form once tagged) has neither an event nor `noEvent`; a rights address carries an event; an element carries an unknown goal; a goal appears twice on a page; an active event appears on no page |
 | Request-level spec | see below |
 | Wiring contract | `netlify.toml` rewrites differ from the adapter's paths; the proxy matcher catches them or stops catching real pages |
-| Confirm-page referrer (built) | a request from a confirm page carries the token in `Referer`; the header rule drifts from `routing` or reaches another page |
+| Confirm-page referrer (built) | a request from a confirm page carries the token in `Referer`; a confirm path lacks the header, or another page gets it |
 | No-production e2e | any analytics script or request appears; analytics writes a cookie or web storage. The only cookie allowed is the existing `NEXT_LOCALE` |
 | Docs | the goal table in `docs/analytics.md` differs from the catalog |
 
@@ -159,6 +160,6 @@ The repo rules in `AGENTS.md`; test first; `npm run check`, build, e2e and budge
 
 ## Open
 
-Vendor yes; the per-site `pa-…js` URL; whether `fix/hero-copy-and-note` lands; whether the mailing list shows the source field; counsel's answers; whether Netlify lets a rewrite override `Cookie` and `Referer`; whether the deploy preview answers the confirm pages with the referrer header.
+Vendor yes; the per-site `pa-…js` URL; whether `fix/hero-copy-and-note` lands; whether the mailing list shows the source field; counsel's answers; whether Netlify lets a rewrite override `Cookie` and `Referer`; the referrer header on both confirm pages is checked on every deploy preview that touches the proxy.
 
 **Owner decision pending:** what ships if the vendor yes or the script URL is missing on 2026-11-29. Proposed: a first pull request with only the `utm_source` change and the privacy sentences about the link (no measurement section), so sign-ups from the launch are attributed in the mailing list, which cannot be backfilled. It means two privacy changes instead of one.
