@@ -53,9 +53,6 @@ export const events = {
 
 export type EventId = keyof typeof events;
 
-// Declared but on no element yet: the sign-up form is tagged only after our own vendor script is checked not to submit tagged forms itself
-export const awaitingScriptCheck = ['signup-submit'] as const satisfies readonly EventId[];
-
 // Events a redesign removed. Their names are never reused, so each keeps one meaning in the dashboard's history
 export const retiredGoals: readonly { goal: string; retiredOn: string; reason: string }[] = [];
 

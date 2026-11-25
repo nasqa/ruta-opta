@@ -21,7 +21,7 @@ registerHooks({
 const { violation, infoEmail, instagramUrl, rightsEmails } = await import(join(analytics, 'policy.ts'));
 const { eventProps, noEvent } = await import(join(analytics, 'markup.ts'));
 const { goalOf } = await import(join(analytics, 'plausible.ts'));
-const { events, awaitingScriptCheck } = await import(join(analytics, 'catalog.ts'));
+const { events } = await import(join(analytics, 'catalog.ts'));
 
 const element = ({ href, inNav = false, optedOut = false, goal }) => ({ href, inNav, optedOut, goal });
 
@@ -248,14 +248,6 @@ describe('the markup of an event', () => {
 
   test('noEvent marks the element with the reason, and with no event', () => {
     assert.deepEqual(noEvent('recovery'), { 'data-no-event': 'recovery' });
-  });
-
-  test('every event awaiting the script check is in the catalog', () => {
-    assert.deepEqual(
-      awaitingScriptCheck.filter((id) => !Object.hasOwn(events, id)),
-      [],
-    );
-    assert.deepEqual([...awaitingScriptCheck], ['signup-submit']);
   });
 });
 

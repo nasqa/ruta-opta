@@ -8,7 +8,10 @@ import { initialWaitlistState } from '@/modules/waitlist';
 import { joinWaitlist } from '@/modules/waitlist/actions';
 import styles from './waitlist-form.module.css';
 
-export const WaitlistForm = () => {
+// Attributes the page hands down to spread on the form; what they mean is the page's business
+type Tracking = { className?: string; [key: `data-${string}`]: string | undefined };
+
+export const WaitlistForm = ({ tracking }: { tracking: Tracking }) => {
   const t = useTranslations('Waitlist');
   const locale = useLocale();
   const [state, action, pending] = useActionState(joinWaitlist, initialWaitlistState);
@@ -27,7 +30,7 @@ export const WaitlistForm = () => {
   const errors = state.status === 'invalid' ? state.errors : {};
 
   return (
-    <form action={action} noValidate className={styles.form}>
+    <form {...tracking} action={action} noValidate className={[styles.form, tracking.className].filter(Boolean).join(' ')}>
       <TextInput
         name="name"
         label={t('name.label')}

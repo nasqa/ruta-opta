@@ -78,6 +78,10 @@ Use `<Button component="a" href={getPathname({ locale, href })}>` instead (strin
   - Token hex in a `.ts` file: `import resolved from '@nasqa/trama-theme-opta/tokens.resolved.json' with { type: 'json' }` works in node:test (with `tests/support/next-resolution.mjs`), `tsc`, ESLint, the Turbopack build and Playwright specs. Keys are flat: `resolved.light['color.action.solid'].hex`, `['ref.arc.1'].hex`; font stacks are nested in `tokens.json`: `font.family.display.$value`.
   - Playwright's default headless shell (`chromium.launch()`) ignores `--enable-features=WebContentsForceDark`; a CSS `filter: invert(1) hue-rotate(180deg)` that re-inverts `img` is the usable proxy for a full-inversion client.
 
+## Playwright specs (VERIFIED in this repo 2026-11-25)
+- With `javaScriptEnabled: false`, Chromium parses `<noscript>` content into real elements (probe: 1 anchor with JS off, 0 with it on), so a DOM walk there reads the fallbacks.
+- A hook or test refuses a default value in its fixture destructuring (`({ baseURL = '' })` fails to load with "unknown parameter"); resolve it in the body.
+
 ## Netlify build vs runtime environment (VERIFIED 2026-11-24)
 - **Fact:** `CONTEXT`, `DEPLOY_URL` and `DEPLOY_PRIME_URL` exist only while building. Netlify Functions (every server action and dynamic route of the OpenNext adapter) see only `URL`, `SITE_NAME` and `SITE_ID` at runtime (docs.netlify.com/build/functions/environment-variables, "Netlify read-only variables"). A value that depends on the deploy context must be chosen at build and inlined.
 - **Pattern here:** `next.config.ts` picks the site address (`DEPLOY_PRIME_URL` for `deploy-preview`/`branch-deploy`, else `URL`) and sets `env: { SITE_URL }`; Next's `env` config is a define replacement in every bundle, server included (`next/dist/lib/static-env.js` `getNextConfigEnv` skips null/undefined values, so a local build leaves `process.env.SITE_URL` to the runtime). Checked on a build with a fake preview env: server chunks hold `new URL("https://deploy-preview-99--…")`. Only `process.env.SITE_URL` member reads are replaced, never destructuring.

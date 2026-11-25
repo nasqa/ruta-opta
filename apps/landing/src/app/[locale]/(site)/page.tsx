@@ -6,6 +6,7 @@ import { alternates } from '@/i18n/alternates';
 import { localesFor } from '@/i18n/coverage';
 import { getPathname } from '@/i18n/navigation';
 import { siteUrl } from '@/shared/env';
+import { eventProps } from '@/modules/analytics/server';
 import { SiteHeader } from '@/modules/site-shell';
 import { Allies } from './_components/home/allies';
 import { Faq } from './_components/home/faq';
@@ -101,7 +102,7 @@ const PrelaunchPage = () => {
             <div className={styles.formCard}>
               {/* The island gets only the namespace it uses */}
               <NextIntlClientProvider messages={{ Waitlist }}>
-                <WaitlistForm />
+                <WaitlistForm tracking={eventProps('signup-submit')} />
               </NextIntlClientProvider>
             </div>
           </div>

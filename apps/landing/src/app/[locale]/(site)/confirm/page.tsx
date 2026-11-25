@@ -5,6 +5,7 @@ import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { localesFor } from '@/i18n/coverage';
 import { getPathname } from '@/i18n/navigation';
+import { noEvent } from '@/modules/analytics/server';
 import { SceneBand, SceneCard, SiteHeader } from '@/modules/site-shell';
 import { readConfirmation } from '@/modules/waitlist/server';
 import confirmStage from './_art/confirm-stage.webp';
@@ -50,7 +51,7 @@ const ConfirmPage = async ({ searchParams }: PageProps<'/[locale]/confirm'>) => 
           <SceneCard>
             <h1 className="t-display-md">{title}</h1>
             <p className="t-body-lg">{t(`${result.status}.text`)}</p>
-            <Button component="a" href={`${getPathname({ locale, href: '/' })}#lista`} size="lg">
+            <Button component="a" href={`${getPathname({ locale, href: '/' })}#lista`} size="lg" {...noEvent('recovery')}>
               {t('again')}
             </Button>
           </SceneCard>
@@ -74,7 +75,7 @@ const ConfirmPage = async ({ searchParams }: PageProps<'/[locale]/confirm'>) => 
           </div>
           {/* The island gets only the namespace it uses */}
           <NextIntlClientProvider messages={{ Confirm }}>
-            <ConfirmForm token={token} />
+            <ConfirmForm token={token} againTracking={noEvent('recovery')} />
           </NextIntlClientProvider>
         </SceneCard>
       </main>

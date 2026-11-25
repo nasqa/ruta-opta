@@ -1,5 +1,6 @@
 import { Badge } from '@mantine/core';
 import { useTranslations } from 'next-intl';
+import { eventProps } from '@/modules/analytics/server';
 import { ArtImage } from '@/modules/site-shell';
 import tourismArt from '../../_art/home-tourism.webp';
 import layout from './layout.module.css';
@@ -38,7 +39,7 @@ export const Tourism = () => {
                 ))}
               </ul>
             </div>
-            <a className={`${styles.link} t-body-md`} href="#lista">
+            <a {...eventProps('tourism-follow', `${styles.link} t-body-md`)} href="#lista">
               {t('tourismLink')}
             </a>
           </div>

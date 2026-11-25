@@ -13,8 +13,11 @@ const final = new Set(['blocked', 'expired', 'invalid']);
 // Signing up again is the way out of these; a blocked address would only be blocked again, and its text gives the privacy address
 const signUpAgain = new Set(['expired', 'invalid']);
 
+// Attributes the page hands down to spread on the way back to the sign-up; what they mean is the page's business
+type Tracking = { className?: string; [key: `data-${string}`]: string | undefined };
+
 // A confirmed subscription redirects to /confirmed; any other answer stays here and says why
-export const ConfirmForm = ({ token }: { token: string }) => {
+export const ConfirmForm = ({ token, againTracking }: { token: string; againTracking: Tracking }) => {
   const t = useTranslations('Confirm');
   const locale = useLocale();
   const [state, action, pending] = useActionState(confirmWaitlist, initialConfirmState);
@@ -37,7 +40,7 @@ export const ConfirmForm = ({ token }: { token: string }) => {
       )}
       {/* A plain anchor: a next-intl Link would prefetch the home's JS */}
       {signUpAgain.has(state.status) && (
-        <Button component="a" href={`${getPathname({ locale, href: '/' })}#lista`} size="lg">
+        <Button component="a" href={`${getPathname({ locale, href: '/' })}#lista`} size="lg" {...againTracking}>
           {t('again')}
         </Button>
       )}
