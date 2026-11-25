@@ -61,6 +61,14 @@ test('the snippet is the vendor stub and an init call, with an endpoint only whe
   assert.equal(load(initSnippet({ host, endpoint: proxyPaths.event })).endpoint, '/o/e');
 });
 
+// What the per-site script turns on from the dashboard, init overrides: a toggle there must not widen what is sent
+test('both shipped snippets turn off the automatic link, download and form events', () => {
+  for (const [variant, init] of Object.entries(shipped)) {
+    const options = load(init);
+    for (const name of ['outboundLinks', 'fileDownloads', 'formSubmissions']) assert.equal(options[name], false, `${name}, ${variant}`);
+  }
+});
+
 for (const [variant, init] of Object.entries(shipped)) {
   describe(`the sanitiser, sending ${variant}`, () => {
     // Every payload goes through here: whatever the case, nothing that comes out may hold the token.

@@ -25,9 +25,10 @@ const stub =
 const queryNames = ['ref', 'source', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
 
 // Source text, not fn.toString(): what runs in the page is what the tests evaluate, whatever the compiler does.
+// The three false options override the per-site script's built-in config, so a dashboard toggle cannot widen what is sent
 // transformRequest fails closed: an event it cannot clean is dropped. Strict mode makes a write that would not stick throw
 export const initSnippet = ({ host, endpoint }: { host: string; endpoint?: string }) => `${stub}
-plausible.init({${endpoint ? `endpoint:${JSON.stringify(endpoint)},` : ''}transformRequest:function(payload){
+plausible.init({${endpoint ? `endpoint:${JSON.stringify(endpoint)},` : ''}outboundLinks:false,fileDownloads:false,formSubmissions:false,transformRequest:function(payload){
 "use strict";
 try{
 if(location.hostname!==${JSON.stringify(host)})return null;
