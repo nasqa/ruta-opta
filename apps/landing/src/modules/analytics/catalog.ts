@@ -11,6 +11,8 @@ export const questions = {
   funnel: { ask: 'Where does the funnel leak: visit, call to action, sign-up, confirmation?', action: 'Which step of the page or the sign-up to fix first' },
 } as const;
 
+// One route per kind of ally, each named by the verb the ally performs. The WhatsApp message and the email subject arrive already
+// written for that kind, so a lead reaches the inbox qualified without the site collecting anything from it
 export const allyRoutes = ['train', 'link', 'validate', 'drive', 'accompany', 'share'] as const;
 export type AllyRoute = (typeof allyRoutes)[number];
 

@@ -6,8 +6,6 @@ import { CopyEmail } from './copy-email';
 import layout from './layout.module.css';
 import styles from './allies.module.css';
 
-// One route per kind of ally, each named by the verb the ally performs. The WhatsApp message and the email subject arrive already
-// written for that kind, so a lead reaches the inbox qualified without the site collecting anything from it
 export const Allies = () => {
   const t = useTranslations('Prelaunch');
   const address = t('allies.email.address');

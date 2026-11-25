@@ -2,7 +2,7 @@ import { expect, type Page, test } from '@playwright/test';
 import en from '../messages/en.json';
 import es from '../messages/es.json';
 import { routing } from '../src/i18n/routing';
-import { events } from '../src/modules/analytics/catalog';
+import { type EventId, events } from '../src/modules/analytics/catalog';
 import { goalOf } from '../src/modules/analytics/plausible';
 import { violation } from '../src/modules/analytics/policy';
 import { confirmTtlMs, sealToken } from '../src/modules/waitlist/token';
@@ -10,7 +10,45 @@ import { testTokenKey } from './fixtures';
 import { pages, pathFor } from './pages';
 
 const messages = { es, en };
-const activeGoals: string[] = Object.values(events).map(({ goal }) => goal);
+const eventsByGoal = new Map<string, (typeof events)[EventId]>(Object.values(events).map((event) => [event.goal, event]));
+const activeGoals = [...eventsByGoal.keys()];
+
+const localeOf = (address: string) => {
+  const prefix = new URL(address).pathname.split('/')[1];
+  const locale = routing.locales.find((candidate) => candidate === prefix);
+  if (!locale) throw new Error(`No locale in ${address}`);
+  return locale;
+};
+
+// The WhatsApp text or the e-mail subject an event's link must carry: null for none at all, undefined for no rule
+const writtenFor = (event: (typeof events)[EventId], locale: keyof typeof messages) => {
+  const { Prelaunch, SiteShell } = messages[locale];
+  const whatsapp = event.channel === 'whatsapp';
+  if (event.placement === 'floating') return SiteShell.whatsappFloat.message;
+  if (!('allyRoute' in event)) return whatsapp ? null : undefined;
+  if (event.allyRoute === 'other') return whatsapp ? Prelaunch.allies.whatsapp.message : Prelaunch.allies.email.subject;
+  const route = Prelaunch.allies.routes[event.allyRoute];
+  return whatsapp ? route.message : route.subject;
+};
+
+// Whether a goal sits where its catalog entry says, judged by the element as written and the messages, never by page positions.
+// Hero Follow and Tourism Follow share intent and channel, so a swap of those two cannot be told apart this way
+const misplacement = (event: (typeof events)[EventId], { tagName, href }: { tagName: string; href?: string }, locale: keyof typeof messages) => {
+  const link = href ?? '';
+  const fits = {
+    page: () => new URL(link, 'https://page.invalid').hash === (event.intent === 'follow' ? '#lista' : '#allies'),
+    whatsapp: () => link.startsWith('https://wa.me/'),
+    email: () => link.startsWith('mailto:'),
+    instagram: () => link === messages[locale].SiteShell.footer.instagramUrl,
+    form: () => tagName === 'FORM',
+    copy: () => tagName === 'BUTTON' && href === undefined,
+  };
+  if (!fits[event.channel]()) return `is on the wrong element for intent "${event.intent}", channel "${event.channel}".`;
+  if (event.channel !== 'whatsapp' && event.channel !== 'email') return undefined;
+  const expected = writtenFor(event, locale);
+  const written = new URL(link).searchParams.get(event.channel === 'whatsapp' ? 'text' : 'subject');
+  return expected === undefined || written === expected ? undefined : `is on a link that says ${JSON.stringify(written)}, not ${JSON.stringify(expected)}.`;
+};
 
 const seal = (locale: keyof typeof messages, now?: number) =>
   sealToken(
@@ -67,6 +105,8 @@ const walk = async (page: Page, javaScript: boolean, visit: (state: string) => P
     await expect(greeting).toBeVisible();
     await page.waitForTimeout(Math.max(0, expiresAt - Date.now() + 500));
     await page.getByRole('button', { name: Confirm.submit }).click();
+    // Next's route announcer is an alert too, so the form's is picked by its text
+    await expect(page.getByRole('alert').filter({ hasText: Confirm.expired.text })).toBeVisible();
     await expect(page.getByRole('link', { name: Confirm.again })).toBeVisible();
     await visit(`${confirm} (expired after opening)`);
   }
@@ -77,6 +117,7 @@ const elementsOf = (page: Page) =>
   page.locator('*').evaluateAll((elements) =>
     elements.map((element) => ({
       html: (element.cloneNode(false) as Element).outerHTML,
+      tagName: element.tagName,
       isLink: element.matches('a[href]'),
       href: element.getAttribute('href') ?? undefined,
       inNav: element.closest('nav') !== null,
@@ -105,12 +146,13 @@ for (const enabled of [true, false]) {
   test.describe(`with JavaScript ${enabled ? 'on' : 'off'}`, () => {
     test.use({ javaScriptEnabled: enabled });
 
-    test('every rendered page follows the event policy, and the walk sees every active goal', async ({ page }) => {
+    test('every rendered page follows the event policy, and each active goal is seen where it belongs', async ({ page }) => {
       const problems: string[] = [];
       const seen = new Set<string>();
 
       await walk(page, enabled, async (state) => {
         const onPage = new Set<string>();
+        const locale = localeOf(page.url());
         for (const { html, isLink, attributes, ...element } of await elementsOf(page)) {
           const goal = goalOf(attributes);
           if (!isLink && goal === undefined) continue;
@@ -118,7 +160,9 @@ for (const enabled of [true, false]) {
           const reason = violation({ ...element, goal });
           if (reason) report(reason);
           if (goal === undefined) continue;
-          if (!activeGoals.includes(goal)) report(`"${goal}" is not an active goal.`);
+          const event = eventsByGoal.get(goal);
+          const misplaced = event ? misplacement(event, element, locale) : 'is not an active goal.';
+          if (misplaced) report(`"${goal}" ${misplaced}`);
           if (onPage.has(goal)) report(`"${goal}" is on the page twice.`);
           onPage.add(goal);
           seen.add(goal);
