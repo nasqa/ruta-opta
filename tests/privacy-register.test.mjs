@@ -173,18 +173,20 @@ const actionPinProblems = ({ actions }) => {
   ];
 };
 
-// A publish blocker names the publication it holds back: a registered version, or "next" for one with no entry yet
+// A publish blocker names the publication it holds back: a registered version, or "after:<label>" for the first version after <label>, valid
+// only while <label> is the newest entry and published, so any newer entry forces it to be re-pointed
 const gatesProblems = ({ policyVersions, actions }) => {
   const published = new Set(policyVersions.filter(({ publishedOn }) => publishedOn !== null).map(({ version }) => version));
   const labels = new Set(policyVersions.map(({ version }) => version));
-  const newestPublished = Boolean(policyVersions.at(-1)?.publishedOn);
+  const newest = policyVersions.at(-1);
   return actions.flatMap(({ id, blocks, gates = null, status }) => {
     if (blocks !== 'publish') return gates === null ? [] : [`${id}: only a publish blocker has gates`];
-    if (gates === 'next')
-      return status === 'open' && !newestPublished
-        ? [`${id}: gates "next", but ${policyVersions.at(-1).version} is not published yet. Point it at the version it holds back`]
-        : [];
-    if (!labels.has(gates)) return [`${id}: gates must be "next" or a registered version, not ${gates}`];
+    const after = /^after:(.+)$/.exec(gates ?? '')?.[1];
+    if (after !== undefined)
+      return after === newest?.version && newest.publishedOn
+        ? []
+        : [`${id}: gates "${gates}", but ${after} is not the newest published entry. Point it at ${newest?.version}, the version it holds back`];
+    if (!labels.has(gates)) return [`${id}: gates must be a registered version or "after:<the newest entry, published>", not ${gates}`];
     return status === 'open' && published.has(gates) ? [`${id}: open, but the version it gates, ${gates}, is marked published`] : [];
   });
 };
@@ -264,11 +266,11 @@ test('actions are never deleted, and what each blocks is pinned', async () => {
   assert.match(actionPinProblems({ actions: withoutBlockers }).join(), /left the register/);
   const rescoped = register.actions.map((action) => ({ ...action, blocks: null, gates: null }));
   assert.match(actionPinProblems({ actions: rescoped }).join(), /what it blocks changed/);
-  const repointed = register.actions.map((action) => (action.blocks === 'publish' ? { ...action, gates: 'next' } : action));
-  assert.match(actionPinProblems({ actions: repointed }).join(), /changed from publish:.+ to publish:next/);
+  const repointed = register.actions.map((action) => (action.blocks === 'publish' ? { ...action, gates: 'after:2026-11-draft' } : action));
+  assert.match(actionPinProblems({ actions: repointed }).join(), /changed from publish:.+ to publish:after:2026-11-draft/);
 });
 
-test('a publish blocker gates a version: never a published one, and "next" only after the newest is published', async () => {
+test('a publish blocker gates a version: never a published one, and "after:<label>" only while that label is the newest, published', async () => {
   const register = await readJSON(registerPath);
   assert.deepEqual(gatesProblems(register), []);
   const policyVersions = [
@@ -278,14 +280,20 @@ test('a publish blocker gates a version: never a published one, and "next" only 
   const blocker = { id: 'probe', blocks: 'publish', status: 'open' };
   const check = (actions, versions = policyVersions) => gatesProblems({ policyVersions: versions, actions }).join();
   assert.equal(check([{ ...blocker, gates: 'new' }]), '');
-  assert.match(check([blocker]), /gates must be "next" or a registered version/);
+  assert.match(check([blocker]), /gates must be a registered version or "after:/);
   assert.match(check([{ ...blocker, gates: 'unknown' }]), /gates must be/);
   assert.match(check([{ id: 'probe', blocks: null, gates: 'new' }]), /only a publish blocker has gates/);
   assert.match(check([{ ...blocker, gates: 'old' }]), /open, but the version it gates, old, is marked published/);
   assert.equal(check([{ ...blocker, gates: 'old', status: 'done' }]), '');
-  assert.match(check([{ ...blocker, gates: 'next' }]), /gates "next", but new is not published yet/);
-  assert.equal(check([{ ...blocker, gates: 'next' }], [policyVersions[0]]), '');
+  // Before any newer entry, "after:old" is the way to hold back the next version
+  assert.equal(check([{ ...blocker, gates: 'after:old' }], [policyVersions[0]]), '');
+  assert.match(check([{ ...blocker, gates: 'after:new' }]), /after:new", but new is not the newest published entry/);
+  // A newer entry, unpublished: the blocker must be re-pointed
+  assert.match(check([{ ...blocker, gates: 'after:old' }]), /after:old", but old is not the newest published entry. Point it at new/);
+  // Review step 7: the newer entry marked published instead of re-pointing; step 8: it arrives already published
   const allPublished = policyVersions.map((version) => ({ ...version, publishedOn: version.publishedOn ?? '2026-12-01' }));
+  assert.match(check([{ ...blocker, gates: 'after:old' }], allPublished), /Point it at new/);
+  assert.match(check([{ ...blocker, gates: 'after:old', status: 'done' }], allPublished), /Point it at new/);
   assert.match(check([{ ...blocker, gates: 'new' }], allPublished), /new, is marked published/);
 });
 
