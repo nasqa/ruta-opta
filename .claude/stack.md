@@ -81,6 +81,10 @@ Use `<Button component="a" href={getPathname({ locale, href })}>` instead (strin
 ## Playwright specs (VERIFIED in this repo 2026-11-25)
 - With `javaScriptEnabled: false`, Chromium parses `<noscript>` content into real elements (probe: 1 anchor with JS off, 0 with it on), so a DOM walk there reads the fallbacks.
 - A hook or test refuses a default value in its fixture destructuring (`({ baseURL = '' })` fails to load with "unknown parameter"); resolve it in the body.
+- A fixture's second parameter named `use` trips `react-hooks/rules-of-hooks` (React 19's `use`); name it `provide`.
+- Playwright 1.65.1 never sees a `keepalive` fetch sent while a document unloads (pagehide, visibilitychange on a full navigation): no route, no `request` event, not even a page CDP session's `Network` events. It goes straight to the network, so `route.abort()` cannot stop it; only `--host-resolver-rules` can. Chromium's NetLog (`--log-net-log=<file> --net-log-capture-mode=Everything`, read after `browser.close()`) records it: `URL_REQUEST_START_JOB` for every address, `SOCKET_BYTES_SENT` (base64) for the bytes on the wire.
+- `--host-resolver-rules=MAP host 127.0.0.1:3100,MAP * ~NOTFOUND,EXCLUDE localhost` works in the headless shell, and `response.serverAddr()` reports the mapped address even when a context route `continue()`s the request. A `.app` name cannot be mapped to plain HTTP: the TLD is HSTS-preloaded, so Chromium upgrades it and fails with `net::ERR_SSL_PROTOCOL_ERROR`.
+- React 19's hydration mismatch in a production build reaches Playwright's `pageerror` as "Minified React error #418".
 
 ## Netlify build vs runtime environment (VERIFIED 2026-11-24)
 - **Fact:** `CONTEXT`, `DEPLOY_URL` and `DEPLOY_PRIME_URL` exist only while building. Netlify Functions (every server action and dynamic route of the OpenNext adapter) see only `URL`, `SITE_NAME` and `SITE_ID` at runtime (docs.netlify.com/build/functions/environment-variables, "Netlify read-only variables"). A value that depends on the deploy context must be chosen at build and inlined.
