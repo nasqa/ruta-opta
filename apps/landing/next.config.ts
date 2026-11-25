@@ -17,11 +17,17 @@ if (context && context !== 'production' && context !== 'dev' && live) {
 const preview = context === 'deploy-preview' || context === 'branch-deploy';
 const siteUrl = (preview && process.env.DEPLOY_PRIME_URL) || process.env.URL;
 
+// The confirm page's address carries the signed token. React writes async scripts above the page's referrer meta tag, so the policy also
+// arrives as a response header: without it those requests send the whole address, which a proxy on our own domain would pass on.
+// Only these pages: the waitlist reads utm_source from the Referer. A literal, checked against routing in tests/config.test.mjs
+const confirmPaths = ['/es/confirmar', '/en/confirm'];
+
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
   // Next skips an undefined value, so src/shared/env.ts then reads the runtime environment and falls back to localhost
   env: { SITE_URL: siteUrl },
+  headers: () => Promise.resolve(confirmPaths.map((source) => ({ source, headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }] }))),
   experimental: { agentFeedback: false },
 };
 

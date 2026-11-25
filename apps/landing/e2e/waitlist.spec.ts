@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, type Page, test } from '@playwright/test';
+import { expect, type Page, type Request, test } from '@playwright/test';
 import en from '../messages/en.json';
 import es from '../messages/es.json';
 import { confirmTtlMs, sealToken } from '../src/modules/waitlist/token';
@@ -180,6 +180,27 @@ test.describe('the confirm page on /es/confirmar', () => {
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
     // The token is in the URL: no Referer header may carry it to another site
     await expect(page.locator('meta[name="referrer"]')).toHaveAttribute('content', 'no-referrer');
+  });
+
+  // A proxy on our own domain passes the browser's headers on to its vendor, so no request of this page may carry the token, the first ones
+  // included. React writes async scripts above the page's referrer meta tag, so the policy has to arrive with the response
+  test('no request from the confirm page carries the token in its Referer', async ({ page }) => {
+    for (const [locale, path] of [
+      ['es', '/es/confirmar'],
+      ['en', '/en/confirm'],
+    ] as const) {
+      const token = seal(undefined, locale);
+      const sent: Request[] = [];
+      const record = (request: Request) => sent.push(request);
+      page.on('request', record);
+      await page.goto(`${path}?t=${token}`, { waitUntil: 'networkidle' });
+      page.off('request', record);
+
+      const subresources = sent.filter((request) => request.resourceType() !== 'document');
+      expect(subresources.length, path).toBeGreaterThan(0);
+      const referers = await Promise.all(subresources.map(async (request) => (await request.allHeaders()).referer ?? ''));
+      expect(referers.filter((referer) => referer.includes(token)).length, `${path}: requests carrying the token`).toBe(0);
+    }
   });
 });
 

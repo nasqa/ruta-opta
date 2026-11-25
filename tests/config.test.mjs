@@ -58,3 +58,13 @@ test('next.config.ts inlines the address of the deploy context as SITE_URL', asy
   assert.equal(await siteUrl({ CONTEXT: undefined, WAITLIST_ADAPTER: undefined }), urls.URL);
   assert.equal(await siteUrl({ CONTEXT: undefined, WAITLIST_ADAPTER: undefined, URL: undefined, DEPLOY_PRIME_URL: undefined }), undefined);
 });
+
+// The confirm page's address carries the token. A policy for the whole site would drop the Referer the waitlist reads utm_source from
+test('only the confirm pages answer with Referrer-Policy: no-referrer, one rule per locale', async () => {
+  const { routing } = await import(join(import.meta.dirname, '../apps/landing/src/i18n/routing.ts'));
+  const rules = await (await load()).default.headers();
+  assert.deepEqual(
+    rules,
+    routing.locales.map((locale) => ({ source: `/${locale}${routing.pathnames['/confirm'][locale]}`, headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }] })),
+  );
+});
