@@ -19,7 +19,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
 };
 
 // The keys of Privacy.sections, which are also the section ids the contents link to
-const sections = ['controller', 'data', 'purpose', 'contact', 'processor', 'rights'] as const;
+const sections = ['controller', 'data', 'purpose', 'measurement', 'contact', 'processor', 'rights', 'requests'] as const;
 
 // The privacy address first, then the English one, in every locale
 const contacts = ['Es', 'En'] as const;
@@ -61,7 +61,13 @@ const PrivacyPage = () => {
               {sections.map((section) => (
                 <section key={section} id={section} className={styles.section}>
                   <h2 className="t-heading-md">{t(`sections.${section}.title`)}</h2>
-                  <p className="t-body-md">{t(`sections.${section}.text`)}</p>
+                  {t(`sections.${section}.text`)
+                    .split('\n\n')
+                    .map((paragraph) => (
+                      <p key={paragraph} className="t-body-md">
+                        {paragraph}
+                      </p>
+                    ))}
                 </section>
               ))}
               <div className={styles.contact}>

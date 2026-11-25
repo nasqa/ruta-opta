@@ -19,8 +19,8 @@ import { deriveKey, parseTokenKeys, type TokenKeys } from './token';
 import { type ConfirmResult, createWaitlist, type ReadResult, type WaitlistDeps } from './use-cases';
 
 // The privacy policy version a subscriber consents to; the token carries it to Zoho. Bump it whenever the policy's fields or purposes change
-// (2026-11-24: the origin tag of a tracked link)
-const policyVersion = '2026-11-24-draft';
+// (2026-11-25: the visit measurement and how to exercise your rights)
+const policyVersion = '2026-11-25-draft';
 
 type Waitlist = ReturnType<typeof createWaitlist>;
 // Reads a variable through its parser; a blank variable takes the fallback. A missing or unparsable value comes back undefined and its name is reported
