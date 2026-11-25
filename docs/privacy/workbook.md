@@ -35,7 +35,7 @@ Cases 1 to 4 and 7 update this table. Write what a source shows; otherwise write
 | A message by WhatsApp or to info@rutaopta.org: name, organization, message | WhatsApp (Meta). The provider of the rutaopta.org mailboxes: unrecorded | Reply and talk about the collaboration | Whoever reads those inboxes: unrecorded | Not stated in the policy. Deleted on request |
 
 - **Sources:** the policy (`Privacy` in `apps/landing/messages/es.json`), ADR 0003 (`docs/decisions/0003-waitlist-form-posts-to-zoho-campaigns.md`), and `apps/landing/src/modules/waitlist` (`use-cases.ts`, `throttle.ts`, `confirm-guard.ts`, `store.ts`). Our code logs event names and codes, never a name or an address (ADR 0003, "Deadlines"; `use-cases.ts`).
-- **Proof of authorization.** The consent time travels in the confirm link but never reaches Zoho, which receives the name, the address and the source. So the record of when a person authorized is Zoho's own date on the contact: **unverified**. Decree 1074 asks to keep proof of the authorization (art. 2.2.2.25.2.5).
+- **Proof of authorization.** The consent time travels in the confirm link but never reaches Zoho, which receives the name, the address and the source. So the record of when a person authorized is Zoho's own date on the contact: **unverified**. Decree 1074 asks to keep proof of the authorization (art. 2.2.2.25.2.5). Open: `consent-proof`. A person listed under `2026-11-draft` accepted one of its three texts: match them by the date they signed up (its `summary` in the register).
 - **Already open:** the policy does not mention the protection codes (`abuse-protection-records-in-policy`), and nothing deletes them (`delete-old-throttle-records`).
 - **Link tags are permanent.** The `o=` value is the link's `utm_source` and cannot be changed after the sign-up. Agree on values before sharing links (`course-whatsapp-utm-source`; `docs/analytics.md`, "Tagged links").
 - **Providers' own pages, read 2026-11-25.** [Plausible](https://plausible.io/privacy), updated November 2026: company in Tartu, Estonia; visitor data processed entirely in the EU; its subprocessors for it are Hetzner (Germany), Bunny (Slovenia) and UpCloud (Finland). [Netlify](https://www.netlify.com/privacy/), updated 4 November 2026: Netlify, Inc.; transfers to the United States under its section on the Data Privacy Framework. That page covers Netlify as controller; its processing for customers falls under its Data Processing Agreement, **not read**. Zoho: no source records the country where this account's data is kept.
@@ -121,6 +121,8 @@ Decree 1074, art. 2.2.2.25.3.1 also says substantial changes to the policy are t
 2. **You:** while the newest version in the register is unpublished, its text may still change: once the owner approves the exact text, put the hash the test prints in its `textSha256`. Once a version is published, **never** edit its hash: add a new version.
 3. Then [11](#11-publishing-a-policy-version).
 
+**One label, one text.** Once a version is published, its label never carries another text. `2026-11-draft` did: three texts were merged under it on 2026-11-23 and 2026-11-24 (its `summary` in the register names them). From `2026-11-25-draft` on, the fingerprint test enforces this.
+
 Already open: the rights text says every e-mail has an unsubscribe link, and the confirmation e-mail has none (`unsubscribe-sentence`). Decree 1074, art. 2.2.2.25.2.6 asks for free, easy ways to revoke or ask for deletion.
 
 ## 6. The controller, its contact data or who attends requests
@@ -162,7 +164,7 @@ Already open: `delete-old-throttle-records`, because nothing deletes the sign-up
 
 **Never** put the person's name, address or message in this repository, an issue, a pull request or a commit. The record goes in the request log, [outside the repository](#records-kept-outside-this-repository).
 
-What people may ask, Law 1581, art. 8: to know, update and rectify their data; proof of the authorization; what use was made of it; to complain to the SIC; to revoke and/or ask for deletion when principles or guarantees are not respected, once the SIC has so determined; free access. What the policy promises them is in `Privacy.sections.rights` and `.requests`.
+What people may ask, Law 1581, art. 8: to know, update and rectify their data; proof of the authorization; what use was made of it; to complain to the SIC; to revoke and/or ask for deletion when principles or guarantees are not respected, once the SIC has so determined; free access. What the policy promises them is in `Privacy.sections.rights` and `.requests`. For someone listed under `2026-11-draft`, the text they accepted depends on the date they signed up ([What we hold and where](#what-we-hold-and-where)).
 
 1. **Ruta Opta team:** the day it arrives, open a record in the request log and pass the message to the legal representative. For a request that reached info@rutaopta.org or WhatsApp, the clock started the day it arrived there.
 2. **Legal representative:** decide whether it is a query (what we hold and how we use it) or a claim (correct, update, delete, withdraw the authorization, or a breach). Write its deadlines from the table below into the record.
@@ -192,7 +194,7 @@ Every legal deadline in this workbook, the incident one included:
 
 What counts, SIC, Circular Única, Título V: a breach of security codes, or the loss, theft or unauthorized access to a database. Treat as one, for example, a leaked key, someone else in the Zoho or Netlify account, or personal data published here. It is reported within 15 business days of being detected and told to the person or area that handles it, whether or not the controller must register in the RNBD.
 
-**Deadline:** the last row of [the deadlines table](#9-a-person-writes-about-their-data). **Who handles incidents is not decided yet.** Tell the owner. "Handler" below is whoever he names.
+**Deadline:** the last row of [the deadlines table](#9-a-person-writes-about-their-data). **Who handles incidents is not decided yet** (`name-incident-owner`). Tell the owner. "Handler" below is whoever he names.
 
 1. **Anyone:** tell the owner at once, and write down when it was detected and by which role.
 2. **Handler:** contain it: revoke the access, rotate the leaked key, take down what was exposed. The waitlist and Zoho keys are Netlify variables; ADR 0003, "Token", says how the token key rotates without breaking links.
@@ -228,7 +230,7 @@ Git history keeps every published text and the register its fingerprint. Decree 
 
 | Duty | Who | When | Register |
 |---|---|---|---|
-| Read privacidad@rutaopta.org and privacy@rutaopta.org | Ruta Opta team | Often enough to meet the deadlines in [9](#9-a-person-writes-about-their-data). How often is not set: ask the owner | |
+| Read privacidad@rutaopta.org and privacy@rutaopta.org | Ruta Opta team | Often enough to meet the deadlines in [9](#9-a-person-writes-about-their-data). How often, and who covers absences, is not set | `set-mailbox-check` |
 | Yearly e-mail to the list: a reminder that offers to unsubscribe | Ruta Opta team | Yearly. The first date is set when the policy is published | `yearly-list-reminder` |
 | Review the policy, this workbook and [What we hold and where](#what-we-hold-and-where) | Santiago | Yearly. Proposed, not confirmed by the owner | `yearly-policy-review` |
 | Weekly tally of counts (`docs/analytics.md`, "Weekly review") | Not named yet | Weekly while the course runs, until 2026-12-18 | `name-weekly-tally-owner` |
@@ -277,6 +279,8 @@ The owner's approval of an exact text holds no personal data: record it in the p
 - It sees text, not behaviour. A new use of data that leaves the text alone passes it. The `privacy-changes` skill and [Which case is it](#which-case-is-it) are the only cover.
 - The fingerprint covers the `Privacy` namespace and the consent label. The e-mails, other pages and the form's fields are not covered.
 - The address check reads only `docs/privacy/` and finds only e-mail addresses: not names or phone numbers, and nothing in issues, pull requests or commits.
+- Only the newest version's hash is checked against the text. An older one, such as `2026-11-draft` (the hash of its last text, read from git history), cannot be.
+- The yearly-duty dates are checked only while the newest version is published, since that is the text that promises them.
 - A `workbook` anchor is checked to exist, not to be the right section.
 - Nothing here sends e-mails or creates calendar events. The yearly e-mail also needs a calendar reminder: `calendar-reminder`, only with the owner's explicit yes.
 

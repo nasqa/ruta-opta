@@ -1,10 +1,18 @@
 {
   "policyVersions": [
     {
+      "version": "2026-11-draft",
+      "publishedOn": "2026-11-23",
+      "textSha256": "8f12ee233492dded124d378dabdfa0ce6b5dc54a1a8b7026d566a098bf6544d5",
+      "summary": "The first version. Three texts were merged to main under this one label, which must never happen again. (1) 1b8c08c, PR #6, merged 2026-11-23 19:42 -05: Spanish only; the controller named as Fundación OPTA, with its NIT and address left as [PENDIENTE] placeholders; the data section also named an optional answer about how the person wants to take part. (2) 97baa9d, PR #9, merged 2026-11-24 06:55 -05: English added; the controller named as Fundación Embajadores de la Paz, responsible for OPTA, with NIT and address; the retention sentence; the consent wording changed to match. (3) a34d4e5, PR #11, merged 2026-11-24 12:39 -05: adds the section on messages by WhatsApp or e-mail. The hash is of text 3, still on main. Commit dates are merge dates; when each deploy went live is not recorded. A person listed under this label must be matched to a text by the date they signed up.",
+      "substantial": true,
+      "subjectsTold": "No record that anyone was told when the text changed under this label. Whether anyone signed up under it is open (check-subscribers-before-publish)."
+    },
+    {
       "version": "2026-11-25-draft",
       "publishedOn": null,
       "textSha256": "1a17839a71eda7f5b1f365566e59c1666905b4dec6c2fe8fdec1b24fd805db82",
-      "summary": "Replaces 2026-11-draft. Adds the link a sign-up came through and its use (counting sign-ups per link), the visit measurement with Plausible and the language cookie, messages by WhatsApp or e-mail, Plausible among the providers, the full rights with who attends them and the terms, the list's lifetime with a yearly reminder, the privacy address and the effective date. The consent wording is unchanged.",
+      "summary": "Replaces 2026-11-draft (its text 3). Adds the link a sign-up came through and its use (counting sign-ups per link), the visit measurement with Plausible and the language cookie, Plausible among the providers, a section on how to exercise rights with who attends them and the terms, the rest of the rights, the list's lifetime with a yearly reminder, the privacy address in the controller section and the effective date. Names the controller as responsible for Ruta Opta rather than OPTA. The consent wording is unchanged.",
       "substantial": true,
       "subjectsTold": "Nobody yet: not published. Whether anyone is on the list under 2026-11-draft is open (check-subscribers-before-publish)."
     }
@@ -123,6 +131,36 @@
     {
       "id": "name-weekly-tally-owner",
       "title": "Name who does the weekly tally",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#12-recurring-duties"
+    },
+    {
+      "id": "consent-proof",
+      "title": "Keep proof of when each person authorized (Decree 1074, art. 2.2.2.25.2.5). The list's source carries the policy version and the link tag but not the moment of consent, which stays sealed in the token. Check whether Zoho keeps and can export the date a contact was added; if not, send the consent date (a code change)",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#what-we-hold-and-where"
+    },
+    {
+      "id": "name-incident-owner",
+      "title": "Name who handles security incidents. The SIC's 15 business days count from detection and telling that person or area",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#10-a-security-incident"
+    },
+    {
+      "id": "set-mailbox-check",
+      "title": "Set how often privacidad@rutaopta.org and privacy@rutaopta.org are read and who covers absences. The policy promises answers within 10 and 15 business days",
       "owner": "Santiago",
       "due": null,
       "repeat": null,

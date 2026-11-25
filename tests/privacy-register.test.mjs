@@ -100,7 +100,7 @@ const actionProblems = ({ actions }, workbookAnchors) => {
 };
 
 const yearlyProblems = ({ policyVersions, actions }) =>
-  policyVersions.some(({ publishedOn }) => publishedOn !== null)
+  policyVersions.at(-1)?.publishedOn
     ? actions.filter(({ repeat, status, due }) => repeat === 'yearly' && status === 'open' && due === null).map(({ id }) => `${id}: a yearly duty with no due date`)
     : [];
 
@@ -142,15 +142,14 @@ test('the anchor check reads headings as GitHub does', () => {
   assert.deepEqual(anchors(markdown), ['#title', '#1-a-new-field-or-datum', '#who-does-what', '#who-does-what-1']);
 });
 
-test('once a version is published, every open yearly duty has a due date', async () => {
+// The yearly duties are promised by the newest text, so an older published version (2026-11-draft) does not date them
+test('once the newest version is published, every open yearly duty has a due date', async () => {
   const register = await readJSON(registerPath);
   assert.deepEqual(yearlyProblems(register), []);
-  // The register is not published yet, so the check is also run on a published copy with an undated duty
-  const published = {
-    policyVersions: register.policyVersions.map((version) => ({ ...version, publishedOn: '2026-12-01' })),
-    actions: [{ id: 'probe', repeat: 'yearly', status: 'open', due: null }],
-  };
-  assert.deepEqual(yearlyProblems(published), ['probe: a yearly duty with no due date']);
+  const undated = [{ id: 'probe', repeat: 'yearly', status: 'open', due: null }];
+  const versions = (...dates) => dates.map((publishedOn, index) => ({ version: `probe-${index}`, publishedOn }));
+  assert.deepEqual(yearlyProblems({ policyVersions: versions('2026-11-23', null), actions: undated }), []);
+  assert.deepEqual(yearlyProblems({ policyVersions: versions('2026-11-23', '2026-12-01'), actions: undated }), ['probe: a yearly duty with no due date']);
 });
 
 test('claude finds the workbook', async () => {
