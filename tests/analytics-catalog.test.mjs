@@ -33,6 +33,7 @@ const goalLedger = [
   'Footer WhatsApp',
   'Footer Email',
   'Footer Instagram',
+  'Signup Submit',
 ];
 
 const activeGoals = () => Object.values(events).map(({ goal }) => goal);

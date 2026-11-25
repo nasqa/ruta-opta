@@ -18,8 +18,8 @@ export type AllyRoute = (typeof allyRoutes)[number];
 type EventDefinition = {
   goal: string;
   intent: 'follow' | 'ally' | 'contact' | 'social';
-  placement: 'hero' | 'tourism' | 'ally-routes' | 'ally-other' | 'floating' | 'footer';
-  channel: 'page' | 'whatsapp' | 'email' | 'copy' | 'instagram';
+  placement: 'hero' | 'tourism' | 'ally-routes' | 'ally-other' | 'floating' | 'footer' | 'signup-form';
+  channel: 'page' | 'whatsapp' | 'email' | 'copy' | 'instagram' | 'form';
   allyRoute?: AllyRoute | 'other';
   answers: readonly (keyof typeof questions)[];
 };
@@ -47,6 +47,8 @@ export const events = {
   'footer-whatsapp': { goal: 'Footer WhatsApp', intent: 'contact', placement: 'footer', channel: 'whatsapp', answers: ['ally-route'] },
   'footer-email': { goal: 'Footer Email', intent: 'contact', placement: 'footer', channel: 'email', answers: ['ally-route'] },
   'footer-instagram': { goal: 'Footer Instagram', intent: 'social', placement: 'footer', channel: 'instagram', answers: ['instagram'] },
+  // Counts attempts, refused ones included (the form validates after submitting). The mailing list is the truth for sign-ups
+  'signup-submit': { goal: 'Signup Submit', intent: 'follow', placement: 'signup-form', channel: 'form', answers: ['funnel', 'channel', 'instagram'] },
 } as const satisfies Record<string, EventDefinition>;
 
 export type EventId = keyof typeof events;
