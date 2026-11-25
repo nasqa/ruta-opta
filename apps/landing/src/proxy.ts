@@ -27,6 +27,7 @@ const proxy = (request: NextRequest) => {
 export default proxy;
 
 export const config = {
-  // Every path except API routes, Next and Vercel internals, and files with an extension
-  matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)',
+  // Every path except API routes, Next and Vercel internals, the analytics paths under /o/ and files with an extension. Netlify runs the proxy
+  // before the rewrites, so an analytics path matched here would get a locale and never reach its rewrite. Next takes only a literal here
+  matcher: '/((?!api|trpc|_next|_vercel|o/|.*\\..*).*)',
 };
