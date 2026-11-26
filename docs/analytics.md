@@ -220,16 +220,19 @@ There are no goals in the dashboard yet, on purpose. After release:
    curl -sI "$preview/en/unsubscribed"
    curl -sI "$preview/es"
    for page in es en es/privacidad en/privacy es/confirmar en/confirm es/confirmado en/confirmed es/baja en/unsubscribed; do
-     echo "$page $(curl -s "$preview/$page" | grep -cE 'plausible\.init|/o/s\.js|plausible\.io/js')"
+     response=$(curl -s -w '\nstatus=%{http_code}' "$preview/$page")
+     scripts=$(printf '%s' "$response" | grep -cE 'plausible\.init|/o/s\.js|plausible\.io/js')
+     events=$(printf '%s' "$response" | grep -o 'plausible-event-name' | wc -l)
+     echo "$page status=${response##*status=} script=$scripts events=$((events))"
    done
    ```
 
    Expected, in order:
-   - `/o/e` does not redirect to a `/es…` address;
+   - `/o/e` does not redirect to a `/es…` address. It answers 403 to GET and HEAD, from Plausible's own CDN (measured on the preview, 2026-11-26: the same page as `plausible.io/api/event` answers with), which shows that the rewrite reaches the vendor;
    - `/o/s.js` returns Plausible's script, not a page of ours;
    - both confirm pages and both unsubscribed pages answer `Referrer-Policy: no-referrer` (Zoho redirects to the unsubscribed ones, and what it appends to their address is unknown);
    - the home does not: the sign-up reads `utm_source` from the `Referer`;
-   - every page prints `0`, so none has the script. The `plausible-event-name` classes are in every build and do not count.
+   - every page prints `status=200`, `script=0` and an `events` count above 0. `script=0` means the page has no script. The `plausible-event-name` classes are in every build, so they are the positive control: without status 200 and some of them, the page did not load, and its `script=0` proves nothing.
 
 2. **Best effort: do the rewrites override `Cookie` and `Referer`?** Netlify passes the browser's headers through a rewrite (its support staff confirm it for cookies). So Plausible can receive a page's non-secret address in `Referer` (UTM tags, at most an ad click id) and this domain's cookies, today only `NEXT_LOCALE`. The confirm and unsubscribed pages send no `Referer`. Both rewrites set a `headers` map; whether it replaces what the browser sent is **unverified**. To test it, on a preview that will never be merged, add a temporary rewrite from `/o/echo` (the proxy skips `/o/`), with the same `status`, `force` and `headers`, to an endpoint that returns the headers it receives. Call it with fake values: `curl -s -H 'Cookie: probe=fake' -H 'Referer: https://example.com/fake' -H 'X-Probe: seen' <that preview>/o/echo`. It is proven only if `X-Probe` comes back, which shows that the endpoint echoes what reaches it, and neither fake value does. If it is not, keep the proxy and record that here.
    - **Result:** not yet checked.
@@ -241,8 +244,10 @@ There are no goals in the dashboard yet, on purpose. After release:
    - no response to `/o/e` carries `x-plausible-dropped` (browser developer tools, Network);
    - the visit and the click reach the dashboard.
 
+5. **After the deploy and before sharing tagged links** (it needs the merge's deploy, not the variable): from a tagged link, for example `https://www.rutaopta.org/es?utm_source=diplomado`, make one real sign-up with an address of our own, confirm it, and check the contact's source in Zoho: it should end in ` · o=diplomado`. Whether Zoho accepts a source ending in ` · o=<tag>` is **unverified**. If it refused it, tagged confirmations would answer "unavailable". The e2e uses a stand-in for Zoho and cannot see this.
+
 ## Script weight
 
 Our Plausible script is about 2.5 KB gzip: 2,491 B for the content alone (`gzip -9n`, measured 2026-11-25 on the pinned copy, after the three automatic measurements were switched off), body only, before response headers. That is above the "about 2 KB" of issue #14.
 
-The JavaScript budget run never loads it. On this branch (2026-11-25) it measured `/es` at 192,680 B against a limit of 199,680 B, which leaves 7,000 B.
+The JavaScript budget run never loads it. On this branch it last measured `/es` at 192,721 B against a limit of 199,680 B, which leaves 6,959 B.

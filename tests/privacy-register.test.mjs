@@ -43,6 +43,10 @@ const actionPins = {
   'yearly-list-reminder': null,
   'yearly-policy-review': null,
   'calendar-reminder': null,
+  'session-reminders': null,
+  'faq-unsubscribe-sentence': null,
+  'confirm-link-codes-in-policy': null,
+  'verify-zoho-source-after-deploy': null,
 };
 
 const sortKeys = (value) =>

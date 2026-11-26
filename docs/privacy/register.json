@@ -31,13 +31,13 @@
     },
     {
       "id": "confirm-effective-date",
-      "title": "Set the policy's effective date to the day it is published",
+      "title": "Set the policy's effective date to the day it is published. Decided by the owner on 2026-11-26: publish with the effective date of 25 November 2026 unchanged",
       "owner": "Santiago",
       "due": null,
       "repeat": null,
       "blocks": "publish",
       "gates": "2026-11-25-draft",
-      "status": "open",
+      "status": "done",
       "workbook": "#11-publishing-a-policy-version"
     },
     {
@@ -232,6 +232,46 @@
       "blocks": null,
       "status": "open",
       "workbook": "#12-recurring-duties"
+    },
+    {
+      "id": "session-reminders",
+      "title": "Build the reminders that bring open privacy actions into Claude sessions (docs/superpowers/plans/2026-11-25-privacy-workbook.md, Task 2). Not built: moved to a later pull request (owner scope freeze, 2026-11-26)",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#limits-of-the-guards"
+    },
+    {
+      "id": "faq-unsubscribe-sentence",
+      "title": "The home FAQ, in both languages, says people can unsubscribe from any e-mail, but the confirmation e-mail has no unsubscribe link. New wording needs the owner's approval",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#5-a-wording-change"
+    },
+    {
+      "id": "confirm-link-codes-in-policy",
+      "title": "The policy's paragraph on the sign-up protection does not mention the codes confirm-guard.ts keeps for each confirmation link. New wording needs the owner's approval",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#what-we-hold-and-where"
+    },
+    {
+      "id": "verify-zoho-source-after-deploy",
+      "title": "After the deploy and before sharing tagged links, confirm one real sign-up from a tagged link and check the contact's source in Zoho: whether Zoho accepts a source that ends in the link tag is unverified (docs/analytics.md, Before the production variable is set, step 5)",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#11-publishing-a-policy-version"
     }
   ]
 }

@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development. Steps use checkbox (`- [ ]`) syntax.
 
-**Goal:** a workbook that says what to do when anything about personal data or measurement changes, one register of versions and open actions, and three ways Claude cannot miss it: a skill, a session reminder and tests.
+**Goal:** a workbook that says what to do when anything about personal data or measurement changes, one register of versions and open actions, and two ways Claude cannot miss it: a skill and tests. A third, a session reminder (Task 2), is not built: it moved to a later pull request (owner scope freeze, 2026-11-26).
 
-**Architecture:** `docs/privacy/{workbook.md,register.json}` are the source. A Node script with a pure function reads the register for the `SessionStart` hook and for `npm run privacy:status`. `node:test` guards tie the register to the policy text, the consent wording, the code's policy version and the Claude wiring.
+**Architecture:** `docs/privacy/{workbook.md,register.json}` are the source. Planned and not built (Task 2, moved to a later pull request): a Node script with a pure function that reads the register for a `SessionStart` hook and for an npm script. `node:test` guards tie the register to the policy text, the consent wording, the code's policy version and the Claude wiring.
 
 **Tech Stack:** Node 24 (`node:test`, `node:crypto`), Claude Code project hooks and skills. No dependency is added.
 
@@ -46,11 +46,13 @@ type Register = {
 
 - [ ] **Step 1: Write `tests/privacy-register.test.mjs`.** Tests: `the policy version in the code is the newest in the register` (read `policyVersion` from `modules/waitlist/server.ts` source); `the policy text and the consent wording match the newest version's fingerprint` (on failure the message gives the computed hash, names the workbook and says never to edit a published version's hash); `versions are unique, complete, and only the newest may be unpublished`; `actions are well formed` (unique ids; the enums above; `due` null or a real `YYYY-MM-DD`; `owner` and `title` non-empty; `workbook` is an anchor that exists in the workbook, computed from its headings as GitHub does); `once a version is published, every open yearly duty has a due date`; `claude finds the workbook` (the skill file and `AGENTS.md` contain `docs/privacy/workbook.md`; the skill has `name: privacy-changes` and a `description`); `the privacy folder holds no address outside rutaopta.org`.
 - [ ] **Step 2: Run** `node --test tests/privacy-register.test.mjs` — expected FAIL, files missing.
-- [ ] **Step 3: Write the register, the workbook, the skill and the pointers.** The skill's `description` names its triggers: privacy policy, consent wording, data collected or its use, forms, analytics and events, cookies or storage, providers, retention, who attends requests, a data-subject request, a security incident, publishing, and open privacy actions or reminders. Its body sends the reader to the workbook and repeats only: classify with the table first, never change policy or consent text without the owner's approval of the exact wording, no personal data in the repository. `AGENTS.md` gets a `## Privacy and data` section of at most three lines and `privacy-changes` in its list of procedures.
+- [ ] **Step 3: Write the register, the workbook, the skill and the pointers.** The skill's `description` names its triggers: privacy policy, consent wording, data collected or its use, forms, analytics and events, cookies or storage, providers, retention, who attends requests, a data-subject request, a security incident, publishing, and open privacy actions or yearly reminders. Its body sends the reader to the workbook and repeats only: classify with the table first, never change policy or consent text without the owner's approval of the exact wording, no personal data in the repository. `AGENTS.md` gets a `## Privacy and data` section of at most three lines and `privacy-changes` in its list of procedures.
 - [ ] **Step 4: Run** the test — PASS. Show two temporary breakages caught (a changed word in `es.json`'s consent; an outside address in the workbook), not committed. `npm run check` passes.
 - [ ] **Step 5: Commit** `docs(privacy): the workbook, its register and the guards`.
 
-### Task 2: The reminders
+### Task 2: The reminders (not built: moved to a later pull request (owner scope freeze, 2026-11-26))
+
+**Nothing in this task exists:** no hook, no reminder script, no `SessionStart` setting, no npm script, no test. The text below is the plan for that later pull request, and so are the hook constraint above and Review Focus 3 and 4. Open in the register: `session-reminders`.
 
 **Files:** Create `.claude/hooks/privacy-reminders.mjs`, `tests/privacy-reminders.test.mjs`. Modify `.claude/settings.json`, `package.json` (script `privacy:status`), `docs/privacy/workbook.md` (how the reminder works).
 
