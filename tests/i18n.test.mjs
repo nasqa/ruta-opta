@@ -77,13 +77,29 @@ test('an English browser at the bare domain still gets the 307 to /en, so / neve
 test('every other path gets exactly what next-intl answers', () => {
   const handleI18nRouting = createMiddleware(routing);
   const request = (path, headers) => new NextRequest(new URL(path, 'http://localhost'), { headers });
-  for (const path of ['/es', '/en', '/privacidad', '/privacy', '/es/privacidad', '/en/privacy', '/fr/anything', '/es/confirmar?t=x']) {
+  for (const path of ['/es', '/en', '/privacidad', '/privacy', '/es/privacidad', '/en/privacy', '/fr/anything', '/es/confirmado']) {
     for (const headers of [{}, english]) {
       const ours = proxy(request(path, headers));
       const theirs = handleI18nRouting(request(path, headers));
       assert.equal(ours.status, theirs.status, path);
       assert.deepEqual([...ours.headers], [...theirs.headers], path);
     }
+  }
+});
+
+// The confirm page's address carries the signed token, and what Zoho appends when it redirects to the unsubscribed page is unknown. The proxy
+// sets the policy because it sees the address the browser asked for: on Netlify, next.config headers are matched after next-intl's rewrite, so
+// a rule for /es/confirmar never applied
+test('only the confirm and unsubscribed pages answer with Referrer-Policy: no-referrer', () => {
+  for (const href of ['/confirm', '/unsubscribed']) {
+    for (const locale of routing.locales) {
+      const path = `/${locale}${routing.pathnames[href][locale]}?t=x`;
+      assert.equal(visit(path).headers.get('referrer-policy'), 'no-referrer', path);
+    }
+  }
+  // The home, where the sign-up form lives, keeps the default policy: the waitlist reads utm_source from the Referer
+  for (const path of ['/', '/es', '/en', '/es?utm_source=instagram', '/en?utm_source=instagram', '/es/confirmado', '/en/confirmed', '/es/privacidad', '/en/privacy']) {
+    assert.equal(visit(path).headers.get('referrer-policy'), null, path);
   }
 });
 

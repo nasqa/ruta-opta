@@ -18,6 +18,16 @@
   text-underline-offset: var(--space-1);
 }
 
+/* The fine print under the consent, with the policy's link on a line of its own */
+.notice {
+  color: var(--color-text-secondary);
+}
+
+.notice a {
+  display: block;
+  width: fit-content;
+}
+
 .form > button {
   justify-self: start;
 }

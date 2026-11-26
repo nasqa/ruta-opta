@@ -18,8 +18,9 @@ import { createThrottle, defaultLimits } from './throttle';
 import { deriveKey, parseTokenKeys, type TokenKeys } from './token';
 import { type ConfirmResult, createWaitlist, type ReadResult, type WaitlistDeps } from './use-cases';
 
-// The privacy policy version a subscriber consents to; the token carries it to Zoho
-const policyVersion = '2026-11-draft';
+// The privacy policy version a subscriber consents to; the token carries it to Zoho. Bump it whenever the policy's fields or purposes change
+// (2026-11-25: the visit measurement and how to exercise your rights)
+const policyVersion = '2026-11-25-draft';
 
 type Waitlist = ReturnType<typeof createWaitlist>;
 // Reads a variable through its parser; a blank variable takes the fallback. A missing or unparsable value comes back undefined and its name is reported
@@ -145,7 +146,7 @@ const current = () => (composition ??= compose());
 // Once per instance is enough to notice, and the log carries no value
 let ipMissingLogged = false;
 
-export const requestConfirmation = (values: WaitlistValues, locale: Locale, ip: string | undefined): Promise<'sent' | 'unavailable'> => {
+export const requestConfirmation = (values: WaitlistValues, locale: Locale, ip: string | undefined, originTag: string | undefined): Promise<'sent' | 'unavailable'> => {
   const { waitlist, live } = current();
   if (live && ip === undefined && !ipMissingLogged) {
     ipMissingLogged = true;
@@ -153,7 +154,7 @@ export const requestConfirmation = (values: WaitlistValues, locale: Locale, ip: 
   }
   // Live requests without the header share one 'unknown' bucket rather than skip the IP rule. Fake mode passes the header through as it is,
   // and without one the IP rule is skipped, so the e2e is unaffected
-  return waitlist.requestConfirmation(values, locale, live ? (ip ?? 'unknown') : ip);
+  return waitlist.requestConfirmation(values, locale, live ? (ip ?? 'unknown') : ip, originTag);
 };
 
 export const readConfirmation = async (token: string): Promise<ReadResult> => current().waitlist.readConfirmation(token);

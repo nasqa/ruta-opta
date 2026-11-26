@@ -17,3 +17,20 @@
   from = "/_next/static/media/home-og.29lym9iu9n3f1.jpg"
   to = "/og/home-es-v2.jpg"
   status = 301
+
+# The analytics vendor behind first-party paths: proxyPaths in src/modules/analytics/plausible.ts, held in step by tests/analytics-wiring.test.mjs.
+# A rewrite passes the browser's headers on, so the headers map blanks the cookie and cuts the Referer to the home. NOT YET VERIFIED: that the map
+# overrides a header the browser sent, rather than only adding one
+[[redirects]]
+  from = "/o/s.js"
+  to = "https://plausible.io/js/pa-gVAEa_XsPsebKDIjckNPK.js"
+  status = 200
+  force = true
+  headers = { Cookie = "", Referer = "https://www.rutaopta.org/" }
+
+[[redirects]]
+  from = "/o/e"
+  to = "https://plausible.io/api/event"
+  status = 200
+  force = true
+  headers = { Cookie = "", Referer = "https://www.rutaopta.org/" }

@@ -8,7 +8,10 @@ import { initialWaitlistState } from '@/modules/waitlist';
 import { joinWaitlist } from '@/modules/waitlist/actions';
 import styles from './waitlist-form.module.css';
 
-export const WaitlistForm = () => {
+// Attributes the page hands down to spread on the form; what they mean is the page's business
+type Tracking = { className?: string; [key: `data-${string}`]: string | undefined };
+
+export const WaitlistForm = ({ tracking }: { tracking: Tracking }) => {
   const t = useTranslations('Waitlist');
   const locale = useLocale();
   const [state, action, pending] = useActionState(joinWaitlist, initialWaitlistState);
@@ -27,7 +30,7 @@ export const WaitlistForm = () => {
   const errors = state.status === 'invalid' ? state.errors : {};
 
   return (
-    <form action={action} noValidate className={styles.form}>
+    <form {...tracking} action={action} noValidate className={[styles.form, tracking.className].filter(Boolean).join(' ')}>
       <TextInput
         name="name"
         label={t('name.label')}
@@ -52,7 +55,9 @@ export const WaitlistForm = () => {
         name="consent"
         defaultChecked={values.consent}
         error={errors.consent && t('consent.error')}
-        label={t.rich('consent.label', { privacy: (chunks) => <Link href="/privacy">{chunks}</Link> })}
+        label={t('consent.label')}
+        description={t.rich('consent.notice', { privacy: (chunks) => <Link href="/privacy">{chunks}</Link> })}
+        classNames={{ label: 't-body-sm', description: `t-caption ${styles.notice}` }}
       />
       <div hidden aria-hidden="true">
         <input name="company" tabIndex={-1} autoComplete="off" defaultValue="" />

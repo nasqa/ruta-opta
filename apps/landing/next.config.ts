@@ -20,8 +20,12 @@ const siteUrl = (preview && process.env.DEPLOY_PRIME_URL) || process.env.URL;
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
-  // Next skips an undefined value, so src/shared/env.ts then reads the runtime environment and falls back to localhost
-  env: { SITE_URL: siteUrl },
+  env: {
+    // Next skips an undefined value, so src/shared/env.ts then reads the runtime environment and falls back to localhost
+    SITE_URL: siteUrl,
+    // Analytics runs in production only. Never undefined: skipped by Next, the runtime environment of a Function would answer instead
+    ANALYTICS_SCRIPT_SRC: context === 'production' ? (process.env.ANALYTICS_SCRIPT_SRC ?? '') : '',
+  },
   experimental: { agentFeedback: false },
 };
 

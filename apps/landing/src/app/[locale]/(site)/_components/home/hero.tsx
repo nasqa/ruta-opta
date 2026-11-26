@@ -1,5 +1,6 @@
 import { Button } from '@mantine/core';
 import { useTranslations } from 'next-intl';
+import { eventProps } from '@/modules/analytics/server';
 import { SceneBand } from '@/modules/site-shell';
 import heroArt from '../../_art/home-hero.webp';
 import styles from './hero.module.css';
@@ -16,10 +17,10 @@ export const Hero = () => {
         </h1>
         <p className="t-body-lg">{t('lead')}</p>
         <div className={styles.actions}>
-          <Button component="a" href="#lista">
+          <Button component="a" href="#lista" {...eventProps('hero-follow')}>
             {t('cta')}
           </Button>
-          <Button component="a" href="#allies" variant="default">
+          <Button component="a" href="#allies" variant="default" {...eventProps('hero-ally')}>
             {t('ctaAllies')}
           </Button>
         </div>
