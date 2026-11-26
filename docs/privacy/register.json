@@ -20,13 +20,13 @@
   "actions": [
     {
       "id": "check-subscribers-before-publish",
-      "title": "Check in Zoho Campaigns whether anyone is already on the list. Anyone found is a question for counsel before publishing (docs/analytics.md, Before the production variable is set, step 3)",
+      "title": "Check in Zoho Campaigns whether anyone is already on the list. Anyone found is a question for counsel before publishing (docs/analytics.md, Before the production variable is set, step 3). Done 2026-11-26: the owner checked Zoho Campaigns before publishing and reported the list empty",
       "owner": "Santiago",
       "due": null,
       "repeat": null,
       "blocks": "publish",
       "gates": "2026-11-25-draft",
-      "status": "open",
+      "status": "done",
       "workbook": "#11-publishing-a-policy-version"
     },
     {
@@ -75,12 +75,12 @@
     },
     {
       "id": "plausible-hostname-allow-list",
-      "title": "In Plausible, Shields, Hostnames, allow only www.rutaopta.org",
+      "title": "In Plausible, Shields, Hostnames, allow only www.rutaopta.org. Done 2026-11-26: confirmed by the owner",
       "owner": "Santiago",
       "due": null,
       "repeat": null,
       "blocks": "measurement",
-      "status": "open",
+      "status": "done",
       "workbook": "#what-blocks-publishing-or-measurement"
     },
     {

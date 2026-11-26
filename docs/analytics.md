@@ -187,7 +187,7 @@ No weekly script is planned: Plausible's Stats API needs the Business plan.
 
 - [x] Account and site created (domain `rutaopta.org`); its script address is in `apps/landing/netlify.toml`.
 - [x] 2026-11-25: outbound links, file downloads and form submissions switched off. The site also forces all three off.
-- [ ] In Shields, Hostnames, allow only `www.rutaopta.org`.
+- [x] 2026-11-26: in Shields, Hostnames, only `www.rutaopta.org` is allowed (confirmed by the owner).
 - [ ] Exclude your own visits. In each browser you use on the site, open `https://www.rutaopta.org` and run `localStorage.plausible_ignore = "true"` in the console.
 - [ ] Name who does the weekly tally.
 
@@ -238,7 +238,7 @@ There are no goals in the dashboard yet, on purpose. After release:
    - **Result:** not yet checked.
    - **The proxy rule:** before anything that signs people in shares this domain, either the override is proven or the proxy goes. Otherwise its session cookie reaches the analytics vendor.
 
-3. **Before publishing: is anyone already on the list?** Check in Zoho. The owner says nobody is (**unverified**). The form has been live under the older policy. Decree 1074 of 2015, art. 2.2.2.25.2.2 ([official text](https://www.cancilleria.gov.co/sites/default/files/Normograma/docs/decreto_1074_2015_pr025.htm), read 2026-11-25): when there are substantial changes to the content of the processing policies about the identification of the controller or the purpose of the processing, which can affect the content of the authorization, the controller must tell the data subject before, or at the latest when, the new policies are applied, and must obtain a new authorization when the change is about the purpose. This is not legal advice: counsel confirms how it applies. This change adds purposes, so anyone found there is a question for counsel before they are measured by link.
+3. **Before publishing: is anyone already on the list?** **Done 2026-11-26:** the owner checked Zoho before publishing and reported the list empty. The form has been live under the older policy. Decree 1074 of 2015, art. 2.2.2.25.2.2 ([official text](https://www.cancilleria.gov.co/sites/default/files/Normograma/docs/decreto_1074_2015_pr025.htm), read 2026-11-25): when there are substantial changes to the content of the processing policies about the identification of the controller or the purpose of the processing, which can affect the content of the authorization, the controller must tell the data subject before, or at the latest when, the new policies are applied, and must obtain a new authorization when the change is about the purpose. This is not legal advice: counsel confirms how it applies. This change adds purposes, so anyone found there is a question for counsel before they are measured by link.
 
 4. **After the owner's approval and the merge,** set `ANALYTICS_SCRIPT_SRC=/o/s.js` in Netlify, for the **Production context only**, and rebuild (Netlify's "Trigger deploy"). Then open the live site with a tagged link, in a browser without the own-visit exclusion, click a call to action. The visitor's IP address must be forwarded, because Plausible's bot filter drops events without it. No direct way to see that is verified here, so check:
    - no response to `/o/e` carries `x-plausible-dropped` (browser developer tools, Network);
