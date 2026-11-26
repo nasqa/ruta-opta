@@ -8,7 +8,7 @@ For whoever runs the campaign. We read three sources, as counts:
 
 Day to day you need [Tagged links](#tagged-links), [Weekly review](#weekly-review-10-minutes) and [Reading rules](#reading-rules). Requirements are in GitHub issue #14. How it is built is in `docs/superpowers/specs/2026-11-25-analytics-design.md`. When a change touches personal data, a provider or the privacy policy, follow [the privacy workbook](privacy/workbook.md).
 
-**Status on 2026-11-25: Plausible counts nothing yet.** It starts when the variable in step 4 of [Before the production variable is set](#before-the-production-variable-is-set) is set. To switch it off, unset the Netlify variable `ANALYTICS_SCRIPT_SRC` and trigger a deploy. Visits from before the start cannot be recovered.
+**Status on 2026-11-26: the measurement is switched on in production, and it is not yet verified that events reach Plausible.** The variable in step 4 of [Before the production variable is set](#before-the-production-variable-is-set) was set that day, and the live home carries the script. Some of that step's checks are still open. To switch it off, unset the Netlify variable `ANALYTICS_SCRIPT_SRC` and trigger a deploy. Visits from before the start cannot be recovered.
 
 ## Questions and decisions
 
@@ -188,6 +188,8 @@ No weekly script is planned: Plausible's Stats API needs the Business plan.
 - [x] Account and site created (domain `rutaopta.org`); its script address is in `apps/landing/netlify.toml`.
 - [x] 2026-11-25: outbound links, file downloads and form submissions switched off. The site also forces all three off.
 - [x] 2026-11-26: in Shields, Hostnames, only `www.rutaopta.org` is allowed (confirmed by the owner).
+- [x] 2026-11-26: `ANALYTICS_SCRIPT_SRC=/o/s.js` set in Netlify, Production context only.
+- [ ] Finish the checks of step 4 in [Before the production variable is set](#before-the-production-variable-is-set): real events in the dashboard, the visitor's IP address forwarded and no `x-plausible-dropped`.
 - [ ] Exclude your own visits. In each browser you use on the site, open `https://www.rutaopta.org` and run `localStorage.plausible_ignore = "true"` in the console.
 - [ ] Name who does the weekly tally.
 
@@ -200,13 +202,15 @@ There are no goals in the dashboard yet, on purpose. After release:
 
 **First, the blockers** in `docs/privacy/register.json`. The policy is published only when no open action has `blocks` set to `publish` ([the workbook's publishing section](privacy/workbook.md#11-publishing-a-policy-version)). The variable is set only after that, once every other open action with `blocks` set to `measurement` is done.
 
+**On 2026-11-26** `2026-11-25-draft` was published (pull request #16, merged as 2a039a5, deployed and checked live) with its publish blockers done. `plausible-hostname-allow-list` is done too, and the variable was set that day. `netlify-script-variable` stays open until the checks of step 4 are complete. The heading above keeps its name because other files point to it.
+
 **Done:**
 
 - Script rewrite: the script and event rewrites are both in `apps/landing/netlify.toml`.
 - Request-level check: `apps/landing/e2e/analytics-requests.spec.ts` runs a pinned copy of our script.
 - Sign-up form: tagged (`Signup Submit`). Our script was read first: it has no `preventDefault` or `.submit()` call and writes no cookie or storage.
 
-**Still to do, in this order:**
+**The steps, in order.** On 2026-11-26 step 3 is done, step 4 is partly done, and steps 2 and 5 are open. For step 1, which comes before the merge, this file records only the `/o/e` result on the preview.
 
 1. **Deploy preview, with GET or HEAD only, so that no event reaches Plausible.** Set `preview` to the pull request's preview address.
 
@@ -243,6 +247,14 @@ There are no goals in the dashboard yet, on purpose. After release:
 4. **After the owner's approval and the merge,** set `ANALYTICS_SCRIPT_SRC=/o/s.js` in Netlify, for the **Production context only**, and rebuild (Netlify's "Trigger deploy"). Then open the live site with a tagged link, in a browser without the own-visit exclusion, click a call to action. The visitor's IP address must be forwarded, because Plausible's bot filter drops events without it. No direct way to see that is verified here, so check:
    - no response to `/o/e` carries `x-plausible-dropped` (browser developer tools, Network);
    - the visit and the click reach the dashboard.
+
+   **Done 2026-11-26:** the variable is set for the Production context only (checked: unset in deploy-preview, branch-deploy and dev). On the live site, with GET and HEAD only:
+   - the home carries the async script and its init, with the `/o/e` endpoint, the sanitiser and the three automatic measurements off;
+   - `/o/s.js` equals the pinned copy;
+   - the confirm and unsubscribed pages answer `Referrer-Policy: no-referrer`, and the home does not;
+   - `HEAD /o/e` answers the vendor's 403, with no redirect.
+
+   **Not yet verified:** that real events reach the Plausible dashboard, that the visitor's IP address is forwarded, and that no response carries `x-plausible-dropped`. `netlify-script-variable` stays open until all three are checked.
 
 5. **After the deploy and before sharing tagged links** (it needs the merge's deploy, not the variable): from a tagged link, for example `https://www.rutaopta.org/es?utm_source=diplomado`, make one real sign-up with an address of our own, confirm it, and check the contact's source in Zoho: it should end in ` · o=diplomado`. Whether Zoho accepts a source ending in ` · o=<tag>` is **unverified**. If it refused it, tagged confirmations would answer "unavailable". The e2e uses a stand-in for Zoho and cannot see this.
 

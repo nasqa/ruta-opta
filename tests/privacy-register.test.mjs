@@ -17,6 +17,7 @@ const testPath = 'tests/privacy-register.test.mjs';
 // register. Marking a version published means adding its line here, which review sees
 const publishedPins = {
   '2026-11-draft': '667ee53eacab2f3db5524d51d520ba1a7236413e05d266f48b612583b9c3d5a8',
+  '2026-11-25-draft': '2b8145647aaf584587f39bbd7d30ba96b1d498034ecf8f8d1404e216fa76d1ac',
 };
 
 // Every action and what it blocks: null, 'measurement', or 'publish:<the version it gates>' (scope below). An action is closed with status
