@@ -87,7 +87,7 @@ Put all three tags on every link or QR code shared outside the site. WhatsApp an
 - The tags go before `#lista`. Remove `#lista` to open at the top of the page.
 - Link to the home (`/es` or `/en`). The sign-up reads `utm_source` from the address of the page with the form. The tag is lost if the visitor uses the language switch, or leaves the home through a plain link and comes back without it, or if a browser or extension strips the Referer. The sign-up still goes through.
 - **Only `utm_source` reaches the mailing list.** Confirmations can never be split by placement or campaign.
-- Neither issue #14 nor the design says which source a WhatsApp share inside the course takes. Suggested: `diplomado` for what the course shares, WhatsApp groups included, and `whatsapp` for WhatsApp outside the course.
+- Decided by the owner (2026-11-25): links shared by the course, its WhatsApp groups included, take `utm_source=diplomado`. `whatsapp` is for WhatsApp outside the course.
 - If you need a value that is not listed, such as a campaign outside the course and Instagram, add it here before you share the link.
 
 ## KPI definitions

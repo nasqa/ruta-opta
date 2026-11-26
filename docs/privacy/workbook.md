@@ -26,10 +26,10 @@ Cases 1 to 4 and 7 update this table. Write what a source shows; otherwise write
 
 | Datum | Where it lives | Why | Who can see it | How long |
 |---|---|---|---|---|
-| Name and e-mail address of a confirmed sign-up | Zoho Campaigns, the list for the sign-up's language. Country: unrecorded | Send news and say when Ruta Opta opens | Users of the Zoho Campaigns account: unrecorded | Until the person unsubscribes, then only so as not to write again. The list lasts while Ruta Opta sends news |
-| Source of that sign-up: `rutaopta.org/<locale> · <policy version> · o=<utm_source>` | Zoho Campaigns, on the contact | Which language and policy version the person authorized. Count sign-ups per link | As above | As the contact |
+| Name and e-mail address of a confirmed sign-up | Zoho Campaigns, the list for the sign-up's language. Country: unrecorded | Send news and say when Ruta Opta opens, both named in the consent | Users of the Zoho Campaigns account: unrecorded | Until the person unsubscribes, then only so as not to write again. The list lasts while Ruta Opta sends news |
+| Source of that sign-up: `rutaopta.org/<locale> · <policy version> · o=<utm_source>` | Zoho Campaigns, on the contact | Which language and policy version the person authorized. Count sign-ups per link, which the consent names | As above | As the contact |
 | A pending sign-up: name, e-mail address, language, consent time, policy version, link tag | Sealed inside the confirm link, which is e-mailed through Zoho CPaaS. We keep no copy | Subscribe only after the person confirms | Nobody without the token key. The address passes through Zoho CPaaS | The link works 7 days. What Zoho CPaaS keeps of a sent e-mail: unverified |
-| Sign-up protection codes: keyed hashes of the IP address with the hour, of the e-mail address with the date, and of confirm links | Netlify Blobs, store `waitlist` | Limit abuse of the form and of confirm links | Members of the Netlify site: unrecorded | Nothing deletes them, except two short claims released after a failed send |
+| Sign-up protection codes: keyed hashes of the IP address with the hour, of the e-mail address with the date, and of confirm links | Netlify Blobs, store `waitlist` | Limit abuse of the form and of confirm links. The policy's data section tells people about the codes made from their e-mail and IP address | Members of the Netlify site: unrecorded | Nothing deletes them, except two short claims released after a failed send |
 | A visit: page, where it came from, buttons and links tapped, time and scroll, device, system, browser, approximate place. A daily code from the IP address and browser details | Plausible Insights OÜ, Estonia, processed in the EU. It passes through Netlify | Count visits and clicks (`docs/analytics.md`) | Users of the Plausible dashboard: unrecorded | Plausible's retention: unverified. Nothing is sent until `ANALYTICS_SCRIPT_SRC` is set |
 | Every request to the site: IP address and headers, cookies included | Netlify, Inc. | Serve the site and run the sign-up | Netlify. What members of the Netlify site can see: unverified | Unverified |
 | Language cookie `NEXT_LOCALE`: only "es" or "en" | The visitor's browser | Remember the language | The site | The browser session |
@@ -37,8 +37,8 @@ Cases 1 to 4 and 7 update this table. Write what a source shows; otherwise write
 
 - **Sources:** the policy (`Privacy` in `apps/landing/messages/es.json`), ADR 0003 (`docs/decisions/0003-waitlist-form-posts-to-zoho-campaigns.md`), and `apps/landing/src/modules/waitlist` (`use-cases.ts`, `throttle.ts`, `confirm-guard.ts`, `store.ts`). Our code logs event names and codes, never a name or an address (ADR 0003, "Deadlines"; `use-cases.ts`).
 - **Proof of authorization.** The consent time travels in the confirm link but never reaches Zoho, which receives the name, the address and the source. So the record of when a person authorized is Zoho's own date on the contact: **unverified**. Decree 1074 asks to keep proof of the authorization (art. 2.2.2.25.2.5). Open: `consent-proof`. A person listed under `2026-11-draft` accepted one of its three texts: match them by the date they signed up (its `summary` in the register).
-- **Already open:** the policy does not mention the protection codes (`abuse-protection-records-in-policy`), and nothing deletes them (`delete-old-throttle-records`).
-- **Link tags are permanent.** The `o=` value is the link's `utm_source` and cannot be changed after the sign-up. Agree on values before sharing links (`course-whatsapp-utm-source`; `docs/analytics.md`, "Tagged links").
+- **Protection codes.** The second paragraph of the policy's data section says what they are made from, what they are for and that for now they are not deleted automatically (`abuse-protection-records-in-policy`, done). Already open: nothing deletes them (`delete-old-throttle-records`). The change that deletes them changes that sentence too ([5](#5-a-wording-change)).
+- **Link tags are permanent.** The `o=` value is the link's `utm_source` and cannot be changed after the sign-up. Agree on values before sharing links (`docs/analytics.md`, "Tagged links"). The owner decided on 2026-11-25 that links the course shares, its WhatsApp groups included, take `diplomado`, and that `whatsapp` is for WhatsApp outside the course (`course-whatsapp-utm-source`, done).
 - **Providers' own pages, read 2026-11-25.** [Plausible](https://plausible.io/privacy), updated November 2026: company in Tartu, Estonia; visitor data processed entirely in the EU; its subprocessors for it are Hetzner (Germany), Bunny (Slovenia) and UpCloud (Finland). [Netlify](https://www.netlify.com/privacy/), updated 4 November 2026: Netlify, Inc.; transfers to the United States under its section on the Data Privacy Framework. That page covers Netlify as controller; its processing for customers falls under its Data Processing Agreement, **not read**. Zoho: no source records the country where this account's data is kept.
 
 ## Which case is it
@@ -79,7 +79,7 @@ Decree 1074, art. 2.2.2.25.2.2: substantial changes about the controller's ident
 
 1. **You:** write the new use in one sentence: which data, for what, who sees it.
 2. **You:** **stop** before using any data already held for it. Ask the owner ([open an action](#open-an-action)).
-3. **You:** check that the consent wording on the form names every purpose, the new one included. Today it does not name the per-link sign-up count: `consent-wording-purpose`.
+3. **You:** check that the consent wording on the form names every purpose, the new one included. The consent has two layers. `Waitlist.consent.label`, beside the box, names who processes the data and the purposes: send news, say when Ruta Opta opens and count sign-ups per link (`consent-wording-purpose`, done). `Waitlist.consent.notice`, under it, says what a person can do with their data, with the privacy address, the phone and the link to the policy. Whether the count needs a box of its own is with counsel ([question 4](#questions-for-counsel)).
 4. **You:** draft the policy's purpose section (`Privacy.sections.purpose`) and update [What we hold and where](#what-we-hold-and-where).
 5. **Owner, with counsel:** how to ask the people already on the list for the new authorization ([open an action](#open-an-action)).
 6. Then [11](#11-publishing-a-policy-version), with `substantial: true`.
@@ -114,7 +114,7 @@ Decree 1074, art. 2.2.2.25.2.2: substantial changes about the controller's ident
 
 ## 5. A wording change
 
-**Blocks publishing:** yes. Any change to the `Privacy` namespace or to `Waitlist.consent.label`, in `es.json` or `en.json`, needs its version in the register; the tests fail until it has one.
+**Blocks publishing:** yes. Any change to the `Privacy` namespace, `Waitlist.consent.label` or `Waitlist.consent.notice`, in `es.json` or `en.json`, needs its version in the register; the tests fail until it has one.
 
 | The change | Substantial? | What it needs |
 |---|---|---|
@@ -130,7 +130,7 @@ Decree 1074, art. 2.2.2.25.3.1 also says substantial changes to the policy are t
 
 **One label, one text.** Once a version is published, its label never carries another text. `2026-11-draft` did: three texts were merged under it on 2026-11-23 and 2026-11-24 (its `summary` in the register names them). Now each published entry is pinned whole, as a hash of every field, in `tests/privacy-register.test.mjs`. Changing any field of a published entry fails, and the failure prints the new pin line. Dropping one fails too. Marking a version published means adding its pin, which review sees. Change a published entry only to record what happened later, such as that people were told (`subjectsTold`), and never its text: a new text is a new version. What the pins cannot catch is under [Limits of the guards](#limits-of-the-guards).
 
-Already open: the rights text says every e-mail has an unsubscribe link, and the confirmation e-mail has none (`unsubscribe-sentence`). Decree 1074, art. 2.2.2.25.2.6: people may ask for deletion or revoke the authorization at any time, and free, easy ways to do it must be offered.
+The rights text promises the unsubscribe link only in the e-mails with our news, because the confirmation e-mail has none (`unsubscribe-sentence`, done). Decree 1074, art. 2.2.2.25.2.6: people may ask for deletion or revoke the authorization at any time, and free, easy ways to do it must be offered.
 
 ## 6. The controller, its contact data or who attends requests
 
@@ -223,12 +223,12 @@ What counts, SIC, Circular Única, Título V: a breach of security codes, or the
 4. **Owner:** approves the exact text in both languages, in the pull request or before it. Nothing below happens without it.
 5. **Counsel:** answers the points flagged for them. For `2026-11-25-draft` the owner chose to publish before counsel's review (ADR 0003, "Measurement and privacy text"). For a later version, ask him.
 6. **Owner:** first, is anyone already on the list? This is the version's `check-subscribers-<version>` action (for `2026-11-25-draft`, `check-subscribers-before-publish`). If the change is substantial and someone is, tell them before it applies, and get a new authorization if the purpose changed ([5](#5-a-wording-change)). How to collect it: counsel ([open an action](#open-an-action)).
-7. **You:** put the approved text in `apps/landing/messages/es.json` and `en.json` (`Privacy` and `Waitlist.consent.label`).
+7. **You:** put the approved text in `apps/landing/messages/es.json` and `en.json` (`Privacy`, `Waitlist.consent.label` and `Waitlist.consent.notice`).
 8. **You:** the effective date in `Privacy.effective` is the day it will be published. This is the version's `confirm-effective-date-<version>` action (for `2026-11-25-draft`, `confirm-effective-date`). If publishing slips, the date changes and the owner approves the new one.
 9. **You:** give `policyVersion` in `apps/landing/src/modules/waitlist/server.ts` a new name, never used before.
 10. **You:** add the version at the end of `policyVersions` in `docs/privacy/register.json`: `publishedOn: null`, the `textSha256` the test prints, a one-line `summary`, `substantial`, and `subjectsTold` (how and when people were told, or why it was not needed). Never edit a published version's hash.
 11. **You:** in the same pull request, open the version's own actions, with ids that name it and are never reused, each with its pin ([open an action](#open-an-action)). They are `check-subscribers-<version>` and `confirm-effective-date-<version>` (`blocks: "publish"`, `gates: "<version>"`), and `record-publication-<version>` (`blocks: null`, workbook `#11-publishing-a-policy-version`). Re-point every blocker with `gates: "after:<previous label>"` to the new label, and its pin with it. The tests fail until every such blocker is re-pointed, even when the new entry arrives already published, and while the newest version is unpublished without its `record-publication-<version>`.
-12. **You:** update `tests/privacy-measurement.test.mjs` with the text. It pins the policy's section keys and their order (controller, data, purpose, measurement, contact, processor, rights, requests). It pins the measurement section as two paragraphs, the first naming Plausible and the second the cookie, and `Plausible Insights OÜ` in the providers section. In the requests section it pins four paragraphs that name who attends and the privacy address, with the terms 10, 5, 15 and 8 business days in that order. It also pins the controller section ending with the privacy address, the effective line with the year and the yearly phrase in each language, no "OPTA" without "Ruta", and no "[" placeholder.
+12. **You:** update `tests/privacy-measurement.test.mjs` with the text. It pins the policy's section keys and their order (controller, data, purpose, measurement, contact, processor, rights, requests). It pins the data section as two paragraphs, the second naming the IP address and saying that the codes are not deleted automatically, and the rights section promising the unsubscribe link for the news, not for every e-mail. It pins the consent label naming Ruta Opta and the per-link count with no tag, the notice holding the privacy address, the phone and one link to the policy, and no "OPTA" without "Ruta" in the consent messages. It pins the measurement section as two paragraphs, the first naming Plausible and the second the cookie, and `Plausible Insights OÜ` in the providers section. In the requests section it pins four paragraphs that name who attends and the privacy address, with the terms 10, 5, 15 and 8 business days in that order. It also pins the controller section ending with the privacy address, the effective line with the year and the yearly phrase in each language, no "OPTA" without "Ruta", and no "[" placeholder.
 13. **You:** `npm run check` and `npm run check:pending` pass.
 14. **You:** open the pull request and list in it the register's open publish blockers.
 15. **Owner:** on the deploy preview, reads `/es/privacidad`, `/en/privacy` and the consent on the sign-up form.
@@ -287,7 +287,7 @@ The owner chose to publish `2026-11-25-draft` before counsel's review (ADR 0003,
 1. Does the cookieless visit measurement need prior authorization? ADR 0003 cites Law 1581, art. 9.
 2. The international transfer: Plausible (Estonia, EU servers), Netlify (United States), Zoho (country unrecorded).
 3. Anyone already on the list under the earlier version, `2026-11-draft`: what notice, and what new authorization.
-4. The consent wording: does it name the controller and every purpose as it must (`consent-wording-purpose`)?
+4. The consent wording (`Waitlist.consent.label` and `.notice`): does it name the controller and every purpose as it must? Does counting sign-ups per link need its own box? The project rule asks one purpose per box; the owner's choice (2026-11-25) treats the count as part of the same sign-up.
 5. The yearly reminder e-mail, with the list lasting while news are sent (Decree 1074, art. 2.2.2.25.2.8).
 
 Also raised here: how to verify who writes ([9](#9-a-person-writes-about-their-data)), where to report an incident ([10](#10-a-security-incident)), and whether our records prove the authorization ([11](#11-publishing-a-policy-version)).
@@ -325,9 +325,9 @@ What it cannot catch:
 - **The merge and the variable.** It reads the register, not the merge or Netlify. Merging while a publish blocker is open, or setting the analytics variable early, is stopped only by the owner.
 - **The gap after a merge.** Until the follow-up pull request records it ([11](#11-publishing-a-policy-version), step 17), a live text still reads as an unpublished draft: changing it and its hash then passes.
 - **Per-publication actions.** Nothing checks that a version's per-publication checks were opened or closed, or that its `record-publication-<version>` action was closed. That action is required only while the newest entry is unpublished, so an entry added already published needs none.
-- **Older versions.** Only the newest version's hash is checked against the text. An older one is a pinned value: `2026-11-draft`'s is the hash of its last text, read from git history.
+- **Older versions.** Only the newest version's hash is checked against the text. An older one is a pinned value: `2026-11-draft`'s is the hash of its last text, read from git history, from before there was a consent notice.
 - **Yearly dates.** They are checked only while the newest version is published, since that is the text that promises them.
-- **Narrow checks.** The fingerprint covers the `Privacy` namespace and the consent label, not the e-mails, other pages or the form's fields. The address check reads only `docs/privacy/` and finds only e-mail addresses: not names or phone numbers, and nothing in issues, pull requests or commits. A `workbook` anchor is checked to exist, not to be the right section.
+- **Narrow checks.** The fingerprint covers the `Privacy` namespace, the consent label and the notice under it, not the e-mails, other pages or the form's fields and error messages. The address check reads only `docs/privacy/` and finds only e-mail addresses: not names or phone numbers, and nothing in issues, pull requests or commits. A `workbook` anchor is checked to exist, not to be the right section.
 - **Reminders.** Nothing here sends e-mails or creates calendar events. The yearly e-mail also needs a calendar reminder: `calendar-reminder`, only with the owner's explicit yes.
 
 ## Legal references

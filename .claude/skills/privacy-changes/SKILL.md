@@ -10,5 +10,5 @@ The procedure is `docs/privacy/workbook.md`. The policy versions and the open pr
 Three rules hold before you read further:
 
 1. Classify with the workbook's "Which case is it" table first. A change that alters what happens to data but no text still counts: no test sees it.
-2. Never change the policy (`Privacy` in `apps/landing/messages/*.json`) or the consent wording (`Waitlist.consent.label`) without Santiago's approval of the exact wording.
+2. Never change the policy (`Privacy` in `apps/landing/messages/*.json`) or the consent wording (`Waitlist.consent.label` and `Waitlist.consent.notice`) without Santiago's approval of the exact wording.
 3. No personal data in this repository, its issues, pull requests or commits. The repository is public.

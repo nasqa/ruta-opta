@@ -224,7 +224,8 @@
       "error": "Check your email: something seems to be missing. Example: name@email.com."
     },
     "consent": {
-      "label": "I authorize Fundación Embajadores de la Paz, responsible for OPTA, to process my data to send me news and let me know when we open. I can withdraw my authorization at any time. Read the <privacy>data protection policy</privacy>.",
+      "label": "I authorize Fundación Embajadores de la Paz (Ruta Opta) to process my data to send me news, let me know when we open and count sign-ups per link.",
+      "notice": "You can access, correct or delete your data and withdraw your permission. privacy@rutaopta.org · +57\u00a0310\u00a0587\u00a04657 <privacy>Data policy</privacy>",
       "error": "We need your authorization to sign you up."
     },
     "submit": "Follow the process",
@@ -249,7 +250,7 @@
       },
       "data": {
         "title": "What data we ask for",
-        "text": "For the waitlist we ask for your name and your email address. If you came through one of our links, such as the one on Instagram, we also note which one. We keep them until you unsubscribe; after that we keep them only so we never email you again."
+        "text": "For the waitlist we ask for your name and your email address. If you came through one of our links, such as the one on Instagram, we also note which one. We keep them until you unsubscribe; after that we keep them only so we never email you again.\n\nTo protect the form from abuse, we keep codes made from your email address and your IP address, with the date of the attempt. They are only used to limit how many attempts can be made. We don't store your IP address, and your email address can't be read from those codes. For now they are not deleted automatically."
       },
       "purpose": {
         "title": "What we use it for",
@@ -269,7 +270,7 @@
       },
       "rights": {
         "title": "Your rights",
-        "text": "You can see, update and correct your data, ask us to delete it and withdraw your authorization. You can also ask for proof of the authorization you gave us, ask what we have used your data for and access it free of charge. To stop receiving emails, use the unsubscribe link in any of them."
+        "text": "You can see, update and correct your data, ask us to delete it and withdraw your authorization. You can also ask for proof of the authorization you gave us, ask what we have used your data for and access it free of charge. To stop receiving our news, use the unsubscribe link in those emails."
       },
       "requests": {
         "title": "How to exercise your rights",

@@ -53,11 +53,14 @@ const sortKeys = (value) =>
 const sha256 = (value) => createHash('sha256').update(JSON.stringify(sortKeys(value))).digest('hex');
 const scope = ({ blocks, gates }) => (blocks === 'publish' ? `publish:${gates}` : blocks);
 
-// What a person reads before authorizing: the whole Privacy namespace and the consent label, in both locales
-const fingerprint = async () => {
-  const [en, es] = await Promise.all(['en', 'es'].map((locale) => readJSON(`apps/landing/messages/${locale}.json`)));
-  const text = ({ Privacy, Waitlist }) => ({ consent: Waitlist.consent.label, privacy: Privacy });
+// What a person reads before authorizing: the whole Privacy namespace, the consent label and the notice under it, in both locales
+const fingerprintOf = ({ en, es }) => {
+  const text = ({ Privacy, Waitlist: { consent } }) => ({ consent: { label: consent.label, notice: consent.notice }, privacy: Privacy });
   return sha256({ en: text(en), es: text(es) });
+};
+const readMessages = async () => {
+  const [en, es] = await Promise.all(['en', 'es'].map((locale) => readJSON(`apps/landing/messages/${locale}.json`)));
+  return { en, es };
 };
 
 // GitHub's heading ids: lowercase, punctuation dropped, each space a hyphen, -1, -2 for repeats. Headings inside code fences do not count
@@ -209,13 +212,25 @@ test('the policy version in the code is the newest in the register', async () =>
 });
 
 test('the policy text and the consent wording match the newest version\'s fingerprint', async () => {
-  const [computed, { policyVersions }] = await Promise.all([fingerprint(), readJSON(registerPath)]);
+  const [computed, { policyVersions }] = await Promise.all([readMessages().then(fingerprintOf), readJSON(registerPath)]);
   const newest = policyVersions.at(-1);
   const fix =
     newest.publishedOn === null
       ? `${newest.version} is not published yet: once the owner has approved the exact text, put the computed hash in its textSha256.`
       : `${newest.version} is published: add a new version with the computed hash and bump policyVersion. Never edit a published version's hash.`;
   assert.equal(newest.textSha256, computed, `The privacy text or the consent wording changed. Computed fingerprint: ${computed}. ${fix} Follow ${workbookPath}, cases 5 and 11.`);
+});
+
+test('the fingerprint changes with each text a person reads before authorizing', async () => {
+  const messages = await readMessages();
+  const computed = fingerprintOf(messages);
+  for (const locale of ['en', 'es']) {
+    for (const edit of [({ Waitlist }) => (Waitlist.consent.label += '.'), ({ Waitlist }) => (Waitlist.consent.notice += '.'), ({ Privacy }) => (Privacy.effective += '.')]) {
+      const copy = structuredClone(messages);
+      edit(copy[locale]);
+      assert.notEqual(fingerprintOf(copy), computed, `${locale}: ${edit}`);
+    }
+  }
 });
 
 test('versions are unique, complete, and only the newest may be unpublished', async () => {

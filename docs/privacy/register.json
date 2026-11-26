@@ -11,8 +11,8 @@
     {
       "version": "2026-11-25-draft",
       "publishedOn": null,
-      "textSha256": "1a17839a71eda7f5b1f365566e59c1666905b4dec6c2fe8fdec1b24fd805db82",
-      "summary": "Replaces 2026-11-draft (its text 3). Adds the link a sign-up came through and its use (counting sign-ups per link), the visit measurement with Plausible and the language cookie, Plausible among the providers, a section on how to exercise rights with who attends them and the terms, the rest of the rights, the list's lifetime with a yearly reminder, the privacy address in the controller section and the effective date. Names the controller as responsible for Ruta Opta rather than OPTA. The consent wording is unchanged.",
+      "textSha256": "075dc3e52c5ddff2759f7a55d9a94e1d39c0c6d039bab2e5892c515a34b32bb3",
+      "summary": "Replaces 2026-11-draft (its text 3). Adds the link a sign-up came through and its use (counting sign-ups per link), the visit measurement with Plausible and the language cookie, Plausible among the providers, a section on how to exercise rights with who attends them and the terms, the rest of the rights, the list's lifetime with a yearly reminder, the privacy address in the controller section and the effective date. Names the controller as responsible for Ruta Opta rather than OPTA. Says for which e-mails the unsubscribe link works, those with the news, and adds the codes the sign-up protection keeps, which are not deleted automatically for now. The consent wording changes and takes two layers: a label that names Fundación Embajadores de la Paz (Ruta Opta) and the purposes, the per-link count included, and a notice under it with what a person can do with their data, the privacy address, the phone and the link to the policy.",
       "substantial": true,
       "subjectsTold": "Nobody yet: not published. Whether anyone is on the list under 2026-11-draft is open (check-subscribers-before-publish)."
     }
@@ -48,7 +48,7 @@
       "repeat": null,
       "blocks": "publish",
       "gates": "2026-11-25-draft",
-      "status": "open",
+      "status": "done",
       "workbook": "#2-a-new-purpose-or-a-new-use-of-data-we-hold"
     },
     {
@@ -59,7 +59,7 @@
       "repeat": null,
       "blocks": "publish",
       "gates": "2026-11-25-draft",
-      "status": "open",
+      "status": "done",
       "workbook": "#what-we-hold-and-where"
     },
     {
@@ -70,7 +70,7 @@
       "repeat": null,
       "blocks": "publish",
       "gates": "2026-11-25-draft",
-      "status": "open",
+      "status": "done",
       "workbook": "#5-a-wording-change"
     },
     {
@@ -125,7 +125,7 @@
     },
     {
       "id": "counsel-review",
-      "title": "Counsel reviews the interim policy: prior authorization for cookieless measurement, the transfer, notice and authorization for anyone already listed, the consent wording, the yearly reminder. The owner ships before counsel",
+      "title": "Counsel reviews the interim policy: prior authorization for cookieless measurement, the transfer, notice and authorization for anyone already listed, the consent wording, whether counting sign-ups per link needs its own box, the yearly reminder. The owner ships before counsel",
       "owner": "Santiago",
       "due": null,
       "repeat": null,
@@ -160,7 +160,7 @@
       "due": null,
       "repeat": null,
       "blocks": null,
-      "status": "open",
+      "status": "done",
       "workbook": "#what-we-hold-and-where"
     },
     {

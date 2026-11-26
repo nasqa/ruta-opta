@@ -55,7 +55,9 @@ export const WaitlistForm = ({ tracking }: { tracking: Tracking }) => {
         name="consent"
         defaultChecked={values.consent}
         error={errors.consent && t('consent.error')}
-        label={t.rich('consent.label', { privacy: (chunks) => <Link href="/privacy">{chunks}</Link> })}
+        label={t('consent.label')}
+        description={t.rich('consent.notice', { privacy: (chunks) => <Link href="/privacy">{chunks}</Link> })}
+        classNames={{ label: 't-body-sm', description: `t-caption ${styles.notice}` }}
       />
       <div hidden aria-hidden="true">
         <input name="company" tabIndex={-1} autoComplete="off" defaultValue="" />

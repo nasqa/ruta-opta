@@ -224,7 +224,8 @@
       "error": "Revisa el correo: parece que le falta algo. Ejemplo: nombre@correo.com."
     },
     "consent": {
-      "label": "Autorizo a la Fundación Embajadores de la Paz, responsable de OPTA, a tratar mis datos para enviarme novedades y avisarme cuando abramos. Puedo retirar mi autorización cuando quiera. Conoce la <privacy>política de tratamiento de datos</privacy>.",
+      "label": "Autorizo a la Fundación Embajadores de la Paz (Ruta Opta) a tratar mis datos para enviarme novedades, avisarme cuando abramos y contar inscripciones por enlace.",
+      "notice": "Puedes consultar, corregir o borrar tus datos y retirar tu permiso. privacidad@rutaopta.org · +57\u00a0310\u00a0587\u00a04657 <privacy>Política de datos</privacy>",
       "error": "Para inscribirte necesitamos tu autorización."
     },
     "submit": "Quiero seguir el proceso",
@@ -249,7 +250,7 @@
       },
       "data": {
         "title": "Qué datos pedimos",
-        "text": "Para la lista de espera pedimos tu nombre y tu correo electrónico. Si llegaste desde uno de nuestros enlaces, como el de Instagram, también anotamos cuál fue. Los conservamos hasta que te des de baja; después los guardamos solo para no volver a escribirte."
+        "text": "Para la lista de espera pedimos tu nombre y tu correo electrónico. Si llegaste desde uno de nuestros enlaces, como el de Instagram, también anotamos cuál fue. Los conservamos hasta que te des de baja; después los guardamos solo para no volver a escribirte.\n\nPara proteger el formulario contra abusos, guardamos códigos creados a partir de tu correo y de tu dirección IP, con la fecha del intento. Solo sirven para limitar cuántas veces se puede intentar. No guardamos la dirección IP, y tu correo no se puede leer a partir de esos códigos. Por ahora no se borran automáticamente."
       },
       "purpose": {
         "title": "Para qué los usamos",
@@ -269,7 +270,7 @@
       },
       "rights": {
         "title": "Tus derechos",
-        "text": "Puedes conocer, actualizar y corregir tus datos, pedir que los eliminemos y retirar tu autorización. También puedes pedir una prueba de la autorización que nos diste, preguntar qué uso les hemos dado y consultarlos gratis. Para dejar de recibir correos, usa el enlace para darte de baja que trae cada uno."
+        "text": "Puedes conocer, actualizar y corregir tus datos, pedir que los eliminemos y retirar tu autorización. También puedes pedir una prueba de la autorización que nos diste, preguntar qué uso les hemos dado y consultarlos gratis. Para dejar de recibir nuestras novedades, usa el enlace para darte de baja que traen esos correos."
       },
       "requests": {
         "title": "Cómo ejercer tus derechos",
