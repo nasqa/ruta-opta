@@ -1,13 +1,10 @@
 import { Button } from '@mantine/core';
 import { useTranslations } from 'next-intl';
+import { allyRoutes, eventProps } from '@/modules/analytics/server';
 import { mailtoHref, whatsappHref } from './contact-links';
 import { CopyEmail } from './copy-email';
 import layout from './layout.module.css';
 import styles from './allies.module.css';
-
-// One route per kind of ally, each named by the verb the ally performs. The WhatsApp message and the email subject arrive already
-// written for that kind, so a lead reaches the inbox qualified without the site collecting anything from it
-const routes = ['train', 'link', 'validate', 'drive', 'accompany', 'share'] as const;
 
 export const Allies = () => {
   const t = useTranslations('Prelaunch');
@@ -25,7 +22,7 @@ export const Allies = () => {
         </div>
         {/* list-style: none drops the list role in Safari */}
         <ul role="list" aria-labelledby="allies-title" className={styles.routes}>
-          {routes.map((route) => {
+          {allyRoutes.map((route) => {
             const verb = t(`allies.routes.${route}.verb`);
             const cta = t(`allies.routes.${route}.cta`);
             return (
@@ -35,6 +32,7 @@ export const Allies = () => {
                 <p className="t-body-md">{t(`allies.routes.${route}.offer`)}</p>
                 <div className={styles.routeActions}>
                   <Button
+                    {...eventProps(`ally-${route}-whatsapp`)}
                     component="a"
                     href={whatsappHref(number, t(`allies.routes.${route}.message`))}
                     target="_blank"
@@ -44,7 +42,7 @@ export const Allies = () => {
                     {cta}
                   </Button>
                   <a
-                    className={`${styles.byEmail} t-body-md`}
+                    {...eventProps(`ally-${route}-email`, `${styles.byEmail} t-body-md`)}
                     href={mailtoHref(address, t(`allies.routes.${route}.subject`))}
                     aria-label={t('allies.byEmailFor', { label: t('allies.byEmail'), verb })}
                   >
@@ -63,6 +61,7 @@ export const Allies = () => {
               <h4 className="t-heading-sm">{t('allies.whatsapp.title')}</h4>
               <p className="t-body-md">{t('alliesOther.whatsappText')}</p>
               <Button
+                {...eventProps('ally-other-whatsapp')}
                 component="a"
                 href={whatsappHref(number, t('allies.whatsapp.message'))}
                 target="_blank"
@@ -79,10 +78,10 @@ export const Allies = () => {
               {/* Many phones have no mail app set up: the address stays readable, selectable and copyable next to the button */}
               <p className={`${styles.address} t-title`}>{address}</p>
               <div className={styles.actions}>
-                <Button component="a" href={mailtoHref(address, t('allies.email.subject'))} variant="default">
+                <Button component="a" href={mailtoHref(address, t('allies.email.subject'))} variant="default" {...eventProps('ally-other-email')}>
                   {t('allies.email.label')}
                 </Button>
-                <CopyEmail address={address} copyLabel={t('copyEmail')} copiedLabel={t('copiedEmail')} />
+                <CopyEmail address={address} copyLabel={t('copyEmail')} copiedLabel={t('copiedEmail')} tracking={eventProps('copy-email')} />
               </div>
             </div>
           </div>

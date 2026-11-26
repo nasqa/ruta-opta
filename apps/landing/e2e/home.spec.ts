@@ -200,6 +200,19 @@ for (const locale of locales) {
       await expect(answer.getByRole('link', { name: Prelaunch.privacyLink, exact: true })).toHaveAttribute('href', privacyPaths[locale]);
     });
 
+    test('the sign-up consent starts unchecked, and the notice under it links the localized policy', async ({ page }) => {
+      await page.goto(`/${locale}`, { waitUntil: 'networkidle' });
+      const form = page.locator('#lista');
+      const { label, notice } = messages[locale].Waitlist.consent;
+      const checkbox = form.getByRole('checkbox', { name: label, exact: true });
+
+      await expect(checkbox).not.toBeChecked();
+      // The notice is the box's description, outside its label
+      await expect(checkbox).toHaveAccessibleDescription(notice.replace(/<\/?privacy>/g, '').replace(/\s+/g, ' '));
+      const policyLink = /<privacy>(.+)<\/privacy>/.exec(notice)?.[1] ?? 'no <privacy> link in the notice';
+      await expect(form.getByRole('link', { name: policyLink, exact: true })).toHaveAttribute('href', privacyPaths[locale]);
+    });
+
     // Who answers: its own section after the allies (Santiago, 2026-11-24), and again in the FAQ's first answer and the footer
     test('names the foundation in its own section, in the FAQ and in the footer', async ({ page }) => {
       await page.goto(`/${locale}`, { waitUntil: 'networkidle' });

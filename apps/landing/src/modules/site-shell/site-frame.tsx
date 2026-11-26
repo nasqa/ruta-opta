@@ -14,13 +14,20 @@ const { props: logoProps } = getImageProps({ src: logo, alt: '', width: 176, loa
 // WhatsApp's own round mark, green included: its colour is the brand's, so it lives in the file and not in the theme
 const { props: whatsappProps } = getImageProps({ src: whatsapp, alt: '', width: 56, height: 56 });
 
+// Attributes the route hands down for the links that reach Ruta Opta; what they mean is the route's business
+type Tracking = { className?: string; [key: `data-${string}`]: string | undefined };
+export type SiteTracking = Record<'floating' | 'whatsapp' | 'email' | 'instagram', Tracking>;
+
+// A slot's attributes, with its class added to the link's own
+const tagged = (slot: Tracking, className?: string) => ({ ...slot, className: [className, slot.className].filter(Boolean).join(' ') || undefined });
+
 // The home's sections, in page order: the footer links to them from every page
 const sections = ['places', 'method', 'tourism', 'allies', 'faq'] as const;
 
 // Plain HTML instead of Mantine's Container, Group or Anchor: on every route they add client JS (Group measured 33 B), and the budget
 // only goes down. Every link is a plain anchor too: the sticky footer always sits in the viewport (covered, which IntersectionObserver
 // ignores), so a next-intl Link would prefetch its target on every page view
-const SiteFooter = () => {
+const SiteFooter = ({ tracking }: { tracking: SiteTracking }) => {
   const locale = useLocale();
   const t = useTranslations('SiteShell');
   const home = getPathname({ locale, href: '/' });
@@ -56,16 +63,16 @@ const SiteFooter = () => {
             <h2 className="t-overline">{t('footer.contact')}</h2>
             <ul role="list" className="t-body-md">
               <li>
-                <a href={`https://wa.me/${t('footer.whatsappNumber')}`} className={styles.phone}>
+                <a {...tagged(tracking.whatsapp, styles.phone)} href={`https://wa.me/${t('footer.whatsappNumber')}`}>
                   {t('footer.whatsapp')}
                 </a>
               </li>
               <li>
-                <a href={`mailto:${t('footer.infoEmail')}`}>{t('footer.infoEmail')}</a>
+                <a {...tagged(tracking.email)} href={`mailto:${t('footer.infoEmail')}`}>{t('footer.infoEmail')}</a>
               </li>
               <li>
                 {/* The glyph is decorative: the link's text already says the network and the handle */}
-                <a href={t('footer.instagramUrl')} className={styles.social}>
+                <a {...tagged(tracking.instagram, styles.social)} href={t('footer.instagramUrl')}>
                   <svg viewBox="0 0 24 24" width="1.25em" height="1.25em" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
                     <path d="M4 8a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z" />
                     <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0-6 0" />
@@ -100,21 +107,21 @@ const SiteFooter = () => {
 
 // The button that floats over every page and over the footer. A plain anchor, like the footer's links: no Mantine Affix, so no client JS.
 // Its written message is its own, so a contact that arrives with it is known to have come from this button
-const WhatsappButton = () => {
+const WhatsappButton = ({ tracking }: { tracking: SiteTracking['floating'] }) => {
   const t = useTranslations('SiteShell');
 
   return (
-    <a href={`https://wa.me/${t('footer.whatsappNumber')}?text=${encodeURIComponent(t('whatsappFloat.message'))}`} target="_blank" rel="noopener noreferrer" aria-label={t('whatsappFloat.label')} className={styles.whatsapp}>
+    <a {...tagged(tracking, styles.whatsapp)} href={`https://wa.me/${t('footer.whatsappNumber')}?text=${encodeURIComponent(t('whatsappFloat.message'))}`} target="_blank" rel="noopener noreferrer" aria-label={t('whatsappFloat.label')}>
       <img {...whatsappProps} alt="" className={styles.whatsappMark} />
     </a>
   );
 };
 
 // The reveal footer: the page sits on an opaque layer above the footer, which the end of the scroll uncovers where the whole footer fits
-export const SiteFrame = ({ children }: { children: ReactNode }) => (
+export const SiteFrame = ({ children, tracking }: { children: ReactNode; tracking: SiteTracking }) => (
   <>
     <div className={styles.content}>{children}</div>
-    <SiteFooter />
-    <WhatsappButton />
+    <SiteFooter tracking={tracking} />
+    <WhatsappButton tracking={tracking.floating} />
   </>
 );

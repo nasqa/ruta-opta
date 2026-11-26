@@ -25,13 +25,19 @@ A file is born next to the route that uses it (`app/**/_components`). It moves t
 - `process.env` is read only in a module's `server.ts` and in `src/shared/env.ts`; other files import the value from there. The one exception is `process.env.NEXT_PUBLIC_*`.
 - Modules do not import each other. Compose them in the route.
 - `route.ts` files are adapters: they delegate to the module that owns the domain.
-- Procedures: `new-route`, `extract-to-module`, `extract-to-package`, `translate-namespace` in `.claude/skills/`.
+- Procedures: `new-route`, `extract-to-module`, `extract-to-package`, `translate-namespace`, `privacy-changes` in `.claude/skills/`.
 
 ## Data layer
 
 - Queries and DTOs live in a module's `server.ts`. Return DTOs, never raw rows or secrets.
 - Server actions validate their input inside the action, whatever the form validated.
 - Client code never imports `server.ts`. `server-only` plus `next build` is the barrier.
+
+## Privacy and data
+
+- Anything that touches personal data, consent or privacy text, measurement, providers, retention, a privacy request or an incident follows `docs/privacy/workbook.md` (skill `privacy-changes`). Classify the case first.
+- `docs/privacy/register.json` lists the policy versions and the open privacy actions. Before any merge or release, check what blocks it.
+- Policy and consent text change only with Santiago's approval of the exact wording. No personal data in this repository.
 
 ## UI
 
@@ -40,6 +46,7 @@ A file is born next to the route that uses it (`app/**/_components`). It moves t
 - Pages are Server Components with semantic HTML. A Mantine component without handlers may render directly from a server page; one with handlers, state, compound parts or client-side `useTranslations` goes in a `'use client'` island (see `apps/landing/AGENTS.md`).
 - Hand-written colors and lengths are lint errors. Font families, durations and z-index also come from the theme, even where lint cannot see them.
 - Names are kebab-case. Lint enforces it.
+- Every call to action takes an event from `modules/analytics` (see `docs/analytics.md`). `e2e/analytics.spec.ts` fails on a conversion link without one.
 
 ## i18n
 

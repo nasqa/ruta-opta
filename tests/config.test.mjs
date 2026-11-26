@@ -58,3 +58,20 @@ test('next.config.ts inlines the address of the deploy context as SITE_URL', asy
   assert.equal(await siteUrl({ CONTEXT: undefined, WAITLIST_ADAPTER: undefined }), urls.URL);
   assert.equal(await siteUrl({ CONTEXT: undefined, WAITLIST_ADAPTER: undefined, URL: undefined, DEPLOY_PRIME_URL: undefined }), undefined);
 });
+
+test('next.config.ts inlines ANALYTICS_SCRIPT_SRC for production only, and an empty string everywhere else', async () => {
+  const scriptSrc = async (env) => {
+    let value;
+    await withEnv({ ANALYTICS_SCRIPT_SRC: '/o/s.js', ...env }, async () => {
+      value = (await load()).default.env.ANALYTICS_SCRIPT_SRC;
+    });
+    return value;
+  };
+  assert.equal(await scriptSrc({ CONTEXT: 'production', WAITLIST_ADAPTER: 'live' }), '/o/s.js');
+  // Never undefined: Next skips it, and the runtime environment of a Function would answer instead
+  assert.equal(await scriptSrc({ CONTEXT: undefined, WAITLIST_ADAPTER: undefined }), '');
+  assert.equal(await scriptSrc({ CONTEXT: 'deploy-preview', WAITLIST_ADAPTER: 'fake' }), '');
+  assert.equal(await scriptSrc({ CONTEXT: 'branch-deploy', WAITLIST_ADAPTER: 'fake' }), '');
+  assert.equal(await scriptSrc({ CONTEXT: 'dev', WAITLIST_ADAPTER: undefined }), '');
+  assert.equal(await scriptSrc({ CONTEXT: 'production', WAITLIST_ADAPTER: 'live', ANALYTICS_SCRIPT_SRC: undefined }), '');
+});

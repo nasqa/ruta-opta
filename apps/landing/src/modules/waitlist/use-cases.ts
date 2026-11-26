@@ -10,7 +10,9 @@ import { confirmTtlMs, openToken, sealToken, type TokenKeys } from './token';
 // Netlify ends a synchronous Function at 60 s. Each use case answers within this, whatever its store and providers do
 export const useCaseDeadlineMs = 20_000;
 
-export type ConfirmPayload = { email: string; name: string; locale: Locale; consentAt: number; policyVersion: string };
+// o is the origin tag of the link that brought the signup (see origin-tag.ts). Its key is one letter and it is left out when there is none,
+// because every byte here lengthens the emailed link
+export type ConfirmPayload = { email: string; name: string; locale: Locale; consentAt: number; policyVersion: string; o?: string };
 
 export type WaitlistDeps = {
   mailer: Mailer;
@@ -40,8 +42,8 @@ export const createWaitlist = ({ mailer, audience, throttle, guard, keys, policy
   // The error's name says what broke; its message may carry the address, so it is never logged
   const unexpected = (where: 'request' | 'confirm', error: unknown) => log('waitlist:unexpected', { where, name: error instanceof Error ? error.name : typeof error });
 
-  const send = async (values: WaitlistValues, locale: Locale) => {
-    const payload: ConfirmPayload = { email: values.email, name: values.name, locale, consentAt: now(), policyVersion };
+  const send = async (values: WaitlistValues, locale: Locale, originTag: string | undefined) => {
+    const payload: ConfirmPayload = { email: values.email, name: values.name, locale, consentAt: now(), policyVersion, ...(originTag && { o: originTag }) };
     const token = sealToken('confirm', payload, keys, confirmTtlMs, payload.consentAt);
     const message = await confirmEmail(locale, confirmUrl(locale, token));
     const ref = reference();
@@ -51,27 +53,29 @@ export const createWaitlist = ({ mailer, audience, throttle, guard, keys, policy
     return 'unavailable';
   };
 
-  const admitAndSend = async (values: WaitlistValues, locale: Locale, ip: string | undefined): Promise<'sent' | 'unavailable'> => {
+  const admitAndSend = async (values: WaitlistValues, locale: Locale, ip: string | undefined, originTag: string | undefined): Promise<'sent' | 'unavailable'> => {
     const admission = await throttle.admit(values.email, ip).catch(() => undefined);
     if (!admission) return log('waitlist:throttle-failed', {}), 'unavailable';
     if (admission.verdict === 'refuse') return log('waitlist:throttle-refused', { reason: admission.reason }), 'unavailable';
     if (admission.verdict === 'skip') return 'sent';
-    const result = await send(values, locale).catch((error: unknown) => (unexpected('request', error), 'unavailable' as const));
+    const result = await send(values, locale, originTag).catch((error: unknown) => (unexpected('request', error), 'unavailable' as const));
     // The gap claims go back, so an immediate retry sends instead of answering "sent" with nothing sent. The day claim stays (see Admission)
     if (result === 'unavailable') await admission.release().catch(() => log('waitlist:release-failed', {}));
     return result;
   };
 
-  const requestConfirmation = (values: WaitlistValues, locale: Locale, ip: string | undefined) =>
-    timed('request', admitAndSend(values, locale, ip), 'unavailable' as const);
+  const requestConfirmation = (values: WaitlistValues, locale: Locale, ip: string | undefined, originTag?: string) =>
+    timed('request', admitAndSend(values, locale, ip, originTag), 'unavailable' as const);
 
   const readConfirmation = (token: string): ReadResult => {
     const opened = openToken<ConfirmPayload>('confirm', token, keys, now());
     return opened.status === 'valid' ? { status: 'valid', name: opened.payload.name, locale: opened.payload.locale } : { status: opened.status };
   };
 
-  const subscribe = async ({ email, name, locale, policyVersion: consentedVersion }: ConfirmPayload): Promise<ConfirmResult> => {
-    const result = await audience.subscribe({ email, name }, locale, `rutaopta.org/${locale} · ${consentedVersion}`);
+  // The source is how Zoho tells signups apart: page, policy version, and the origin tag when the link had one
+  const subscribe = async ({ email, name, locale, policyVersion: consentedVersion, o }: ConfirmPayload): Promise<ConfirmResult> => {
+    const source = `rutaopta.org/${locale} · ${consentedVersion}${o ? ` · o=${o}` : ''}`;
+    const result = await audience.subscribe({ email, name }, locale, source);
     if (result.status === 'subscribed') return { status: 'subscribed', locale };
     if (result.status === 'unavailable') log('waitlist:subscribe-failed', { code: result.code });
     return { status: result.status };

@@ -224,7 +224,8 @@
       "error": "Check your email: something seems to be missing. Example: name@email.com."
     },
     "consent": {
-      "label": "I authorize Fundación Embajadores de la Paz, responsible for OPTA, to process my data to send me news and let me know when we open. I can withdraw my authorization at any time. Read the <privacy>data protection policy</privacy>.",
+      "label": "I authorize Fundación Embajadores de la Paz (Ruta Opta) to process my data to send me news, let me know when we open and count sign-ups per link.",
+      "notice": "You can access, correct or delete your data and withdraw your permission. privacy@rutaopta.org · +57\u00a0310\u00a0587\u00a04657 <privacy>Data policy</privacy>",
       "error": "We need your authorization to sign you up."
     },
     "submit": "Follow the process",
@@ -239,33 +240,41 @@
     "metaTitle": "Data protection policy",
     "overline": "Fundación Embajadores de la Paz",
     "title": "Data protection policy",
-    "intro": "This policy explains what personal data the OPTA waitlist collects, what we use it for and how you can exercise your rights.",
-    "effective": "Effective from 2026",
+    "intro": "This policy explains what data Ruta Opta collects on its website and its waitlist, what we use it for and how you can exercise your rights.",
+    "effective": "In effect since 25 November 2026. The waitlist database stays in effect for as long as Ruta Opta sends news. Once a year we will email you to remind you, and you can unsubscribe from that email.",
     "toc": "On this page",
     "sections": {
       "controller": {
         "title": "Data controller",
-        "text": "Fundación Embajadores de la Paz, responsible for OPTA, NIT 901679710-4, based at Carrera 13 #2N-49, Torre Fundadores 202, Armenia, Quindío. Legal representative: Stephania Forero. Phone: +57 310 587 4657."
+        "text": "Fundación Embajadores de la Paz, responsible for Ruta Opta, NIT 901679710-4, based at Carrera 13 #2N-49, Torre Fundadores 202, Armenia, Quindío. Legal representative: Stephania Forero. Phone: +57 310 587 4657. Email: privacy@rutaopta.org."
       },
       "data": {
         "title": "What data we ask for",
-        "text": "Your name and your email address. We keep them until you unsubscribe; after that we keep them only so we never email you again."
+        "text": "For the waitlist we ask for your name and your email address. If you came through one of our links, such as the one on Instagram, we also note which one. We keep them until you unsubscribe; after that we keep them only so we never email you again.\n\nTo protect the form from abuse, we keep codes made from your email address and your IP address, with the date of the attempt. They are only used to limit how many attempts can be made. We don't store your IP address, and your email address can't be read from those codes. For now they are not deleted automatically."
       },
       "purpose": {
         "title": "What we use it for",
-        "text": "To send you news from OPTA and let you know when we open. We don't use it for anything else."
+        "text": "We use your name and email to send you news from Ruta Opta and let you know when we open. We use the link you came through only to count how many people sign up from each one. We don't use this data for anything else."
+      },
+      "measurement": {
+        "title": "How we measure visits",
+        "text": "We use Plausible Analytics to know how many people visit the site, where they come from and which buttons they use. The measurement uses no cookies and stores nothing on your phone or computer. It records the page you open, the site or link you came from, the contact and sign-up buttons and links you tap, how long you stay and how far you scroll, your device type, system and browser, and your approximate country, region and city. So that it doesn't count you twice on the same day, it creates a code from your IP address and browser details. The code changes every day and your IP address is not stored. We don't send it your name, your email or anything you type in the form.\n\nApart from measurement, the site may set one cookie to remember the language you are reading it in. It is temporary, holds only \"es\" or \"en\", and is not used for measurement."
       },
       "contact": {
         "title": "If you write to us by WhatsApp or email",
         "text": "If you write to us on WhatsApp or at info@rutaopta.org, for example to become an ally, we use what you tell us (your name, your organization and your message) only to reply and to talk with you about that collaboration. WhatsApp, from Meta, and your email provider process those messages under their own terms. You can ask us to delete the conversation by writing to privacy@rutaopta.org."
       },
       "processor": {
-        "title": "Who helps us send the emails",
-        "text": "We send newsletters with Zoho Campaigns and confirmation emails with Zoho CPaaS, both from Zoho Corporation. The site is hosted on Netlify. These providers may store data on servers outside Colombia."
+        "title": "Who helps us",
+        "text": "We send newsletters with Zoho Campaigns and confirmation emails with Zoho CPaaS, both from Zoho Corporation. The site is hosted on Netlify. Visit data passes through Netlify and is processed by Plausible Insights OÜ, a company in Estonia that stores it on servers in the European Union. These providers may store data on servers outside Colombia."
       },
       "rights": {
         "title": "Your rights",
-        "text": "You can access, update and correct your data, ask us to delete it and withdraw your authorization at any time. You can also use the unsubscribe link in every email."
+        "text": "You can see, update and correct your data, ask us to delete it and withdraw your authorization. You can also ask for proof of the authorization you gave us, ask what we have used your data for and access it free of charge. To stop receiving our news, use the unsubscribe link in those emails."
+      },
+      "requests": {
+        "title": "How to exercise your rights",
+        "text": "Stephania Forero, legal representative, handles requests, queries and claims about your data. Write to privacy@rutaopta.org with your name, the email address you signed up with and what you need.\n\nA query is how you find out what data we hold and how we use it. We answer it within 10 business days at most. If we can't, we will tell you why and on what date we will answer, which will be no more than 5 business days after that deadline.\n\nA claim is how you correct, update or delete data, withdraw your authorization or tell us about a breach of the law. Tell us what happened, give us a contact address and attach any documents you want us to review. If information is missing, we ask for it within 5 days. If 2 months pass without it, we take it that you dropped the claim. We answer within 15 business days at most, counted from the day after we receive it. If we can't, we will tell you why and on what date we will answer, which will be no more than 8 business days after that deadline.\n\nYou can file a complaint with the Superintendence of Industry and Commerce (Superintendencia de Industria y Comercio) after going through this procedure with us."
       }
     },
     "questions": "Questions about your data?",

@@ -7,6 +7,8 @@ description: Use when designing or reviewing anything that captures, converts or
 
 Trama and the project rules stay the authority for design. This skill is the authority for how we ask people for things. The files under `references/` are copied third-party material (MIT, pinned commits, see `references/SOURCES.md`). They are useful and they are wrong for us in places; when they disagree with this file, this file wins.
 
+Anything that touches personal data, consent or privacy wording, measurement or a provider also follows `docs/privacy/workbook.md` (skill `privacy-changes`): who approves, what blocks publishing, what to record.
+
 ## Who we are talking to
 The first visitors are attendees of a rural-tourism course (about 250 people: tourism entrepreneurs, rural women, youth, Indigenous and Afro-descendant participants) on mid and low-end phones, with weak signal, and WhatsApp as their usual channel. Spanish first. Later: allies (businesses, agencies, lodgings, institutions). Do not name the course organizer or imply an agreement with it.
 
@@ -18,7 +20,7 @@ The first visitors are attendees of a rural-tourism course (about 250 people: to
 5. **Consent is specific and recorded.** Unchecked box, plain wording, one purpose per box, the policy linked, double opt-in (already built). Record date, form, language and policy version. The signup data travels sealed in the confirmation token, so every added field lengthens the email link: keep a length budget and test the link in mail clients.
 6. **Never echo what the person typed.** The confirmation email and the confirm page greet by name only. The organization and collaboration answers never appear in emails, pages or logs.
 7. **One-click unsubscribe, honored at once**, with a List-Unsubscribe header on every bulk email. Never re-add someone who left.
-8. **No cookie banner, no personal data in analytics.** Measure with counts and a neutral tracked link (`?o=<tag>`); no third-party trackers.
+8. **No cookie banner, no personal data in analytics.** The only third-party measurement allowed is Plausible: cookieless, nothing stored on the device, served first-party through our own proxy, and never sent anything we collect (names, emails, tokens, form values). It processes the visitor's IP address and user agent to count a day's visitors and stores neither. Measure with counts and UTM-tagged links. No other trackers.
 
 ## Ley 1581 de 2012 (habeas data): to confirm with counsel
 Treat everything below as working assumptions, not conclusions.

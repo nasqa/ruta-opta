@@ -17,6 +17,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { siteUrl } from '@/shared/env';
+import { AnalyticsScript } from './_components/analytics-script';
 
 export const generateStaticParams = () => routing.locales.map((locale) => ({ locale }));
 
@@ -46,6 +47,7 @@ const LocaleLayout = async ({ children }: LayoutProps<'/[locale]'>) => {
         {/* Runs while the HTML parses, before React hydrates */}
         <script dangerouslySetInnerHTML={{ __html: dropHeadWhitespace }} />
         <ColorSchemeScript forceColorScheme="light" />
+        <AnalyticsScript />
       </head>
       <body>
         {/* Client islands get only the namespaces they use */}

@@ -1,0 +1,277 @@
+{
+  "policyVersions": [
+    {
+      "version": "2026-11-draft",
+      "publishedOn": "2026-11-23",
+      "textSha256": "8f12ee233492dded124d378dabdfa0ce6b5dc54a1a8b7026d566a098bf6544d5",
+      "summary": "The first version. Three texts were merged to main under this one label, which must never happen again. (1) 1b8c08c, PR #6, merged 2026-11-23 19:42 -05: Spanish only; the controller named as Fundación OPTA, with its NIT and address left as [PENDIENTE] placeholders; the data section also named an optional answer about how the person wants to take part. (2) 97baa9d, PR #9, merged 2026-11-24 06:55 -05: English added; the controller named as Fundación Embajadores de la Paz, responsible for OPTA, with NIT and address; the retention sentence; the consent wording changed to match. (3) a34d4e5, PR #11, merged 2026-11-24 12:39 -05: adds the section on messages by WhatsApp or e-mail. The hash is of text 3, still on main. Commit dates are merge dates; when each deploy went live is not recorded. A person listed under this label must be matched to a text by the date they signed up.",
+      "substantial": true,
+      "subjectsTold": "No record that anyone was told when the text changed under this label. Whether anyone signed up under it is open (check-subscribers-before-publish)."
+    },
+    {
+      "version": "2026-11-25-draft",
+      "publishedOn": null,
+      "textSha256": "075dc3e52c5ddff2759f7a55d9a94e1d39c0c6d039bab2e5892c515a34b32bb3",
+      "summary": "Replaces 2026-11-draft (its text 3). Adds the link a sign-up came through and its use (counting sign-ups per link), the visit measurement with Plausible and the language cookie, Plausible among the providers, a section on how to exercise rights with who attends them and the terms, the rest of the rights, the list's lifetime with a yearly reminder, the privacy address in the controller section and the effective date. Names the controller as responsible for Ruta Opta rather than OPTA. Says for which e-mails the unsubscribe link works, those with the news, and adds the codes the sign-up protection keeps, which are not deleted automatically for now. The consent wording changes and takes two layers: a label that names Fundación Embajadores de la Paz (Ruta Opta) and the purposes, the per-link count included, and a notice under it with what a person can do with their data, the privacy address, the phone and the link to the policy.",
+      "substantial": true,
+      "subjectsTold": "Nobody yet: not published. Whether anyone is on the list under 2026-11-draft is open (check-subscribers-before-publish)."
+    }
+  ],
+  "actions": [
+    {
+      "id": "check-subscribers-before-publish",
+      "title": "Check in Zoho Campaigns whether anyone is already on the list. Anyone found is a question for counsel before publishing (docs/analytics.md, Before the production variable is set, step 3). Done 2026-11-26: the owner checked Zoho Campaigns before publishing and reported the list empty",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": "publish",
+      "gates": "2026-11-25-draft",
+      "status": "done",
+      "workbook": "#11-publishing-a-policy-version"
+    },
+    {
+      "id": "confirm-effective-date",
+      "title": "Set the policy's effective date to the day it is published. Decided by the owner on 2026-11-26: publish with the effective date of 25 November 2026 unchanged",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": "publish",
+      "gates": "2026-11-25-draft",
+      "status": "done",
+      "workbook": "#11-publishing-a-policy-version"
+    },
+    {
+      "id": "consent-wording-purpose",
+      "title": "The consent names the foundation as responsible for OPTA and does not name the per-link sign-up count; the authorization must name all specific purposes (Decree 1074, art. 2.2.2.25.2.2). A draft was sent to the owner",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": "publish",
+      "gates": "2026-11-25-draft",
+      "status": "done",
+      "workbook": "#2-a-new-purpose-or-a-new-use-of-data-we-hold"
+    },
+    {
+      "id": "abuse-protection-records-in-policy",
+      "title": "The policy does not mention the codes the sign-up protection keeps. A draft was sent to the owner",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": "publish",
+      "gates": "2026-11-25-draft",
+      "status": "done",
+      "workbook": "#what-we-hold-and-where"
+    },
+    {
+      "id": "unsubscribe-sentence",
+      "title": "The rights text says every e-mail has an unsubscribe link; the confirmation e-mail has none. A draft was sent to the owner",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": "publish",
+      "gates": "2026-11-25-draft",
+      "status": "done",
+      "workbook": "#5-a-wording-change"
+    },
+    {
+      "id": "plausible-hostname-allow-list",
+      "title": "In Plausible, Shields, Hostnames, allow only www.rutaopta.org. Done 2026-11-26: confirmed by the owner",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": "measurement",
+      "status": "done",
+      "workbook": "#what-blocks-publishing-or-measurement"
+    },
+    {
+      "id": "netlify-script-variable",
+      "title": "After the merge that publishes the policy, set ANALYTICS_SCRIPT_SRC=/o/s.js in Netlify, Production context only, rebuild and check the live site (docs/analytics.md, Before the production variable is set, step 4)",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": "measurement",
+      "status": "open",
+      "workbook": "#what-blocks-publishing-or-measurement"
+    },
+    {
+      "id": "record-publication-2026-11-25-draft",
+      "title": "After the merge that publishes 2026-11-25-draft: set its publishedOn to the publication day, add its pin to tests/privacy-register.test.mjs, give the yearly duties their due dates, and close this action",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#11-publishing-a-policy-version"
+    },
+    {
+      "id": "name-counsel",
+      "title": "Name the counsel who answers privacy questions, and how to reach them while a request's or an incident's deadline runs",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#who-does-what"
+    },
+    {
+      "id": "choose-records-location",
+      "title": "Choose where the request log and the incident notes are kept, outside this repository, and who can open them",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#records-kept-outside-this-repository"
+    },
+    {
+      "id": "counsel-review",
+      "title": "Counsel reviews the interim policy: prior authorization for cookieless measurement, the transfer, notice and authorization for anyone already listed, the consent wording, whether counting sign-ups per link needs its own box, the yearly reminder. The owner ships before counsel",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#questions-for-counsel"
+    },
+    {
+      "id": "rnbd-threshold",
+      "title": "Check whether the foundation's total assets reach 100,000 UVT, the threshold for registering in the RNBD",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#the-national-database-register-rnbd"
+    },
+    {
+      "id": "delete-old-throttle-records",
+      "title": "Delete the sign-up protection's codes once they no longer serve (Decree 1074, art. 2.2.2.25.2.8). A code change, proposed as a separate pull request",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#7-retention-or-how-long-the-database-lasts"
+    },
+    {
+      "id": "course-whatsapp-utm-source",
+      "title": "Confirm the utm_source for links shared in the course's WhatsApp groups before sharing them (diplomado is a suggestion). Sign-ups cannot be re-tagged",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "done",
+      "workbook": "#what-we-hold-and-where"
+    },
+    {
+      "id": "name-weekly-tally-owner",
+      "title": "Name who does the weekly tally",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#12-recurring-duties"
+    },
+    {
+      "id": "consent-proof",
+      "title": "Keep proof of when each person authorized (Decree 1074, art. 2.2.2.25.2.5). The list's source carries the policy version and the link tag but not the moment of consent, which stays sealed in the token. Check whether Zoho keeps and can export the date a contact was added; if not, send the consent date (a code change)",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#what-we-hold-and-where"
+    },
+    {
+      "id": "name-incident-owner",
+      "title": "Name who handles security incidents. The SIC's 15 business days count from detection and telling that person or area",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#10-a-security-incident"
+    },
+    {
+      "id": "set-mailbox-check",
+      "title": "Set how often privacidad@rutaopta.org and privacy@rutaopta.org are read and who covers absences. The policy promises answers within 10 and 15 business days",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#12-recurring-duties"
+    },
+    {
+      "id": "yearly-list-reminder",
+      "title": "Send the list the yearly e-mail that reminds people and offers to unsubscribe",
+      "owner": "Ruta Opta team",
+      "due": null,
+      "repeat": "yearly",
+      "blocks": null,
+      "status": "open",
+      "workbook": "#12-recurring-duties"
+    },
+    {
+      "id": "yearly-policy-review",
+      "title": "Review the policy, the workbook and what we hold. Proposed: the owner has not confirmed it",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": "yearly",
+      "blocks": null,
+      "status": "open",
+      "workbook": "#12-recurring-duties"
+    },
+    {
+      "id": "calendar-reminder",
+      "title": "Create a calendar reminder for the yearly e-mail, only with Santiago's explicit yes",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#12-recurring-duties"
+    },
+    {
+      "id": "session-reminders",
+      "title": "Build the reminders that bring open privacy actions into Claude sessions (docs/superpowers/plans/2026-11-25-privacy-workbook.md, Task 2). Not built: moved to a later pull request (owner scope freeze, 2026-11-26)",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#limits-of-the-guards"
+    },
+    {
+      "id": "faq-unsubscribe-sentence",
+      "title": "The home FAQ, in both languages, says people can unsubscribe from any e-mail, but the confirmation e-mail has no unsubscribe link. New wording needs the owner's approval",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#5-a-wording-change"
+    },
+    {
+      "id": "confirm-link-codes-in-policy",
+      "title": "The policy's paragraph on the sign-up protection does not mention the codes confirm-guard.ts keeps for each confirmation link. New wording needs the owner's approval",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#what-we-hold-and-where"
+    },
+    {
+      "id": "verify-zoho-source-after-deploy",
+      "title": "After the deploy and before sharing tagged links, confirm one real sign-up from a tagged link and check the contact's source in Zoho: whether Zoho accepts a source that ends in the link tag is unverified (docs/analytics.md, Before the production variable is set, step 5)",
+      "owner": "Santiago",
+      "due": null,
+      "repeat": null,
+      "blocks": null,
+      "status": "open",
+      "workbook": "#11-publishing-a-policy-version"
+    }
+  ]
+}
