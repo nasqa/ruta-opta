@@ -216,6 +216,8 @@ There are no goals in the dashboard yet, on purpose. After release:
    curl -s "$preview/o/s.js" | head -c 300
    curl -sI "$preview/es/confirmar"
    curl -sI "$preview/en/confirm"
+   curl -sI "$preview/es/baja"
+   curl -sI "$preview/en/unsubscribed"
    curl -sI "$preview/es"
    for page in es en es/privacidad en/privacy es/confirmar en/confirm es/confirmado en/confirmed es/baja en/unsubscribed; do
      echo "$page $(curl -s "$preview/$page" | grep -cE 'plausible\.init|/o/s\.js|plausible\.io/js')"
@@ -225,11 +227,11 @@ There are no goals in the dashboard yet, on purpose. After release:
    Expected, in order:
    - `/o/e` does not redirect to a `/es…` address;
    - `/o/s.js` returns Plausible's script, not a page of ours;
-   - both confirm pages answer `Referrer-Policy: no-referrer`;
-   - the home does not;
+   - both confirm pages and both unsubscribed pages answer `Referrer-Policy: no-referrer` (Zoho redirects to the unsubscribed ones, and what it appends to their address is unknown);
+   - the home does not: the sign-up reads `utm_source` from the `Referer`;
    - every page prints `0`, so none has the script. The `plausible-event-name` classes are in every build and do not count.
 
-2. **Best effort: do the rewrites override `Cookie` and `Referer`?** Netlify passes the browser's headers through a rewrite (its support staff confirm it for cookies). So Plausible can receive a page's non-secret address in `Referer` (UTM tags, at most an ad click id) and this domain's cookies, today only `NEXT_LOCALE`. The confirm pages send no `Referer`. Both rewrites set a `headers` map; whether it replaces what the browser sent is **unverified**. To test it, on a preview that will never be merged, add a temporary rewrite from `/o/echo` (the proxy skips `/o/`), with the same `status`, `force` and `headers`, to an endpoint that returns the headers it receives. Call it with fake values: `curl -s -H 'Cookie: probe=fake' -H 'Referer: https://example.com/fake' -H 'X-Probe: seen' <that preview>/o/echo`. It is proven only if `X-Probe` comes back, which shows that the endpoint echoes what reaches it, and neither fake value does. If it is not, keep the proxy and record that here.
+2. **Best effort: do the rewrites override `Cookie` and `Referer`?** Netlify passes the browser's headers through a rewrite (its support staff confirm it for cookies). So Plausible can receive a page's non-secret address in `Referer` (UTM tags, at most an ad click id) and this domain's cookies, today only `NEXT_LOCALE`. The confirm and unsubscribed pages send no `Referer`. Both rewrites set a `headers` map; whether it replaces what the browser sent is **unverified**. To test it, on a preview that will never be merged, add a temporary rewrite from `/o/echo` (the proxy skips `/o/`), with the same `status`, `force` and `headers`, to an endpoint that returns the headers it receives. Call it with fake values: `curl -s -H 'Cookie: probe=fake' -H 'Referer: https://example.com/fake' -H 'X-Probe: seen' <that preview>/o/echo`. It is proven only if `X-Probe` comes back, which shows that the endpoint echoes what reaches it, and neither fake value does. If it is not, keep the proxy and record that here.
    - **Result:** not yet checked.
    - **The proxy rule:** before anything that signs people in shares this domain, either the override is proven or the proxy goes. Otherwise its session cookie reaches the analytics vendor.
 

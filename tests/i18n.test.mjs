@@ -87,15 +87,18 @@ test('every other path gets exactly what next-intl answers', () => {
   }
 });
 
-// The confirm page's address carries the signed token. The proxy sets the policy because it sees the address the browser asked for: on Netlify,
-// next.config headers are matched after next-intl's rewrite, so a rule for /es/confirmar never applied
-test('only the confirm pages answer with Referrer-Policy: no-referrer', () => {
-  for (const locale of routing.locales) {
-    const path = `/${locale}${routing.pathnames['/confirm'][locale]}?t=x`;
-    assert.equal(visit(path).headers.get('referrer-policy'), 'no-referrer', path);
+// The confirm page's address carries the signed token, and what Zoho appends when it redirects to the unsubscribed page is unknown. The proxy
+// sets the policy because it sees the address the browser asked for: on Netlify, next.config headers are matched after next-intl's rewrite, so
+// a rule for /es/confirmar never applied
+test('only the confirm and unsubscribed pages answer with Referrer-Policy: no-referrer', () => {
+  for (const href of ['/confirm', '/unsubscribed']) {
+    for (const locale of routing.locales) {
+      const path = `/${locale}${routing.pathnames[href][locale]}?t=x`;
+      assert.equal(visit(path).headers.get('referrer-policy'), 'no-referrer', path);
+    }
   }
-  // A policy for the whole site would drop the Referer the waitlist reads utm_source from
-  for (const path of ['/', '/es', '/en', '/es?utm_source=instagram', '/es/confirmado', '/en/confirmed', '/es/baja', '/es/privacidad']) {
+  // The home, where the sign-up form lives, keeps the default policy: the waitlist reads utm_source from the Referer
+  for (const path of ['/', '/es', '/en', '/es?utm_source=instagram', '/en?utm_source=instagram', '/es/confirmado', '/en/confirmed', '/es/privacidad', '/en/privacy']) {
     assert.equal(visit(path).headers.get('referrer-policy'), null, path);
   }
 });

@@ -243,6 +243,30 @@ test('smoke: the confirm page comes from the local server with its own referrer 
   await arrived(lab, 'pageview', confirm);
 });
 
+// What Zoho appends when it redirects here after an unsubscribe is unknown: a made-up value stands in for it
+for (const locale of routing.locales) {
+  const unsubscribed = pathFor(locale, '/unsubscribed');
+  const home = pathFor(locale, '/');
+
+  test(`no Referer from ${unsubscribed} carries what its address holds, and ${home}, with the sign-up, keeps the default policy`, async ({
+    page,
+    lab,
+  }) => {
+    const appended = `appended-${crypto.randomUUID()}`;
+    await lab.inject();
+    const response = await lab.open(`${unsubscribed}?contact=${appended}`);
+
+    // Soft, so that a missing header still shows which requests would carry the address
+    expect.soft(response.headers()['referrer-policy']).toBe('no-referrer');
+    await arrived(lab, 'pageview', unsubscribed);
+    await hide(page);
+    await arrived(lab, 'engagement', unsubscribed);
+    expect(inspect(await lab.seen(), appended).leaks).toEqual([]);
+
+    expect((await lab.open(`${home}?utm_source=email`)).headers()['referrer-policy']).toBeUndefined();
+  });
+}
+
 for (const locale of routing.locales) {
   const other = routing.locales.find((candidate) => candidate !== locale) ?? locale;
   const confirm = pathFor(locale, '/confirm');
