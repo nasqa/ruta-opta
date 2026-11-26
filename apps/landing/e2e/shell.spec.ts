@@ -77,6 +77,29 @@ for (const { locale, href, path } of pages) {
     await expect(footer.getByText(SiteShell.footer.place, { exact: true })).toBeVisible();
     await expect(footer.getByText(SiteShell.footer.rights.replace('{year}', String(new Date().getFullYear())), { exact: true })).toBeVisible();
   });
+
+  // The WhatsApp button floats over the bottom end of the window and is the last focus stop. Every control before it is scrolled
+  // clear of it when it takes focus, so no focused control sits under it, not even in part (WCAG 2.4.12)
+  test(`${path}: no focused control sits under the floating WhatsApp button`, async ({ page }) => {
+    await page.goto(path);
+    await page.evaluate(() => document.fonts.ready);
+    const floating = page.getByRole('link', { name: SiteShell.whatsappFloat.label, exact: true });
+    const focused = page.locator(':focus');
+    const isFocused = () => floating.evaluate((element) => element === document.activeElement);
+    const covered: string[] = [];
+
+    for (let presses = 0; presses < 150; presses++) {
+      await page.keyboard.press('Tab');
+      if (await isFocused()) break;
+      const [control, button] = await Promise.all([focused.boundingBox(), floating.boundingBox()]);
+      if (!control || !button) continue;
+      const overlapX = Math.min(control.x + control.width, button.x + button.width) - Math.max(control.x, button.x);
+      const overlapY = Math.min(control.y + control.height, button.y + button.height) - Math.max(control.y, button.y);
+      if (overlapX > 0 && overlapY > 0) covered.push(await focused.evaluate((element) => element.getAttribute('aria-label') ?? element.textContent?.trim() ?? element.tagName));
+    }
+    expect(await isFocused(), 'focus reaches the floating button, the last stop').toBe(true);
+    expect(covered).toEqual([]);
+  });
 }
 
 test('the language switch on /confirm keeps the token', async ({ page }) => {
