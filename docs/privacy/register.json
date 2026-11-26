@@ -10,11 +10,11 @@
     },
     {
       "version": "2026-11-25-draft",
-      "publishedOn": null,
+      "publishedOn": "2026-11-26",
       "textSha256": "075dc3e52c5ddff2759f7a55d9a94e1d39c0c6d039bab2e5892c515a34b32bb3",
-      "summary": "Replaces 2026-11-draft (its text 3). Adds the link a sign-up came through and its use (counting sign-ups per link), the visit measurement with Plausible and the language cookie, Plausible among the providers, a section on how to exercise rights with who attends them and the terms, the rest of the rights, the list's lifetime with a yearly reminder, the privacy address in the controller section and the effective date. Names the controller as responsible for Ruta Opta rather than OPTA. Says for which e-mails the unsubscribe link works, those with the news, and adds the codes the sign-up protection keeps, which are not deleted automatically for now. The consent wording changes and takes two layers: a label that names Fundación Embajadores de la Paz (Ruta Opta) and the purposes, the per-link count included, and a notice under it with what a person can do with their data, the privacy address, the phone and the link to the policy.",
+      "summary": "Replaces 2026-11-draft (its text 3). Adds the link a sign-up came through and its use (counting sign-ups per link), the visit measurement with Plausible and the language cookie, Plausible among the providers, a section on how to exercise rights with who attends them and the terms, the rest of the rights, the list's lifetime with a yearly reminder, the privacy address in the controller section and the effective date. Names the controller as responsible for Ruta Opta rather than OPTA. Says for which e-mails the unsubscribe link works, those with the news, and adds the codes the sign-up protection keeps, which are not deleted automatically for now. The consent wording changes and takes two layers: a label that names Fundación Embajadores de la Paz (Ruta Opta) and the purposes, the per-link count included, and a notice under it with what a person can do with their data, the privacy address, the phone and the link to the policy. Published on 2026-11-26: pull request #16, merged as 2a039a5, deployed and checked live. Its effective line says 25 November 2026, by the owner's decision of 2026-11-26.",
       "substantial": true,
-      "subjectsTold": "Nobody yet: not published. Whether anyone is on the list under 2026-11-draft is open (check-subscribers-before-publish)."
+      "subjectsTold": "There was nobody to tell: before publishing, the owner checked Zoho Campaigns and reported the list empty (2026-11-26, check-subscribers-before-publish)."
     }
   ],
   "actions": [
@@ -85,7 +85,7 @@
     },
     {
       "id": "netlify-script-variable",
-      "title": "After the merge that publishes the policy, set ANALYTICS_SCRIPT_SRC=/o/s.js in Netlify, Production context only, rebuild and check the live site (docs/analytics.md, Before the production variable is set, step 4)",
+      "title": "After the merge that publishes the policy, set ANALYTICS_SCRIPT_SRC=/o/s.js in Netlify, Production context only, rebuild and check the live site (docs/analytics.md, Before the production variable is set, step 4). Set on 2026-11-26 for the Production context only (unset in deploy-preview, branch-deploy and dev), and the live checks made with GET and HEAD only passed. Still open: confirm that real events reach the Plausible dashboard, that the visitor IP address is forwarded and that no response carries x-plausible-dropped",
       "owner": "Santiago",
       "due": null,
       "repeat": null,
@@ -95,12 +95,12 @@
     },
     {
       "id": "record-publication-2026-11-25-draft",
-      "title": "After the merge that publishes 2026-11-25-draft: set its publishedOn to the publication day, add its pin to tests/privacy-register.test.mjs, give the yearly duties their due dates, and close this action",
+      "title": "After the merge that publishes 2026-11-25-draft: set its publishedOn to the publication day, add its pin to tests/privacy-register.test.mjs, give the yearly duties their due dates, and close this action. Done 2026-11-26",
       "owner": "Santiago",
       "due": null,
       "repeat": null,
       "blocks": null,
-      "status": "open",
+      "status": "done",
       "workbook": "#11-publishing-a-policy-version"
     },
     {
@@ -205,9 +205,9 @@
     },
     {
       "id": "yearly-list-reminder",
-      "title": "Send the list the yearly e-mail that reminds people and offers to unsubscribe",
+      "title": "Send the list the yearly e-mail that reminds people and offers to unsubscribe. First due 2027-11-26, one year after publication: the date is proposed, not confirmed by the owner",
       "owner": "Ruta Opta team",
-      "due": null,
+      "due": "2027-11-26",
       "repeat": "yearly",
       "blocks": null,
       "status": "open",
@@ -215,9 +215,9 @@
     },
     {
       "id": "yearly-policy-review",
-      "title": "Review the policy, the workbook and what we hold. Proposed: the owner has not confirmed it",
+      "title": "Review the policy, the workbook and what we hold. Proposed: the owner has not confirmed it, nor its first due date, 2027-11-26, one year after publication",
       "owner": "Santiago",
-      "due": null,
+      "due": "2027-11-26",
       "repeat": "yearly",
       "blocks": null,
       "status": "open",
